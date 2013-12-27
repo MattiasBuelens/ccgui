@@ -20,7 +20,7 @@ function TextArea:initialize(opts)
 	super.initialize(self, opts)
 
 	-- Text lines
-	self.lines = {""}
+	self:setText(opts.text)
 	self.longestLineLength = 0
 
 	-- Cursor position
