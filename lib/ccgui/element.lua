@@ -15,10 +15,15 @@ local Rectangle		= require "ccgui.geom.Rectangle"
 local Element = EventEmitter:subclass("ccgui.Element")
 function Element:initialize(opts)
 	super.initialize(self)
+	-- Copy all options (includes extensions such as "stretch")
+	for k,v in pairs(opts) do
+		self[k] = v
+	end
+
 	-- Parent element
 	self.parent = opts.parent or nil
 	-- Visibility
-	self.isVisible = true
+	self.isVisible = (type(opts.isVisible) == "nil") or (not not opts.isVisible)
 	-- Colors
 	self.foreground = opts.foreground or colours.black
 	self.background = opts.background or 0
@@ -215,7 +220,7 @@ end
 function Element:draw(x, y, text, fgColor, bgColor, bounds)
 	if type(x) == "table" then
 		-- Position given as vector
-		return self:draw(x.x, x.y, y, text, fgColor, bgColor)
+		x, y, text, fgColor, bgColor, bounds = x.x, x.y, y, text, fgColor, bgColor
 	end
 
 	if bounds then

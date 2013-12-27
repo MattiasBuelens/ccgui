@@ -32,15 +32,11 @@ function PaintPixel:merge(pixel)
 	if self.foreground == 0 then
 		if pixel ~= nil and pixel.foreground ~= 0 then
 			self.foreground = pixel.foreground
-		else
-			self.foreground = colours.white
 		end
 	end
 	if self.background == 0 then
 		if pixel ~= nil and pixel.background ~= 0 then
 			self.background = pixel.background
-		else
-			self.background = colours.black
 		end
 	end
 end

@@ -14,13 +14,10 @@ local TextArea = ScrollElement:subclass("ccgui.TextArea")
 function TextArea:initialize(opts)
 	-- Default style
 	opts.background = opts.background or colours.white
+	-- Scroll horizontally by default as well
+	opts.horizontal = (type(opts.horizontal) == "nil") or (not not opts.horizontal)
 
 	super.initialize(self, opts)
-	
-	-- Scrolling
-	self.horizontal = (type(opts.horizontal) == "nil") or (not not opts.horizontal)
-	self.vertical = (type(opts.vertical) == "nil") or (not not opts.vertical)
-	self.mouseScroll = (type(opts.mouseScroll) == "nil") or (not not opts.mouseScroll)
 
 	-- Text lines
 	self.lines = {""}

@@ -11,7 +11,7 @@ local Button = TextElement:subclass("ccgui.Button")
 function Button:initialize(opts)
 	-- Default style
 	opts.foreground = opts.foreground or colours.grey
-	opts.background = opts.foreground or colours.lightGrey
+	opts.background = opts.background or colours.lightGrey
 	opts.padding = opts.padding or 1
 
 	super.initialize(self, opts)
