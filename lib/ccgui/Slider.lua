@@ -11,14 +11,6 @@ local FlowContainer	= require "ccgui.FlowContainer"
 local Line			= require "ccgui.geom.Line"
 local Rectangle		= require "ccgui.geom.Rectangle"
 
-local ArrowButton = Button:subclass("ccgui.slider.ArrowButton")
-function ArrowButton:initialize(opts)
-	-- Default style
-	opts.border = 0
-	opts.padding = 0
-	super.initialize(self, opts)
-end
-
 local Bar = Element:subclass("ccgui.slider.Bar")
 function Bar:initialize(opts)
 	super.initialize(self, opts)
@@ -140,38 +132,42 @@ local Slider = FlowContainer:subclass("ccgui.Slider")
 function Slider:initialize(opts)
 	super.initialize(self, opts)
 
-	-- Orientation
-	self.horizontal = not not opts.horizontal
-
 	-- Arrow buttons
 	self.showArrows = (type(opts.showArrows) == "nil") or (not not opts.showArrows)
 	self.arrowLabels = opts.arrowLabels or { "-", "+" }
+	-- Colors
+	self.colorForeground = opts.colorForeground or colours.grey
+	self.colorBar = opts.colorBar or colours.grey
+	self.colorButton = opts.colorButton or colours.lightGrey
 
 	-- Slider bar
-	self.bar = Bar:new({
+	self.bar = Bar:new{
 		parent		= self,
 		horizontal	= self.horizontal,
 		stretch		= true,
 		foreground	= self.colorBar,
 		background	= self.background
-	})
+	}
 
 	-- Arrow buttons
-	self.showArrows = not not self.showArrows
 	if self.showArrows then
-		self.prevArrow = ArrowButton:new({
+		self.prevArrow = Button:new{
 			parent		= self,
 			text		= self.arrowLabels[1],
 			foreground	= self.colorForeground,
-			background	= self.colorButton
-		})
+			background	= self.colorButton,
+			border		= 0,
+			padding		= 0
+		}
 		self.prevArrow:on("buttonpress", self.prevStep, self)
-		self.nextArrow = ArrowButton:new({
+		self.nextArrow = Button:new{
 			parent		= self,
 			text		= self.arrowLabels[2],
 			foreground	= self.colorForeground,
-			background	= self.colorButton
-		})
+			background	= self.colorButton,
+			border		= 0,
+			padding		= 0
+		}
 		self.nextArrow:on("buttonpress", self.nextStep, self)
 		self:add(self.prevArrow, self.bar, self.nextArrow)
 	else

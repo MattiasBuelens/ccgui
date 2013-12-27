@@ -147,12 +147,9 @@ function FlowContainer:calcLayout(bbox)
 		if oldBbox == nil or oldBbox ~= child.bbox then
 			-- Bounding box changed, repaint child and container
 			child:markRepaint()
-			childBboxChanged = true
+			self:markRepaint()
 		end
-	end)
-	if childBboxChanged then
-		self:markRepaint()
-	end]]--
+	end)]]--
 
 	-- Use given bounding box
 	self.bbox = bbox

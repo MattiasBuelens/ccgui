@@ -19,8 +19,6 @@ function Container:initialize(opts)
 	self:on("paint", self.drawChildren, self)
 	self:sinkEvent("beforepaint")
 	self:sinkEvent("afterpaint")
-	self:sinkEvent("beforeframe")
-	self:sinkEvent("afterframe")
 
 	-- Mouse
 	self:sinkEvent("mouse_click")
@@ -117,8 +115,18 @@ function Container:remove(child)
 	return true
 end
 
+function Container:markRepaint()
+	if not self.needsRepaint then
+		super.markRepaint(self)
+		-- Repaint all visible children
+		self:eachVisible(function(child)
+			child:markRepaint()
+		end)
+	end
+end
+
 function Container:drawChildren()
-	-- Repaint all children
+	-- Paint visible children
 	self:eachVisible(function(child)
 		child:paint()
 	end)

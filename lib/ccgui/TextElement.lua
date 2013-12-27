@@ -26,7 +26,7 @@ end
 function TextElement:setText(text)
 	self.text = text or ""
 	self.lines = {}
-	--self:markRepaint()
+	self:markRepaint()
 end
 
 local function wrapLine(str, limit)

@@ -39,17 +39,24 @@ function Element:initialize(opts)
 	-- Focus
 	self:on("focus", self.updateFocus, self)
 	-- Paint
-	self:on("paint", self.clear, self)
+	self:on("repaint", self.clear, self)
 	self:on("paint", self.drawBorder, self)
 
+	-- Bubble focus events
+	self:bubbleEvent("focus")
+	self:bubbleEvent("blur")
+	-- Repaint on focus
+	self:on("focus", self.markRepaint, self)
+	self:on("blur", self.markRepaint, self)
+
 	-- Need repaint
-	--self.needsRepaint = true
-	--self:markRepaint()
+	self.needsPaint = true
+	self.needsRepaint = true
 end
 
 function Element:show()
 	if not self.isVisible then
-		--self:markRepaint()
+		self:markRepaint()
 		self.isVisible = true
 		return true
 	end
@@ -58,7 +65,7 @@ end
 
 function Element:hide()
 	if self.isVisible then
-		--self:markRepaint()
+		self:markRepaint()
 		self.isVisible = false
 		return true
 	end
@@ -189,21 +196,41 @@ function Element:getOutput()
 	return self.parent:getOutput()
 end
 
---[[function Element:markRepaint()
-	self.needsRepaint = true
+function Element:markPaint()
+	if not self.needsPaint then
+		self.needsPaint = true
+		if self.parent ~= nil then
+			self.parent:markPaint()
+		end
+	end
 end
 
-function Element:unmarkRepaint()
+function Element:markRepaint()
+	self.needsRepaint = true
+	self:markPaint()
+end
+
+function Element:unmarkPaint()
+	self.needsPaint = false
 	self.needsRepaint = false
-end]]--
+end
 
 function Element:paint()
+	-- Ignore if invisible or no paint requested
 	if not self.isVisible then return end
+	if not self.needsPaint then return end
+
 	self:trigger("beforepaint")
 	if self.bbox ~= nil then
+		-- Repaint
+		if self.needsRepaint then
+			self:trigger("repaint")
+		end
+		-- Paint
 		self:trigger("paint")
 	end
 	self:trigger("afterpaint")
+	self:unmarkPaint()
 end
 
 -- Clear element's bounding box

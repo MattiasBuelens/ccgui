@@ -42,7 +42,7 @@ function HorizontalSlider:getValue()
 end
 function HorizontalSlider:rawSetValue(newValue)
 	self.parent.scrollPosition.x = newValue
-	--self.parent:markRepaint()
+	self.parent:markRepaint()
 end
 function HorizontalSlider:getSpan()
 	return self.parent:scrollVisible().x
@@ -67,7 +67,7 @@ function VerticalSlider:getValue()
 end
 function VerticalSlider:rawSetValue(newValue)
 	self.parent.scrollPosition.y = newValue
-	--self.parent:markRepaint()
+	self.parent:markRepaint()
 end
 function VerticalSlider:getSpan()
 	return self.parent:scrollVisible().y
@@ -155,8 +155,22 @@ function ScrollElement:outer(bbox)
 	return super.outer(self, bbox:expand(self:scrollBarMargins()))
 end
 
+function ScrollElement:markPaint()
+	if not self.needsPaint then
+		super.markPaint(self)
+		-- Repaint scrollbars
+		if self.horizontal then
+			self.sliderHoriz:markRepaint()
+		end
+		if self.vertical then
+			self.sliderVerti:markRepaint()
+		end
+	end
+end
+
 function ScrollElement:scrollPaint()
 	if self.showScrollBars then
+		-- Paint scrollbars
 		if self.horizontal then
 			self.sliderHoriz:paint()
 		end

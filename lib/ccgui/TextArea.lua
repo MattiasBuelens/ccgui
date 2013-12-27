@@ -6,7 +6,6 @@
 --]]
 
 local Element		= require "ccgui.Element"
-local FocusElement	= require "ccgui.FocusElement"
 local ScrollElement	= require "ccgui.ScrollElement"
 local Rectangle		= require "ccgui.geom.Rectangle"
 
@@ -32,7 +31,7 @@ function TextArea:initialize(opts)
 	self:on("char", self.textChar, self)
 
 	self:on("paint", self.drawText, self)
-	self:on("afterframe", self.drawCursor, self)
+	self:on("afterpaint", self.drawCursor, self)
 end
 
 local function splitLines(str)
@@ -65,7 +64,7 @@ function TextArea:setText(text)
 		self:setCursor(1, 1)
 	end
 	-- Mark for repaint
-	--self:markRepaint()
+	self:markRepaint()
 end
 
 function TextArea:multiline()
@@ -125,6 +124,7 @@ function TextArea:textClick(button, x, y)
 		if self:canFocus() and self:contains(x, y) then
 			local cursor = self:fromScreen(x, y)
 			self:setCursor(cursor.x, cursor.y)
+			self:focus()
 		end
 	end
 end
@@ -334,7 +334,7 @@ function TextArea:textKey(key)
 		end
 	end
 	-- Mark for repaint
-	--self:markRepaint()
+	self:markRepaint()
 end
 
 function TextArea:textChar(char)
@@ -342,7 +342,7 @@ function TextArea:textChar(char)
 		-- Insert character
 		self:insert(char)
 		-- Mark for repaint
-		--self:markRepaint()
+		self:markRepaint()
 	end
 end
 

@@ -81,7 +81,7 @@ function TabContainer:setCurrentTab(tab)
 	self.currentTab = tab
 
 	self:updateVisibleTab()
-	--self.tabPane:markRepaint()
+	self.tabPane:markRepaint()
 	return true
 end
 
