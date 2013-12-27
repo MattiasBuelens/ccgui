@@ -6,14 +6,13 @@
 --]]
 
 
-local root = fs.combine(shell.getRunningProgram(), "/../../")
+local root = fs.combine(shell.getRunningProgram(), "../lib/")
 dofile(fs.combine(root, "/compat.lua"))
 package.root = root
 
-local Geometry		= require "ccgui.Geometry"
+local Margins		= require "ccgui.geom.Margins"
 local Align			= require "ccgui.Align"
 local VAlign		= require "ccgui.VAlign"
-local Margins		= Geometry.Margins
 
 local paint = true
 local isRunning = true

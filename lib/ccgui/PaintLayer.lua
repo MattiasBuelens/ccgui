@@ -6,8 +6,9 @@
 --]]
 
 local Object	= require "objectlua.Object"
+local Rectangle	= require "ccgui.geom.Rectangle"
 
-local PaintPixel = Object.subclass("ccgui.paint.PaintPixel")
+local PaintPixel = Object:subclass("ccgui.paint.PaintPixel")
 function PaintPixel:initialize(opts)
 	super.initialize(self, opts)
 
@@ -44,7 +45,7 @@ function PaintPixel:merge(pixel)
 	end
 end
 
-local PaintLayer = Object.subclass("ccgui.paint.PaintLayer")
+local PaintLayer = Object:subclass("ccgui.paint.PaintLayer")
 function PaintLayer:initialize(opts)
 	super.initialize(self, opts)
 
@@ -60,7 +61,7 @@ end
 
 -- Get bounding rectangle
 function PaintLayer:getBounds()
-	return ccgui.newRectangle(1, 1, self.width, self.height)
+	return Rectangle:new(1, 1, self.width, self.height)
 end
 
 function PaintLayer:updateBounds()

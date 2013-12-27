@@ -7,7 +7,7 @@
 
 local Element		= require "ccgui.Element"
 
-local Container = Element.subclass("ccgui.Container")
+local Container = Element:subclass("ccgui.Container")
 function Container:initialize(opts)
 	super.initialize(self, opts)
 

@@ -7,7 +7,7 @@
 
 local FlowContainer	= require "ccgui.FlowContainer"
 
-local TabContainer = FlowContainer.subclass("ccgui.TabContainer")
+local TabContainer = FlowContainer:subclass("ccgui.TabContainer")
 function TabContainer:initialize(opts)
 	super.initialize(self, opts)
 

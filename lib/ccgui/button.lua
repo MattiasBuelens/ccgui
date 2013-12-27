@@ -5,9 +5,9 @@
 
 --]]
 
-local Element	= require "ccgui.Element"
+local TextElement	= require "ccgui.TextElement"
 
-local Button = TextElement.subclass("ccgui.Button")
+local Button = TextElement:subclass("ccgui.Button")
 function Button:initialize(opts)
 	-- Default style
 	opts.foreground = opts.foreground or colours.grey

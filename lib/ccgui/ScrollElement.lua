@@ -5,11 +5,14 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Element	= require "ccgui.Element"
+local Slider	= require "ccgui.Slider"
+local Margins	= require "ccgui.geom.Margins"
+local Rectangle	= require "ccgui.geom.Rectangle"
 
-local ScrollSlider = common.newClass(ccgui.Slider)
-function ScrollSlider:init()
-	ccgui.Slider.init(self)
+local ScrollSlider = Slider:subclass("ccgui.scroll.ScrollSlider")
+function ScrollSlider:initialize(opts)
+	super.initialize(self, opts)
 
 	self:on("beforepaint", self.sliderLayout, self, -1)
 end
@@ -23,14 +26,16 @@ function ScrollSlider:getMinimum()
 	return 0
 end
 
-local HorizontalSlider = common.newClass({
-	horizontal	= true,
-	arrowLabels	= { "<", ">" }
-}, ScrollSlider)
+local HorizontalSlider = ScrollSlider:subclass("ccgui.scroll.HorizontalScrollSlider")
+function HorizontalSlider:initialize(opts)
+	opts.horizontal = true
+	opts.arrowLabels = { "<", ">" }
+	super.initialize(self, opts)
+end
 function HorizontalSlider:sliderLayout()
 	-- Place below inner box of scroll element
 	local sbox = self.parent:inner(self.parent.bbox)
-	self.bbox = ccgui.newRectangle(sbox.x, sbox.y + sbox.h, sbox.w, 1)
+	self.bbox = Rectangle:new(sbox.x, sbox.y + sbox.h, sbox.w, 1)
 end
 function HorizontalSlider:getValue()
 	return self.parent.scrollPosition.x
@@ -46,14 +51,16 @@ function HorizontalSlider:getMaximum()
 	return self.parent:scrollTotal().x
 end
 
-local VerticalSlider = common.newClass({
-	horizontal = false,
-	arrowLabels	= { "^", "v" }
-}, ScrollSlider)
+local VerticalSlider = ScrollSlider:subclass("ccgui.scroll.VerticalScrollSlider")
+function VerticalSlider:initialize(opts)
+	opts.horizontal = false
+	opts.arrowLabels = { "^", "v" }
+	super.initialize(self, opts)
+end
 function VerticalSlider:sliderLayout()
 	-- Place at right of inner box of scroll element
 	local sbox = self.parent:inner(self.parent.bbox)
-	self.bbox = ccgui.newRectangle(sbox.x + sbox.w, sbox.y, 1, sbox.h)
+	self.bbox = Rectangle:new(sbox.x + sbox.w, sbox.y, 1, sbox.h)
 end
 function VerticalSlider:getValue()
 	return self.parent.scrollPosition.y
@@ -69,36 +76,24 @@ function VerticalSlider:getMaximum()
 	return self.parent:scrollTotal().y
 end
 
-local ScrollElement = common.newClass({
+local ScrollElement = Element:subclass("ccgui.ScrollElement")
+function ScrollElement:initialize(opts)
+	super.initialize(self, opts)
+
 	-- Orientation
-	horizontal		= false,
-	vertical		= true,
+	self.horizontal = not not opts.horizontal
+	self.vertical = (type(opts.vertical) == "nil") or (not not opts.vertical)
 	-- Show scroll bars
-	showScrollBars	= true,
+	self.showScrollBars = (type(opts.showScrollBars) == "nil") or (not not opts.showScrollBars)
 	-- Mouse scroll
-	mouseScroll		= false,
+	self.mouseScroll = not not opts.mouseScroll
 	-- Colors
-	colorForeground	= colours.grey,
-	colorBar		= colours.grey,
-	colorButton		= colours.lightGrey,
+	self.colorForeground = opts.colorForeground or colours.grey
+	self.colorBar = opts.colorBar or colours.grey
+	self.colorButton = opts.colorButton or colours.lightGrey
+
 	-- Relative scroll position
-	scrollPosition	= nil,
-	-- Sliders
-	sliderHoriz		= nil,
-	sliderVerti		= nil
-}, ccgui.Element)
-ccgui.ScrollElement = ScrollElement
-
-function ScrollElement:init()
-	ccgui.Element.init(self)
-
-	-- Scroll position
 	self.scrollPosition = vector.new(0, 0)
-
-	-- Orientation
-	self.horizontal = not not self.horizontal
-	self.vertical = not not self.vertical
-
 	-- Sliders
 	self.sliderHoriz = HorizontalSlider:new({
 		parent			= self,
@@ -146,18 +141,18 @@ function ScrollElement:scrollBarMargins()
 		if self.vertical then
 			right = 1
 		end
-		return ccgui.newMargins(0, right, bottom, 0)
+		return Margins:new(0, right, bottom, 0)
 	end
 
-	return ccgui.newMargins(0)
+	return Margins:new(0)
 end
 
 function ScrollElement:inner(bbox)
-	return ccgui.Element.inner(self, bbox):contract(self:scrollBarMargins())
+	return super.inner(self, bbox):contract(self:scrollBarMargins())
 end
 
 function ScrollElement:outer(bbox)
-	return ccgui.Element.outer(self, bbox:expand(self:scrollBarMargins()))
+	return super.outer(self, bbox:expand(self:scrollBarMargins()))
 end
 
 function ScrollElement:scrollPaint()
@@ -202,3 +197,6 @@ function ScrollElement:sinkEvent(event)
 		end
 	end, self)
 end
+
+-- Exports
+return ScrollElement

@@ -8,9 +8,9 @@
 local Element	= require "ccgui.Element"
 local Button	= require "ccgui.Button"
 
-local ToggleButton = Button.subclass("ccgui.ToggleButton")
+local ToggleButton = Button:subclass("ccgui.ToggleButton")
 function ToggleButton:initialize(opts)
-	super.initialize(self)
+	super.initialize(self, opts)
 
 	-- Button label
 	self.labelOn = opts.labelOn or "On"

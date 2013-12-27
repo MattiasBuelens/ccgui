@@ -8,13 +8,14 @@
 local Element		= require "ccgui.Element"
 local FocusElement	= require "ccgui.FocusElement"
 local ScrollElement	= require "ccgui.ScrollElement"
+local Rectangle		= require "ccgui.geom.Rectangle"
 
-local TextArea = ScrollElement.subclass("ccgui.TextArea")
+local TextArea = ScrollElement:subclass("ccgui.TextArea")
 function TextArea:initialize(opts)
 	-- Default style
 	opts.background = opts.background or colours.white
 
-	super.initialize(self)
+	super.initialize(self, opts)
 	
 	-- Scrolling
 	self.horizontal = (type(opts.horizontal) == "nil") or (not not opts.horizontal)
@@ -26,7 +27,7 @@ function TextArea:initialize(opts)
 	self.longestLineLength = 0
 
 	-- Cursor position
-	self.cursorLine = 1, -- [1, #(lines)]
+	self.cursorLine = 1 -- [1, #(lines)]
 	self.cursorChar = 1  -- [1, #(lines[cursorLine])]
 
 	self:on("mouse_click", self.textClick, self)
@@ -112,8 +113,7 @@ end
 ]]--
 
 function TextArea:canFocus()
-	-- Mixin FocusElement
-	return FocusElement.canFocus(self)
+	return self.isVisible
 end
 
 function TextArea:textBlur()

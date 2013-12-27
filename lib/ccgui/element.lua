@@ -12,13 +12,7 @@ local Border		= require "ccgui.Border"
 local Margins		= require "ccgui.geom.Margins"
 local Rectangle		= require "ccgui.geom.Rectangle"
 
---[[
-
-	Element
-
-]]--
-
-local Element = EventEmitter.subclass("ccgui.Element")
+local Element = EventEmitter:subclass("ccgui.Element")
 function Element:initialize(opts)
 	super.initialize(self)
 	-- Parent element
@@ -110,7 +104,7 @@ end
 -- Update element layout within given bounding box
 function Element:updateLayout(bbox)
 	self:calcSize(bbox)
-	self:calcLayout(ccgui.newRectangle(bbox:tl(), self.size:size()))
+	self:calcLayout(Rectangle:new(bbox:tl(), self.size:size()))
 end
 
 -- Check if the bounding box with padding contains the given point

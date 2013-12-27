@@ -7,7 +7,7 @@
 
 local Element		= require "ccgui.Element"
 
-local FocusElement = Element.subclass("ccgui.FocusElement")
+local FocusElement = Element:subclass("ccgui.FocusElement")
 function FocusElement:initialize(opts)
 	super.initialize(self, opts)
 

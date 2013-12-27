@@ -8,8 +8,9 @@
 local Element		= require "ccgui.Element"
 local Align			= require "ccgui.Align"
 local VAlign		= require "ccgui.VAlign"
+local Rectangle		= require "ccgui.geom.Rectangle"
 
-local TextElement = Element.subclass("ccgui.TextElement")
+local TextElement = Element:subclass("ccgui.TextElement")
 function TextElement:initialize(opts)
 	super.initialize(self, opts)
 
@@ -98,7 +99,7 @@ function TextElement:calcSize(size)
 	self.lineCount = nh
 
 	-- Get inner bounding box with new size
-	bbox = ccgui.newRectangle(bbox.x, bbox.y, nw, nh)
+	bbox = Rectangle:new(bbox.x, bbox.y, nw, nh)
 	-- Use outer size box
 	self.size = self:outer(bbox)
 end

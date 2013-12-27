@@ -6,8 +6,9 @@
 --]]
 
 local Container		= require "ccgui.Container"
+local Rectangle		= require "ccgui.geom.Rectangle"
 
-local FlowContainer = Container.subclass("ccgui.FlowContainer")
+local FlowContainer = Container:subclass("ccgui.FlowContainer")
 function FlowContainer:initialize(opts)
 	super.initialize(self, opts)
 	-- Orientation
@@ -52,7 +53,7 @@ function FlowContainer:calcSize(size)
 			return
 		end
 		-- Get child size
-		child:calcSize(ccgui.Rectangle:new{
+		child:calcSize(Rectangle:new{
 			[flowDim] = remaining,
 			[fixedDim] = fixedSize
 		})
@@ -71,7 +72,7 @@ function FlowContainer:calcSize(size)
 	for i,child in ipairs(stretchChildren) do
 		local childSize = (i == 1 and firstStretch) or stretchSize
 		-- Get child size
-		child:calcSize(ccgui.Rectangle:new{
+		child:calcSize(Rectangle:new{
 			[flowDim] = childSize,
 			[fixedDim] = fixedSize
 		})
@@ -89,7 +90,7 @@ function FlowContainer:calcSize(size)
 	end)
 
 	-- Get children size box
-	local bbox = ccgui.Rectangle:new{
+	local bbox = Rectangle:new{
 		[flowDim] = flowSize,
 		[fixedDim] = maxFixed
 	}
@@ -125,7 +126,7 @@ function FlowContainer:calcLayout(bbox)
 	self:eachVisible(function(child, i, isLast)
 		local spacing = (not isLast and self.spacing) or 0
 		-- Get child bounding box
-		child:calcLayout(ccgui.Rectangle:new{
+		child:calcLayout(Rectangle:new{
 			[flowCoord] = flowPos,
 			[fixedCoord] = fixedPos,
 			[flowDim] = child.size[flowDim],
@@ -156,3 +157,6 @@ function FlowContainer:calcLayout(bbox)
 	-- Use given bounding box
 	self.bbox = bbox
 end
+
+-- Exports
+return FlowContainer

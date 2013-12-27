@@ -11,7 +11,7 @@ local FlowContainer	= require "ccgui.FlowContainer"
 local Line			= require "ccgui.geom.Line"
 local Rectangle		= require "ccgui.geom.Rectangle"
 
-local ArrowButton = Button.subclass("ccgui.slider.ArrowButton")
+local ArrowButton = Button:subclass("ccgui.slider.ArrowButton")
 function ArrowButton:initialize(opts)
 	-- Default style
 	opts.border = 0
@@ -19,7 +19,7 @@ function ArrowButton:initialize(opts)
 	super.initialize(self, opts)
 end
 
-local Bar = Element.subclass("ccgui.slider.Bar")
+local Bar = Element:subclass("ccgui.slider.Bar")
 function Bar:initialize(opts)
 	super.initialize(self, opts)
 
@@ -136,7 +136,7 @@ function Bar:dragging(button, x, y)
 	end
 end
 
-local Slider = FlowContainer.subclass("ccgui.Slider")
+local Slider = FlowContainer:subclass("ccgui.Slider")
 function Slider:initialize(opts)
 	super.initialize(self, opts)
 

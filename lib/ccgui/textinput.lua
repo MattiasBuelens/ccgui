@@ -7,7 +7,7 @@
 
 local TextArea	= require "ccgui.TextArea"
 
-local TextInput = TextArea.subclass("ccgui.TextInput")
+local TextInput = TextArea:subclass("ccgui.TextInput")
 function TextInput:initialize(opts)
 	opts.horizontal = true
 	opts.vertical = false

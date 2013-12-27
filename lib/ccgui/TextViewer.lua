@@ -7,7 +7,7 @@
 
 local TextArea	= require "ccgui.TextArea"
 
-local TextViewer = TextArea.subclass("ccgui.TextViewer")
+local TextViewer = TextArea:subclass("ccgui.TextViewer")
 
 function TextViewer:readonly()
 	return true

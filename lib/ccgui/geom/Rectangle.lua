@@ -11,21 +11,25 @@ local Margins = require "ccgui.geom.Margins"
 local Line = require "ccgui.geom.Line"
 local Polygon = require "ccgui.geom.Polygon"
 
-local Rectangle = Polygon.subclass("ccgui.Rectangle")
+local Rectangle = Polygon:subclass("ccgui.Rectangle")
 function Rectangle:initialize(x, y, w, h)
-	-- Position as vector
 	if type(x) == "table" then
-		return ccgui.newRectangle(x.x, x.y, y, w)
+		if(x.w) then
+			-- Clone rectangle
+			x, y, w, h = x.x, x.y, x.w, x.h
+		else
+			-- Position as vector
+			x, y, w, h = x.x, x.y, y, w
+		end
 	end
-	-- Size as vector
 	if type(w) == "table" then
-		return ccgui.newRectangle(x, y, w.x, w.y)
+		-- Size as vector
+		w, h = w.x, w.y
 	end
-	
-	self.x = x
-	self.x = x,
-	self.y = y,
-	self.w = math.max(0, w),
+
+	self.x = x or 0
+	self.y = y or 0
+	self.w = math.max(0, w)
 	self.h = math.max(0, h)
 	self.vertices = { self:tl(), self:tr(), self:br(), self:bl() }
 end

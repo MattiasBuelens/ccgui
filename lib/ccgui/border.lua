@@ -5,15 +5,11 @@
 
 --]]
 
-local Border = common.newClass{
-	top		= 0,
-	right	= 0,
-	bottom	= 0,
-	left	= 0
-}
-ccgui.Border = Border
+local Object		= require "objectlua.Object"
+local Margins		= require "ccgui.geom.Margins"
 
-function ccgui.newBorder(...)
+local Border = Object:subclass("ccgui.Border")
+function Border:initialize(...)
 	local args = { ... }
 	local n = #args
 
@@ -40,12 +36,10 @@ function ccgui.newBorder(...)
 		top, right, bottom, left = args[1], args[2], args[3], args[2]
 	end
 
-	return Border:new{
-		top		= tonumber(top),
-		right	= tonumber(right),
-		bottom	= tonumber(bottom),
-		left	= tonumber(left)
-	}
+	self.top	= tonumber(top)
+	self.right	= tonumber(right)
+	self.bottom	= tonumber(bottom)
+	self.left	= tonumber(left)
 end
 
 function Border:get(side)
@@ -71,7 +65,7 @@ function Border:has(side)
 end
 
 function Border:margins()
-	return ccgui.Margins:new{
+	return Margins:new{
 		top		= self:has("top")		and 1 or 0,
 		right	= self:has("right")		and 1 or 0,
 		bottom	= self:has("bottom")	and 1 or 0,
@@ -84,3 +78,6 @@ function Border:__tostring()
 		..self:get("top")..","..self:get("right")..","
 		..self:get("bottom")..","..self:get("left").."]"
 end
+
+-- Exports
+return Border

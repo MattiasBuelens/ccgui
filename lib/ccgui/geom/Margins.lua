@@ -9,7 +9,7 @@ os.loadAPI("/rom/apis/vector")
 
 local Object = require "objectlua.Object"
 
-local Margins = Object.subclass("ccgui.geom.Margins")
+local Margins = Object:subclass("ccgui.geom.Margins")
 function Margins:initialize(...)
 	local args = { ... }
 	local n = #args
