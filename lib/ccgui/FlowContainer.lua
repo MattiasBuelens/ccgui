@@ -5,21 +5,15 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Container		= require "ccgui.Container"
 
-local FlowContainer = common.newClass({
+local FlowContainer = Container.subclass("ccgui.FlowContainer")
+function FlowContainer:initialize(opts)
+	super.initialize(self, opts)
 	-- Orientation
-	horizontal = false,
+	self.horizontal = not not opts.horizontal
 	-- Spacing between children
-	spacing = 0
-}, ccgui.Container)
-ccgui.FlowContainer = FlowContainer
-
-function FlowContainer:init()
-	ccgui.Container.init(self)
-
-	-- Orientation
-	self.horizontal = not not self.horizontal
+	self.spacing = opts.spacing or 0
 end
 
 function FlowContainer:calcSize(size)

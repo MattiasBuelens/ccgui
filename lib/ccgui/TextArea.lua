@@ -1,36 +1,33 @@
 --[[
 
 	ComputerCraft GUI
-	Text input controls
+	Text area
 
 --]]
 
-ccgui = ccgui or {}
+local Element		= require "ccgui.Element"
+local FocusElement	= require "ccgui.FocusElement"
+local ScrollElement	= require "ccgui.ScrollElement"
 
-local TextArea = common.newClass({
-	-- Colors
-	background			= colours.white,
+local TextArea = ScrollElement.subclass("ccgui.TextArea")
+function TextArea:initialize(opts)
+	-- Default style
+	opts.background = opts.background or colours.white
 
+	super.initialize(self)
+	
 	-- Scrolling
-	horizontal			= true,
-	vertical			= true,
-	mouseScroll			= true,
+	self.horizontal = (type(opts.horizontal) == "nil") or (not not opts.horizontal)
+	self.vertical = (type(opts.vertical) == "nil") or (not not opts.vertical)
+	self.mouseScroll = (type(opts.mouseScroll) == "nil") or (not not opts.mouseScroll)
 
 	-- Text lines
-	lines				= nil,
-	longestLineLength	= 0,
+	self.lines = {""}
+	self.longestLineLength = 0
 
 	-- Cursor position
-	cursorLine			= 1, -- [1, #(lines)]
-	cursorChar			= 1  -- [1, #(lines[cursorLine])]
-}, ccgui.ScrollElement, ccgui.FocusElement)
-ccgui.TextArea = TextArea
-
-function TextArea:init()
-	ccgui.FocusElement.init(self)
-	ccgui.ScrollElement.init(self)
-
-	self.lines = {""}
+	self.cursorLine = 1, -- [1, #(lines)]
+	self.cursorChar = 1  -- [1, #(lines[cursorLine])]
 
 	self:on("mouse_click", self.textClick, self)
 	self:on("key", self.textKey, self)
@@ -115,7 +112,8 @@ end
 ]]--
 
 function TextArea:canFocus()
-	return ccgui.FocusElement.canFocus(self)
+	-- Mixin FocusElement
+	return FocusElement.canFocus(self)
 end
 
 function TextArea:textBlur()
@@ -280,7 +278,7 @@ function TextArea:calcSize(size)
 	if not self:multiline() then h = 1 end
 
 	-- Get inner bounding box with new size
-	bbox = ccgui.newRectangle(bbox.x, bbox.y, w, h)
+	bbox = Rectangle:new(bbox.x, bbox.y, w, h)
 	-- Use outer size box
 	self.size = self:outer(bbox)
 end
@@ -351,36 +349,5 @@ function TextArea:textChar(char)
 	end
 end
 
---[[
-
-	Single line text input
-
-]]--
-
-local TextInput = common.newClass(ccgui.TextArea)
-ccgui.TextInput = TextInput
-
-function TextInput:init()
-	self.horizontal = true
-	self.vertical = false
-	self.mouseScroll = false
-	self.showScrollBars = false
-
-	ccgui.TextArea.init(self)
-end
-
-function TextInput:multiline()
-	return false
-end
-
---[[
-
-	Multiline text viewer
-
-]]--
-local TextViewer = common.newClass(ccgui.TextArea)
-ccgui.TextViewer = TextViewer
-
-function TextViewer:readonly()
-	return true
-end
+-- Exports
+return TextArea

@@ -5,15 +5,18 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Object	= require "objectlua.Object"
 
-local PaintPixel = common.newClass({
-	x			= 0,
-	y			= 0,
-	content		= " ",
-	foreground	= colours.white,
-	background	= 0
-})
+local PaintPixel = Object.subclass("ccgui.paint.PaintPixel")
+function PaintPixel:initialize(opts)
+	super.initialize(self, opts)
+
+	self.x			= opts.x or 0
+	self.y			= opts.y or 0
+	self.content	= opts.content or " "
+	self.foreground	= opts.foreground or colours.white
+	self.background	= opts.background or 0
+end
 
 -- Compare pixels
 function PaintPixel:__eq(o)
@@ -41,19 +44,16 @@ function PaintPixel:merge(pixel)
 	end
 end
 
-local PaintLayer = common.newClass({
-	-- Painted pixels
-	buffer = nil,
-	-- Pixels to be painted
-	update = nil,
-	-- Output device
-	output = term
-})
-ccgui.PaintLayer = PaintLayer
+local PaintLayer = Object.subclass("ccgui.paint.PaintLayer")
+function PaintLayer:initialize(opts)
+	super.initialize(self, opts)
 
-function PaintLayer:init(o)
+	-- Painted pixels
 	self.buffer = {}
+	-- Pixels to be painted
 	self.update = {}
+	-- Output device
+	self.output = opts.output or term
 
 	self:updateBounds()
 end
@@ -181,3 +181,6 @@ function PaintLayer:write(x, y, text, foreground, background)
 		}))
 	end
 end
+
+-- Exports
+return PaintLayer

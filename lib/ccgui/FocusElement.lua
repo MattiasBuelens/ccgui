@@ -5,15 +5,13 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Element		= require "ccgui.Element"
 
-local FocusElement = common.newClass({
-	hasFocus = false
-}, ccgui.Element)
-ccgui.FocusElement = FocusElement
+local FocusElement = Element.subclass("ccgui.FocusElement")
+function FocusElement:initialize(opts)
+	super.initialize(self, opts)
 
-function FocusElement:init()
-	ccgui.Element.init(self)
+	self.hasFocus = false
 
 	self:bubbleEvent("focus")
 	self:bubbleEvent("blur")
@@ -27,3 +25,6 @@ end
 function FocusElement:canFocus()
 	return self.isVisible
 end
+
+-- Exports
+return FocusElement

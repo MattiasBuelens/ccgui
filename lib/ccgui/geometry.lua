@@ -5,8 +5,9 @@
 
 --]]
 
-ccgui = ccgui or {}
 os.loadAPI("/rom/apis/vector")
+
+local Object = require "objectlua.Object"
 
 --[[
 
@@ -14,15 +15,8 @@ os.loadAPI("/rom/apis/vector")
 
 ]]--
 
-local Margins = common.newClass{
-	top = 0,
-	right = 0,
-	bottom = 0,
-	left = 0
-}
-ccgui.Margins = Margins
-
-function ccgui.newMargins(...)
+local Margins = Object.subclass("ccgui.Margins")
+function Margins:initialize(...)
 	local args = { ... }
 	local n = #args
 	local top, right, bottom, left
@@ -46,12 +40,10 @@ function ccgui.newMargins(...)
 		top, right, bottom, left = args[1], args[2], args[3], args[2]
 	end
 
-	return Margins:new{
-		top		= tonumber(top),
-		right	= tonumber(right),
-		bottom	= tonumber(bottom),
-		left	= tonumber(left)
-	}
+	self.top	= tonumber(top)
+	self.right	= tonumber(right)
+	self.bottom	= tonumber(bottom)
+	self.left	= tonumber(left)
 end
 
 function Margins:vertical()
@@ -63,11 +55,11 @@ function Margins:horizontal()
 end
 
 function Margins:add(m)
-	return ccgui.newMargins(self.top + m.top, self.right + m.right, self.bottom + m.bottom, self.left + m.left)
+	return Margins:new(self.top + m.top, self.right + m.right, self.bottom + m.bottom, self.left + m.left)
 end
 
 function Margins:multiply(m)
-	return ccgui.newMargins(self.top * m, self.right * m, self.bottom * m, self.left * m)
+	return Margins:new(self.top * m, self.right * m, self.bottom * m, self.left * m)
 end
 
 function Margins:__add(o)
@@ -93,17 +85,10 @@ end
 
 ]]--
 
-local Line = common.newClass{
-	start = nil,
-	stop = nil
-}
-ccgui.Line = Line
-
-function ccgui.newLine(start, stop)
-	return Line:new{
-		start = start,
-		stop = stop
-	}
+local Line = Object.subclass("ccgui.Line")
+function Line:initialize(start, stop)
+	self.start = start
+	self.stop = stop
 end
 
 function Line:delta()
@@ -158,13 +143,9 @@ end
 
 ]]--
 
-local Polygon = common.newClass{
-	___vertices = nil
-}
-ccgui.Polygon = Polygon
-
-function Polygon:init()
-	local vertices = self.___vertices
+local Polygon = Object.subclass("ccgui.Polygon")
+function Polygon:initialize(vertices)
+	vertices = vertices or {}
 
 	-- Vertices passed as table
 	while table.getn(vertices) == 1 do
@@ -176,31 +157,20 @@ function Polygon:init()
 		error("Polygon requires at least two vertices")
 	end
 
-	-- Protect vertices from modifications
-	setmetatable(vertices, {
-		__newindex = function()
-			error("Polygon vertices list is immutable")
-		end
-	})
-
-	self.___vertices = vertices
-end
-
-function Polygon:vertices()
-	return self.___vertices
+	self.vertices = vertices
 end
 
 function Polygon:sides()
-	local vertices = self:vertices()
+	local vertices = self.vertices
 
 	-- Add last side first
 	local v1, v2 = vertices[#vertices], vertices[1]
-	local sides = { ccgui.newLine(v1, v2) }
+	local sides = { Line:new(v1, v2) }
 
 	-- Walk over vertices
 	for i=2, #vertices do
 		v1, v2 = v2, vertices[i]
-		table.insert(sides, ccgui.newLine(v1, v2))
+		table.insert(sides, Line:new(v1, v2))
 	end
 
 	return sides
@@ -225,7 +195,7 @@ function Polygon:points()
 end
 
 function Polygon:bbox()
-	local vertices = self:vertices()
+	local vertices = self.vertices
 
 	-- Upper and lower coordinates
 	local ux, uy = vertices[1].x, vertices[1].y
@@ -241,11 +211,11 @@ function Polygon:bbox()
 	end
 
 	-- Return as rectangle
-	return ccgui.newRectangle(lx, ly, ux - lx, uy - ly)
+	return Rectangle:new(lx, ly, ux - lx, uy - ly)
 end
 
 function Polygon:__tostring()
-	return "Polygon["..table.getn(self:vertices()).."]"
+	return "Polygon["..table.getn(self.vertices).."]"
 end
 
 --[[
@@ -254,15 +224,8 @@ end
 
 ]]--
 
-local Rectangle = common.newClass({
-	x = 0,
-	y = 0,
-	w = 0,
-	h = 0
-}, Polygon)
-ccgui.Rectangle = Rectangle
-
-function ccgui.newRectangle(x, y, w, h)
+local Rectangle = Polygon.subclass("ccgui.Rectangle")
+function Rectangle:initialize(x, y, w, h)
 	-- Position as vector
 	if type(x) == "table" then
 		return ccgui.newRectangle(x.x, x.y, y, w)
@@ -272,20 +235,12 @@ function ccgui.newRectangle(x, y, w, h)
 		return ccgui.newRectangle(x, y, w.x, w.y)
 	end
 	
-	return Rectangle:new{
-		x = x,
-		y = y,
-		w = math.max(0, w),
-		h = math.max(0, h)
-	}
-end
-
-function Rectangle:init()
-	self.___vertices = self:vertices()
-end
-
-function Rectangle:vertices()
-	return { self:tl(), self:tr(), self:br(), self:bl() }
+	self.x = x
+	self.x = x,
+	self.y = y,
+	self.w = math.max(0, w),
+	self.h = math.max(0, h)
+	self.vertices = { self:tl(), self:tr(), self:br(), self:bl() }
 end
 
 function Rectangle:bbox()
@@ -320,19 +275,19 @@ end
 
 -- Sides
 function Rectangle:left()
-	return ccgui.newLine(self:tl(), self:bl())
+	return Line:new(self:tl(), self:bl())
 end
 
 function Rectangle:right()
-	return ccgui.newLine(self:tr(), self:br())
+	return Line:new(self:tr(), self:br())
 end
 
 function Rectangle:top()
-	return ccgui.newLine(self:tl(), self:tr())
+	return Line:new(self:tl(), self:tr())
 end
 
 function Rectangle:bottom()
-	return ccgui.newLine(self:bl(), self:br())
+	return Line:new(self:bl(), self:br())
 end
 
 -- Size
@@ -357,12 +312,12 @@ end
 
 -- Modifications
 function Rectangle:shift(v)
-	return ccgui.newRectangle(self.x + v.x, self.y + v.y, self.w, self.h)
+	return Rectangle:new(self.x + v.x, self.y + v.y, self.w, self.h)
 end
 
 function Rectangle:expand(m)
-	m = ccgui.newMargins(m)
-	return ccgui.newRectangle(
+	m = Margins:new(m)
+	return Rectangle:new(
 		self.x - m.left, self.y - m.top,
 		self.w + m:horizontal(), self.h + m:vertical()
 	)
@@ -381,3 +336,11 @@ function Rectangle:intersects(rect)
 	   and self.y <= rect.y + rect.h
 	   and self.y + self.h >= rect.y
 end
+
+-- Exports
+return {
+	Margins		= Margins,
+	Line		= Line,
+	Polygon		= Polygon,
+	Rectangle	= Rectangle
+}

@@ -5,27 +5,27 @@
 
 --]]
 
-ccgui = ccgui or {}
+local FlowContainer	= require "ccgui.FlowContainer"
 
-local TabContainer = common.newClass({
-	-- Current tab
-	currentTab = nil,
+local TabContainer = FlowContainer.subclass("ccgui.TabContainer")
+function TabContainer:initialize(opts)
+	super.initialize(self, opts)
+
 	-- Spacing between tab buttons
-	tabSpacing = 0,
+	self.tabSpacing = opts.tabSpacing or 0
 	-- Stretch tab panes
-	tabStretch = true,
+	self.tabStretch = (type(opts.tabStretch) == "nil") or (not not opts.tabStretch)
 	-- Style for tab buttons
-	tabStyle = ccgui.Button
-}, ccgui.FlowContainer)
-ccgui.TabContainer = TabContainer
+	self.tabStyle = opts.tabStyle or ccgui.Button
 
-function TabContainer:init()
-	ccgui.FlowContainer.init(self)
-
+	-- Current tab
+	self.currentTab = nil
+	-- Tab bar
 	self.tabBar = ccgui.FlowContainer:new{
 		horizontal = not self.horizontal,
 		spacing = self.tabSpacing
 	}
+	-- Tab pane
 	self.tabPane = ccgui.FlowContainer:new{
 		horizontal = not self.horizontal,
 		stretch = tabStretch
@@ -134,3 +134,6 @@ function TabContainer:sinkEventToCurrent(event)
 		end
 	end, self)
 end
+
+-- Exports 
+return TabContainer

@@ -5,25 +5,20 @@
 
 --]]
 
-ccgui = ccgui or {}
+local FlowContainer		= require "ccgui.FlowContainer"
 
-local Page = common.newClass({
+local Page = FlowContainer.subclass("ccgui.Page")
+function Page:initialize(opts)
+	super.initialize(self, opts)
+
 	-- Paint layer
-	layer = nil,
-	-- Frames per second
-	fps = 5,
-	-- Identifier of frame timer
-	frameTimer = nil
-}, ccgui.FlowContainer)
-ccgui.Page = Page
-
-function Page:init()
-	ccgui.FlowContainer.init(self)
-
-	-- Create paint layer
 	self.layer = ccgui.PaintLayer.new({
 		output = self.output or term
 	})
+	-- Frames per second
+	self.fps = opts.fps or 5
+	-- Identifier of frame timer
+	self.frameTimer = nil
 
 	self:on("beforepaint", self.pageLayout, self)
 	self:on("timer", self.pageTimer, self)
@@ -108,3 +103,6 @@ end
 function Page:reset()
 	self.layer:clear()
 end
+
+-- Exports
+return Page

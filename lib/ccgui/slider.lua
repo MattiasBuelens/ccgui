@@ -5,23 +5,29 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Element		= require "ccgui.Element"
+local Button		= require "ccgui.Button"
+local FlowContainer	= require "ccgui.FlowContainer"
+local Geometry		= require "ccgui.Geometry"
+local Line, Rectangle = Geometry.Line, Geometry.Rectangle
 
-local ArrowButton = common.newClass({
-	border = ccgui.newBorder(0),
-	padding = ccgui.newMargins(0)
-}, ccgui.Button)
+local ArrowButton = Button.subclass("ccgui.slider.ArrowButton")
+function ArrowButton:initialize(opts)
+	-- Default style
+	opts.border = 0
+	opts.padding = 0
+	super.initialize(self, opts)
+end
 
-local Bar = common.newClass({
+local Bar = Element.subclass("ccgui.slider.Bar")
+function Bar:initialize(opts)
+	super.initialize(self, opts)
+
 	-- Orientation
-	horizontal		= false,
+	self.horizontal = false
 	-- Dragging
-	dragStartPos	= nil,
-	dragStartValue	= nil
-}, ccgui.Element)
-
-function Bar:init()
-	ccgui.Element.init(self)
+	self.dragStartPos = nil
+	self.dragStartValue = nil
 
 	self:on("beforepaint", self.barLayout, self)
 	self:on("paint", self.barPaint, self)
@@ -77,16 +83,16 @@ function Bar:getBarLine()
 	end
 
 	-- Create line
-	return ccgui.newLine(bbox:tl() + startPos, bbox:tl() + stopPos)
+	return Line:new(bbox:tl() + startPos, bbox:tl() + stopPos)
 end
 
 -- Get the bounding rectangle of the bar
 function Bar:getBarRect()
 	local line = self:getBarLine()
 	if self.horizontal then
-		return ccgui.newRectangle(line.start, line:length(), 1)
+		return Rectangle:new(line.start, line:length(), 1)
 	else
-		return ccgui.newRectangle(line.start, 1, line:length())
+		return Rectangle:new(line.start, 1, line:length())
 	end
 end
 
@@ -130,26 +136,16 @@ function Bar:dragging(button, x, y)
 	end
 end
 
-local Slider = common.newClass({
-	-- Arrow buttons
-	showArrows		= true,
-	arrowLabels		= { "-", "+" },
-	-- Colors
-	colorForeground	= colours.grey,
-	colorBar		= colours.grey,
-	colorButton		= colours.lightGrey,
-	-- Children
-	prevArrow		= nil,
-	nextArrow		= nil,
-	bar				= nil
-}, ccgui.FlowContainer)
-ccgui.Slider = Slider
-
-function Slider:init()
-	ccgui.FlowContainer.init(self)
+local Slider = FlowContainer.subclass("ccgui.Slider")
+function Slider:initialize(opts)
+	super.initialize(self, opts)
 
 	-- Orientation
-	self.horizontal = not not self.horizontal
+	self.horizontal = not not opts.horizontal
+
+	-- Arrow buttons
+	self.showArrows = (type(opts.showArrows) == "nil") or (not not opts.showArrows)
+	self.arrowLabels = opts.arrowLabels or { "-", "+" }
 
 	-- Slider bar
 	self.bar = Bar:new({
@@ -232,3 +228,6 @@ end
 function Slider:nextStep()
 	self:addValue(self:getStep())
 end
+
+-- Exports
+return Slider

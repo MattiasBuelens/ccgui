@@ -5,20 +5,19 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Element	= require "ccgui.Element"
+local Button	= require "ccgui.Button"
 
-local ToggleButton = common.newClass({
-	-- Button state
-	toggleState = false,
+local ToggleButton = Button.subclass("ccgui.ToggleButton")
+function ToggleButton:initialize(opts)
+	super.initialize(self)
+
 	-- Button label
-	labelOn = "On",
-	labelOff = "Off"
-}, ccgui.Button)
-ccgui.ToggleButton = ToggleButton
+	self.labelOn = opts.labelOn or "On"
+	self.labelOff = opts.labelOff or "Off"
 
-function ToggleButton:init()
-	ccgui.Button.init(self)
-
+	-- Button state
+	self.toggleState = false
 	self:updateLabel()
 
 	self:on("buttonpress", self.togglePress, self)
@@ -67,3 +66,6 @@ function ToggleButton:togglePress()
 		self:trigger("toggleoff")
 	end
 end
+
+-- Exports
+return ToggleButton

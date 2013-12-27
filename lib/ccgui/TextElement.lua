@@ -5,24 +5,19 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Element		= require "ccgui.Element"
+local Align			= require "ccgui.Align"
+local VAlign		= require "ccgui.VAlign"
 
-local TextElement = common.newClass({
+local TextElement = Element.subclass("ccgui.TextElement")
+function TextElement:initialize(opts)
+	super.initialize(self, opts)
+
 	-- Text
-	text = "",
+	self:setText(opts.text)
 	-- Text alignment
-	align = ccgui.Align.Left,
-	valign = ccgui.VAlign.Top,
-	-- Private: lines to draw
-	lines = nil,
-	lineCount = 0
-}, ccgui.Element)
-ccgui.TextElement = TextElement
-
-function TextElement:init()
-	ccgui.Element.init(self)
-
-	self:setText(self.text)
+	self.align = opts.align or Align.Left
+	self.valign = opts.valign or VAlign.Top
 
 	self:on("paint", self.drawText, self)
 end
@@ -115,12 +110,12 @@ function TextElement:drawText()
 	-- Vertical align
 	local firstLine, y = 1, bbox.y
 	local nLines, nLinesToPaint = #self.lines, self.lineCount
-	if self.valign == ccgui.VAlign.Center then
+	if self.valign == VAlign.Center then
 		y = y + math.floor((bbox.h - nLinesToPaint)/2)
 		if nLines > nLinesToPaint then
 			firstLine = math.floor((nLines - nLinesToPaint)/2) + 1
 		end
-	elseif self.valign == ccgui.VAlign.Bottom then
+	elseif self.valign == VAlign.Bottom then
 		y = y + bbox.h - nLinesToPaint
 		if nLines > nLinesToPaint then
 			firstLine = nLines - nLinesToPaint + 1
@@ -133,9 +128,9 @@ function TextElement:drawText()
 		-- Horizontal align
 		local x = bbox.x
 		local len = #(line)
-		if self.align == ccgui.Align.Center then
+		if self.align == Align.Center then
 			x = x + math.floor((bbox.w - len)/2)
-		elseif self.align == ccgui.Align.Right then
+		elseif self.align == Align.Right then
 			x = x + bbox.w - len
 		end
 		-- Write text
@@ -143,3 +138,6 @@ function TextElement:drawText()
 		y = y + 1
 	end
 end
+
+-- Exports
+return TextElement

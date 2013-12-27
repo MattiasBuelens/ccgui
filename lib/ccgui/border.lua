@@ -30,7 +30,7 @@ function ccgui.newBorder(...)
 			top, right, bottom, left = x.top, x.right, x.bottom, x.left
 		else
 			-- One color for all
-			widths = ccgui.newMargins(x)
+			top, right, bottom, left = x, x, x, x
 		end
 	elseif n == 2 then
 		-- Vertical and horizontal colors

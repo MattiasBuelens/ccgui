@@ -5,20 +5,15 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Element		= require "ccgui.Element"
 
-local Container = common.newClass({
+local Container = Element.subclass("ccgui.Container")
+function Container:initialize(opts)
+	super.initialize(self, opts)
+
 	-- Children
-	children = nil,
-	-- Focused child index
-	childFocus = nil
-}, ccgui.Element)
-ccgui.Container = Container
-
-function Container:init()
-	ccgui.Element.init(self)
-
 	self.children = {}
+	self.childFocus = nil
 
 	-- Paint
 	self:on("paint", self.drawChildren, self)
@@ -103,7 +98,7 @@ function Container:remove(child)
 	child.parent = nil
 
 	-- Remove from children
-	local i = common.ifind(self.children, child)
+	local i = self:find(child, false)
 	if i ~= nil then
 		table.remove(self.children, i)
 		-- Fix focused child
@@ -164,7 +159,7 @@ function Container:blur()
 	end
 
 	-- Call super
-	return ccgui.Element.blur(self)
+	return super.blur(self)
 end
 
 --[[
@@ -191,3 +186,6 @@ function Container:sinkEventToCurrent(event)
 		end
 	end, self, 1000)
 end
+
+-- Exports
+return Container

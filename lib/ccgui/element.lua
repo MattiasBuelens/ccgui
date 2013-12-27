@@ -5,11 +5,12 @@
 
 --]]
 
-ccgui = ccgui or {}
+local Object		= require "objectlua.Object"
+local EventEmitter	= require "event.EventEmitter"
 
--- Alignment enumerations
-ccgui.Align = { Left = 0, Center = 1, Right = 2 }
-ccgui.VAlign = { Top = 0, Middle = 1, Bottom = 2 }
+local Border		= require "ccgui.Border"
+local Geometry		= require "ccgui.Geometry"
+local Margins, Rectangle = Geometry.Margins, Geometry.Rectangle
 
 --[[
 
@@ -17,42 +18,33 @@ ccgui.VAlign = { Top = 0, Middle = 1, Bottom = 2 }
 
 ]]--
 
-local Element = common.newClass({
+local Element = EventEmitter.subclass("ccgui.Element")
+function Element:initialize(opts)
+	super.initialize(self)
 	-- Parent element
-	parent = nil,
-	-- Need repaint
-	--needsRepaint = true,
-	-- Colors
-	foreground = colours.black,
-	background = 0,
-	-- Size and bounding box for drawing
-	size = nil,
-	bbox = nil,
-	-- Border
-	border = ccgui.newBorder(),
-	-- Padding
-	padding = ccgui.newMargins(0),
+	self.parent = opts.parent or nil
 	-- Visibility
-	isVisible = true
-}, common.Observable)
-ccgui.Element = Element
-
-function Element:init()
-	common.Observable.init(self)
-
-	self.padding = ccgui.newMargins(self.padding)
-	self.border = ccgui.newBorder(self.border)
-
+	self.isVisible = true
+	-- Colors
+	self.foreground = opts.foreground or colours.black
+	self.background = opts.background or 0
+	-- Padding
+	self.padding = Margins:new(opts.padding or 0)
+	-- Border
+	self.border = Border:new(opts.border or 0)
+	-- Size and bounding box for drawing
+	self.size = opts.size or nil
+	self.bbox = opts.bbox or nil
 	-- Mouse
 	self:on("mouse_click", self.mouseClick, self)
-
 	-- Focus
 	self:on("focus", self.updateFocus, self)
-
 	-- Paint
 	self:on("paint", self.clear, self)
 	self:on("paint", self.drawBorder, self)
 
+	-- Need repaint
+	--self.needsRepaint = true
 	--self:markRepaint()
 end
 
@@ -107,7 +99,7 @@ end
 
 -- Calculate element size within given size box
 function Element:calcSize(size)
-	self.size = ccgui.newRectangle(0, 0, 0, 0)
+	self.size = Rectangle:new(0, 0, 0, 0)
 end
 
 -- Calculate element layout within given bounding box
@@ -286,3 +278,6 @@ function Element:bubbleEvent(event)
 		end
 	end, self)
 end
+
+-- Exports
+return Element
