@@ -120,11 +120,14 @@ end
 
 function TextArea:textClick(button, x, y)
 	if button == 1 then
-		-- Left mouse button, set cursor
+		-- Left mouse button
 		if self:canFocus() and self:contains(x, y) then
+			-- Set cursor
 			local cursor = self:fromScreen(x, y)
 			self:setCursor(cursor.x, cursor.y)
+			-- Focus and draw cursor
 			self:focus()
+			self:drawCursor()
 		end
 	end
 end
