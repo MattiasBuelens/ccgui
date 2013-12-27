@@ -5,9 +5,9 @@
 
 --]]
 
-dofile("/common/program")
-dofile("/common/string")
-dofile("/common/table")
-dofile("/common/class")
-dofile("/common/observable")
-dofile("/common/store")
+dofile("/rom/common/program.lua")
+dofile("/rom/common/string.lua")
+dofile("/rom/common/table.lua")
+dofile("/rom/common/class.lua")
+dofile("/rom/common/observable.lua")
+dofile("/rom/common/store.lua")

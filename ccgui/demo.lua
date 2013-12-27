@@ -6,7 +6,7 @@
 --]]
 
 -- Load dependencies
-dofile("/common/all")
+dofile("/rom/common/all.lua")
 program.load("all")
 
 local paint = true
