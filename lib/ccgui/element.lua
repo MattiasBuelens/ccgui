@@ -9,8 +9,8 @@ local Object		= require "objectlua.Object"
 local EventEmitter	= require "event.EventEmitter"
 
 local Border		= require "ccgui.Border"
-local Geometry		= require "ccgui.Geometry"
-local Margins, Rectangle = Geometry.Margins, Geometry.Rectangle
+local Margins		= require "ccgui.geom.Margins"
+local Rectangle		= require "ccgui.geom.Rectangle"
 
 --[[
 

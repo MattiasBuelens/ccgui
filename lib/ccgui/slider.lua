@@ -8,8 +8,8 @@
 local Element		= require "ccgui.Element"
 local Button		= require "ccgui.Button"
 local FlowContainer	= require "ccgui.FlowContainer"
-local Geometry		= require "ccgui.Geometry"
-local Line, Rectangle = Geometry.Line, Geometry.Rectangle
+local Line			= require "ccgui.geom.Line"
+local Rectangle		= require "ccgui.geom.Rectangle"
 
 local ArrowButton = Button.subclass("ccgui.slider.ArrowButton")
 function ArrowButton:initialize(opts)
