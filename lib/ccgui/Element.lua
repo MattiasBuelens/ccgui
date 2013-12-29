@@ -77,6 +77,7 @@ function Element:hide()
 		if self.parent ~= nil then
 			self.parent:markRepaint()
 		end
+		self:blur()
 		self.isVisible = false
 		return true
 	end
