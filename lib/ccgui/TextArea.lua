@@ -213,11 +213,12 @@ function TextArea:delete(before)
 
 	if before then
 		if self.cursorChar == 1 and self.cursorLine > 1 then
+			-- Get old length of previous line
+			local prevLength = #(self.lines[self.cursorLine-1])
 			-- Concat with previous line
 			self.lines[self.cursorLine-1] = self.lines[self.cursorLine-1] .. self.lines[self.cursorLine]
 			table.remove(self.lines, self.cursorLine)
-			local x = #(self.lines[self.cursorLine-1]) + 1
-			self:setCursor(x, self.cursorLine-1)
+			self:setCursor(prevLength + 1, self.cursorLine-1)
 		elseif self.cursorChar > 1 then
 			-- Remove previous in current line
 			local line = self.lines[self.cursorLine]
