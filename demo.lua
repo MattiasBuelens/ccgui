@@ -10,14 +10,11 @@ local root = fs.combine(shell.getRunningProgram(), "../lib/")
 dofile(fs.combine(root, "/compat.lua"))
 package.root = root
 
-local Margins		= require "ccgui.geom.Margins"
-local Align			= require "ccgui.Align"
-local VAlign		= require "ccgui.VAlign"
+local ccgui	= require "ccgui"
 
-local paint = true
 local isRunning = true
 
-local screen = require("ccgui.Page"):new{
+local screen = ccgui.Page:new{
 	horizontal = false,
 	background = colours.white,
 	_name = "screen"
@@ -26,17 +23,17 @@ local header = require("ccgui.FlowContainer"):new{
 	horizontal = true,
 	_name = "header"
 }
-local headerTitle = require("ccgui.TextElement"):new{
+local headerTitle = ccgui.TextElement:new{
 	text = "CCGUI DEMONSTRATION",
-	align = Align.Center,
+	align = ccgui.Align.Center,
 	stretch = true,
 	foreground = colours.white,
 	background = colours.blue,
 	_name = "headerTitle"
 }
-local btnQuit = require("ccgui.Button"):new{
+local btnQuit = ccgui.Button:new{
 	text = "X",
-	align = Align.Right,
+	align = ccgui.Align.Right,
 	padding = 0,
 	_name = "btnQuit"
 }
@@ -45,34 +42,34 @@ btnQuit:on("buttonpress", function()
 end)
 header:add(headerTitle, btnQuit)
 
-local footer = require("ccgui.TextElement"):new{
+local footer = ccgui.TextElement:new{
 	text = "Ready",
 	foreground = colours.white,
 	background = colours.lightGrey,
 	_name = "footer"
 }
 
-local toolbar = require("ccgui.FlowContainer"):new{
+local toolbar = ccgui.FlowContainer:new{
 	horizontal = true,
-	padding = Margins:new(0, 1),
+	padding = ccgui.geom.Margins:new(0, 1),
 	spacing = 1,
 	_name = "toolbar"
 }
-local btnOne = require("ccgui.Button"):new{
+local btnOne = ccgui.Button:new{
 	text = "One",
 	_name = "btnOne"
 }
 btnOne:on("buttonpress", function()
 	footer:setText("One pressed")
 end)
-local btnTwo = require("ccgui.Button"):new{
+local btnTwo = ccgui.Button:new{
 	text = "Two",
 	_name = "btnTwo"
 }
 btnTwo:on("buttonpress", function()
 	footer:setText("Two pressed")
 end)
-local btnThree = require("ccgui.Button"):new{
+local btnThree = ccgui.Button:new{
 	text = "Three",
 	_name = "btnThree"
 }
@@ -81,22 +78,22 @@ btnThree:on("buttonpress", function()
 end)
 toolbar:add(btnOne, btnTwo, btnThree)
 
-local fieldAddress = require("ccgui.FlowContainer"):new{
+local fieldAddress = ccgui.FlowContainer:new{
 	horizontal = true,
-	padding = Margins:new(1),
+	padding = ccgui.geom.Margins:new(1),
 	_name = "fieldAddress"
 }
-local labelAddress = require("ccgui.TextElement"):new{
+local labelAddress = ccgui.TextElement:new{
 	text = "To: ",
 	_name = "labelAddress"
 }
-local textAddress = require("ccgui.TextInput"):new{
+local textAddress = ccgui.TextInput:new{
 	_name = "textAddress"
 }
 textAddress:setText("mattias@island")
 fieldAddress:add(labelAddress, textAddress)
 
-local textMessage = require("ccgui.TextArea"):new{
+local textMessage = ccgui.TextArea:new{
 	stretch = true
 }
 screen:add(header, toolbar, fieldAddress, textMessage, footer)

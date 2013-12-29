@@ -11,4 +11,6 @@ local VAlign = {
 	Bottom	= 3
 }
 
+-- Exports
+_G.ccgui.VAlign = VAlign
 return VAlign
