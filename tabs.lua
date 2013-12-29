@@ -24,7 +24,7 @@ local header = require("ccgui.FlowContainer"):new{
 	_name = "header"
 }
 local headerTitle = ccgui.TextElement:new{
-	text = "CCGUI :: Demonstration",
+	text = "CCGUI :: Tabs Example",
 	align = ccgui.Align.Center,
 	stretch = true,
 	foreground = colours.white,
@@ -50,56 +50,25 @@ local footer = ccgui.TextElement:new{
 	background = colours.lightGrey,
 	_name = "footer"
 }
+local tabs = ccgui.TabContainer:new{
+	horizontal = false,
+	tabStretch = true,
+	tabPadding = ccgui.geom.Margins:new(1, 1, 0),
+	tabSpacing = 1,
+	tabBackground = colours.lightBlue,
+	tabOpts = {
+		foreground = colours.black,
+		background = colours.white
+	},
+	_name = "tabs"
+}
+tabs:addTab("Read", ccgui.TextViewer:new{
+	text = "Foo\nbar"
+})
+tabs:addTab("Write", ccgui.TextArea:new{
+})
 
-local toolbar = ccgui.FlowContainer:new{
-	horizontal = true,
-	padding = ccgui.geom.Margins:new(0, 1),
-	spacing = 1,
-	_name = "toolbar"
-}
-local btnOne = ccgui.Button:new{
-	text = "One",
-	_name = "btnOne"
-}
-btnOne:on("buttonpress", function()
-	footer:setText("One pressed")
-end)
-local btnTwo = ccgui.Button:new{
-	text = "Two",
-	_name = "btnTwo"
-}
-btnTwo:on("buttonpress", function()
-	footer:setText("Two pressed")
-end)
-local btnThree = ccgui.Button:new{
-	text = "Three",
-	_name = "btnThree"
-}
-btnThree:on("buttonpress", function()
-	footer:setText("Three pressed")
-end)
-toolbar:add(btnOne, btnTwo, btnThree)
-
-local fieldAddress = ccgui.FlowContainer:new{
-	horizontal = true,
-	padding = ccgui.geom.Margins:new(1),
-	_name = "fieldAddress"
-}
-local labelAddress = ccgui.TextElement:new{
-	text = "To: ",
-	_name = "labelAddress"
-}
-local textAddress = ccgui.TextInput:new{
-	_name = "textAddress"
-}
-textAddress:setText("mattias@island")
-fieldAddress:add(labelAddress, textAddress)
-
-local textMessage = ccgui.TextArea:new{
-	stretch = true,
-	_name = "textMessage"
-}
-screen:add(header, toolbar, fieldAddress, textMessage, footer)
+screen:add(header, tabs, footer)
 
 screen:paint()
 while isRunning do
