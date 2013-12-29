@@ -94,7 +94,8 @@ textAddress:setText("mattias@island")
 fieldAddress:add(labelAddress, textAddress)
 
 local textMessage = ccgui.TextArea:new{
-	stretch = true
+	stretch = true,
+	_name = "textMessage"
 }
 screen:add(header, toolbar, fieldAddress, textMessage, footer)
 

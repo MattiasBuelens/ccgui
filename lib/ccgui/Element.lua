@@ -36,8 +36,6 @@ function Element:initialize(opts)
 	self.bbox = opts.bbox or nil
 	-- Mouse
 	self:on("mouse_click", self.mouseClick, self)
-	-- Focus
-	self:on("focus", self.updateFocus, self)
 	-- Paint
 	self:on("repaint", self.clear, self)
 	self:on("paint", self.drawBorder, self)
@@ -139,12 +137,9 @@ function Element:focus()
 	if not self:canFocus() then
 		return false
 	end
-
-	-- Set focus
-	if not self.hasFocus then
-		self.hasFocus = true
-		self:trigger("focus", self)
-	end
+	
+	-- Grab focus
+	self:updateFocus(self)
 
 	return true
 end
@@ -154,7 +149,7 @@ function Element:blur()
 		return false
 	end
 
-	-- Set focus
+	-- Lose focus
 	if self.hasFocus then
 		self.hasFocus = false
 		self:trigger("blur", self)
@@ -171,6 +166,11 @@ function Element:updateFocus(newFocus)
 	-- Bubble up to parent
 	if self.parent ~= nil then
 		self.parent:updateFocus(newFocus)
+	end
+	-- Trigger focus if gained focus
+	if self == newFocus and not self.hasFocus then
+		self.hasFocus = true
+		self:trigger("focus", self)
 	end
 end
 

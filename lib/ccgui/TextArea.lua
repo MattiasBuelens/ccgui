@@ -28,6 +28,9 @@ function TextArea:initialize(opts)
 	self.cursorLine = 1 -- [1, #(lines)]
 	self.cursorChar = 1  -- [1, #(lines[cursorLine])]
 
+	self:on("focus", self.textFocus, self)
+	self:on("blur", self.textBlur, self)
+	
 	self:on("mouse_click", self.textClick, self)
 	self:on("key", self.textKey, self)
 	self:on("char", self.textChar, self)
@@ -114,10 +117,12 @@ function TextArea:canFocus()
 	return self.isVisible
 end
 
+function TextArea:textFocus()
+	self:drawCursor()
+end
+
 function TextArea:textBlur()
-	if not self.hasFocus then
-		self:getOutput().setCursorBlink(false)
-	end
+	self:getOutput().setCursorBlink(false)
 end
 
 function TextArea:textClick(button, x, y)
@@ -127,8 +132,7 @@ function TextArea:textClick(button, x, y)
 			-- Set cursor
 			local cursor = self:fromScreen(x, y)
 			self:setCursor(cursor.x, cursor.y)
-			-- Focus and draw cursor
-			self:focus()
+			-- Draw cursor
 			self:drawCursor()
 		end
 	end
