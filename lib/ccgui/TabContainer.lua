@@ -127,13 +127,5 @@ function TabContainer:updateVisibleTab()
 	end)
 end
 
-function TabContainer:sinkEventToCurrent(event)
-	self:on(event, function(...)
-		if self.isVisible and self.currentTab ~= nil then
-			self.currentTab:trigger(event, ...)
-		end
-	end, self)
-end
-
 -- Exports 
 return TabContainer

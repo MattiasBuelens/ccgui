@@ -85,7 +85,7 @@ function FlowContainer:calcSize(size)
 	end
 
 	-- Enforce fixed size
-	self:eachVisible(function(child, i)
+	self:eachVisible(function(child)
 		child.size[fixedDim] = maxFixed
 	end)
 
@@ -103,10 +103,10 @@ function FlowContainer:calcLayout(bbox)
 	local cbox = self:inner(bbox)
 
 	-- Collect old child bounding boxes
-	local childBboxes = {}
+	--[[local childBboxes = {}
 	self:eachVisible(function(child, i)
 		childBboxes[i] = child.bbox
-	end)
+	end)]]--
 
 	-- Flow coordinate
 	local flowCoord = (self.horizontal and "x") or "y"
