@@ -27,8 +27,12 @@ function Bar:initialize(opts)
 	self:on("mouse_drag", self.dragging, self)
 end
 
+function Bar:hasBounds()
+	return self.bbox ~= nil
+end
+
 function Bar:getBounds()
-	assert(self.bbox ~= nil, "slider not positioned")
+	assert(self:hasBounds(), "slider bar not positioned")
 	return self:inner(self.bbox)
 end
 
@@ -95,7 +99,7 @@ end
 
 -- Start dragging on mouse click on bar
 function Bar:dragStart(button, x, y)
-	if button == 1 and self.isVisible and self:getBarRect():contains(x, y) then
+	if button == 1 and self.isVisible and self:hasBounds() and self:getBarRect():contains(x, y) then
 		-- Store starting position
 		self.dragStartPos = vector.new(x, y)
 		self.dragStartValue = self.parent:getValue()
@@ -108,7 +112,7 @@ end
 
 -- Adjust the scroll position while dragging
 function Bar:dragging(button, x, y)
-	if button == 1 and self.dragStartPos ~= nil then
+	if button == 1 and self:hasBounds() and self.dragStartPos ~= nil then
 		-- Get drag delta
 		local current = vector.new(x, y)
 		local deltaPos = current - self.dragStartPos
