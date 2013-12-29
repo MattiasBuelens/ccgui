@@ -11,19 +11,26 @@ local TabContainer = FlowContainer:subclass("ccgui.TabContainer")
 function TabContainer:initialize(opts)
 	super.initialize(self, opts)
 
-	-- Spacing between tab buttons
+	-- Tab bar style
+	self.tabPadding = opts.tabPadding or 0
 	self.tabSpacing = opts.tabSpacing or 0
+	self.tabBackground = opts.tabBackground or 0
+
 	-- Stretch tab panes
 	self.tabStretch = (type(opts.tabStretch) == "nil") or (not not opts.tabStretch)
-	-- Style for tab buttons
-	self.tabStyle = opts.tabStyle or ccgui.Button
+	-- Class for tab buttons
+	self.tabClass = opts.tabClass or ccgui.Button
+	-- Extra options (styling) for tab buttons
+	self.tabOpts = opts.tabOpts or {}
 
 	-- Current tab
 	self.currentTab = nil
 	-- Tab bar
 	self.tabBar = ccgui.FlowContainer:new{
 		horizontal = not self.horizontal,
-		spacing = self.tabSpacing
+		padding = self.tabPadding,
+		spacing = self.tabSpacing,
+		background = self.tabBackground
 	}
 	-- Tab pane
 	self.tabPane = ccgui.FlowContainer:new{
@@ -67,9 +74,12 @@ function TabContainer:addTab(label, tab)
 end
 
 function TabContainer:addButton(label)
-	local tabButton = self.tabStyle:new{
+	local tabButton = self.tabClass:new{
 		text = label
 	}
+	for k,v in pairs(self.tabOpts) do
+		tabButton[k] = v
+	end
 	self.tabBar:add(tabButton)
 	return tabButton
 end
