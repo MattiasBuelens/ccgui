@@ -179,7 +179,7 @@ function ScrollElement:scrollPaint()
 end
 
 function ScrollElement:scrollMouse(dir, x, y)
-	if self.isVisible and self.mouseScroll and self:contains(x, y) then
+	if self:visible() and self.mouseScroll and self:contains(x, y) then
 		-- Prefer vertical over horizontal scrolling
 		local slider = self.vertical and self.sliderVerti or self.sliderHorzi
 		-- Step in scroll direction
@@ -199,7 +199,7 @@ end
 
 function ScrollElement:sinkEvent(event)
 	self:on(event, function(self, ...)
-		if self.isVisible and self.showScrollBars then
+		if self:visible() and self.showScrollBars then
 			if self.horizontal then
 				self.sliderHoriz:trigger(event, ...)
 			end

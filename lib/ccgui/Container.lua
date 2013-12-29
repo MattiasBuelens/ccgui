@@ -176,7 +176,7 @@ end
 
 function Container:sinkEvent(event)
 	self:on(event, function(self, ...)
-		if self.isVisible then
+		if self:visible() then
 			local args = { ... }
 			self:each(function(child)
 				child:trigger(event, unpack(args))
@@ -187,7 +187,7 @@ end
 
 function Container:sinkEventToCurrent(event)
 	self:on(event, function(self, ...)
-		if self.isVisible and self.childFocus ~= nil then
+		if self:visible() and self.childFocus ~= nil then
 			self.children[self.childFocus]:trigger(event, ...)
 		end
 	end, self, 1000)

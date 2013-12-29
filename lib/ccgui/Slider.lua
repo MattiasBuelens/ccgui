@@ -99,7 +99,7 @@ end
 
 -- Start dragging on mouse click on bar
 function Bar:dragStart(button, x, y)
-	if button == 1 and self.isVisible and self:hasBounds() and self:getBarRect():contains(x, y) then
+	if button == 1 and self:visible() and self:hasBounds() and self:getBarRect():contains(x, y) then
 		-- Store starting position
 		self.dragStartPos = vector.new(x, y)
 		self.dragStartValue = self.parent:getValue()

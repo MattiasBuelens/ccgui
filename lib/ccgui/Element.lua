@@ -52,6 +52,17 @@ function Element:initialize(opts)
 	self.needsRepaint = true
 end
 
+function Element:visible()
+	if not self.isVisible then
+		return false
+	end
+	if self.parent ~= nil then
+		return self.parent:visible()
+	end
+	-- TODO What about detached children?
+	return true
+end
+
 function Element:show()
 	if not self.isVisible then
 		self:markRepaint()
@@ -63,7 +74,9 @@ end
 
 function Element:hide()
 	if self.isVisible then
-		self:markRepaint()
+		if self.parent ~= nil then
+			self.parent:markRepaint()
+		end
 		self.isVisible = false
 		return true
 	end
@@ -217,7 +230,7 @@ end
 
 function Element:paint()
 	-- Ignore if invisible or no paint requested
-	if not self.isVisible then return end
+	if not self:visible() then return end
 	if not self.needsPaint then return end
 
 	self:trigger("beforepaint")

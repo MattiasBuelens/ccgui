@@ -114,7 +114,7 @@ end
 ]]--
 
 function TextArea:canFocus()
-	return self.isVisible
+	return self:visible()
 end
 
 function TextArea:textFocus()
