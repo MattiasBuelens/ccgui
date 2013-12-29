@@ -14,7 +14,7 @@ local ScrollSlider = Slider:subclass("ccgui.scroll.ScrollSlider")
 function ScrollSlider:initialize(opts)
 	super.initialize(self, opts)
 
-	self:on("beforepaint", self.sliderLayout, self, -1)
+	self:on("beforepaint", self.sliderLayout, self)
 end
 function ScrollSlider:sliderLayout()
 	error("ScrollSlider:sliderLayout() not implemented")
@@ -35,7 +35,9 @@ end
 function HorizontalSlider:sliderLayout()
 	-- Place below inner box of scroll element
 	local sbox = self.parent:inner(self.parent.bbox)
-	self.bbox = Rectangle:new(sbox.x, sbox.y + sbox.h, sbox.w, 1)
+	local bbox = Rectangle:new(sbox.x, sbox.y + sbox.h, sbox.w, 1)
+	-- Update layout
+	self:updateLayout(bbox)
 end
 function HorizontalSlider:getValue()
 	return self.parent.scrollPosition.x
@@ -60,7 +62,9 @@ end
 function VerticalSlider:sliderLayout()
 	-- Place at right of inner box of scroll element
 	local sbox = self.parent:inner(self.parent.bbox)
-	self.bbox = Rectangle:new(sbox.x + sbox.w, sbox.y, 1, sbox.h)
+	local bbox = Rectangle:new(sbox.x + sbox.w, sbox.y, 1, sbox.h)
+	-- Update layout
+	self:updateLayout(bbox)
 end
 function VerticalSlider:getValue()
 	return self.parent.scrollPosition.y

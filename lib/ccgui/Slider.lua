@@ -16,12 +16,11 @@ function Bar:initialize(opts)
 	super.initialize(self, opts)
 
 	-- Orientation
-	self.horizontal = false
+	self.horizontal = not not opts.horizontal
 	-- Dragging
 	self.dragStartPos = nil
 	self.dragStartValue = nil
 
-	self:on("beforepaint", self.barLayout, self)
 	self:on("paint", self.barPaint, self)
 
 	self:on("mouse_click", self.dragStart, self)
@@ -29,8 +28,8 @@ function Bar:initialize(opts)
 end
 
 function Bar:getBounds()
-	assert(self.parent.bbox ~= nil, "slider not positioned")
-	return self:inner(self.parent.bbox)
+	assert(self.bbox ~= nil, "slider not positioned")
+	return self:inner(self.bbox)
 end
 
 -- Get the available space for the bar
@@ -86,10 +85,6 @@ function Bar:getBarRect()
 	else
 		return Rectangle:new(line.start, 1, line:length())
 	end
-end
-
-function Bar:barLayout()
-	self.bbox = self:getBounds()
 end
 
 -- Draw the bar
