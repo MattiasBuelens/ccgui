@@ -48,31 +48,29 @@ function Container:find(elem, deep)
 	return nil
 end
 
-function Container:each(func)
-	local n = #self.children
+function Container:visibleChildren()
+	local t = {}
 	for i,child in ipairs(self.children) do
-		func(child, i, i == n)
+		if child.isVisible then
+			table.insert(t, child)
+		end
+	end
+	return t
+end
+
+local function forEach(t, f)
+	local n = #t
+	for i,x in ipairs(t) do
+		f(x, i, n)
 	end
 end
 
-function Container:eachVisible(func)
-	-- Check if there is another visible child
-	-- after the given child index
-	local hasVisibleAfter = function(i)
-		for j=i+1, #self.children do
-			if self.children[j].isVisible then
-				return true
-			end
-		end
-		return false
-	end
+function Container:each(func)
+	return forEach(self.children, func)
+end
 
-	-- Process only visible children
-	self:each(function(child, i)
-		if child.isVisible then
-			func(child, i, not hasVisibleAfter(i))
-		end
-	end)
+function Container:eachVisible(func)
+	return forEach(self:visibleChildren(), func)
 end
 
 function Container:add(...)

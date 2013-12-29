@@ -39,9 +39,9 @@ function FlowContainer:calcSize(size)
 	local stretchChildren = {}
 
 	-- Update sizes of children
-	self:eachVisible(function(child, i, isLast)
+	self:eachVisible(function(child, i, n)
 		-- No spacing on last child
-		local spacing = (not isLast and self.spacing) or 0
+		local spacing = (i < n and self.spacing) or 0
 		-- Handle stretched children later
 		if child.stretch then
 			-- Remove spacing from remaining
@@ -123,8 +123,8 @@ function FlowContainer:calcLayout(bbox)
 	local fixedPos, fixedSize = cbox[fixedCoord], cbox[fixedDim]
 
 	-- Update layout of children
-	self:eachVisible(function(child, i, isLast)
-		local spacing = (not isLast and self.spacing) or 0
+	self:eachVisible(function(child, i, n)
+		local spacing = (i < n and self.spacing) or 0
 		-- Get child bounding box
 		child:calcLayout(Rectangle:new{
 			[flowCoord] = flowPos,

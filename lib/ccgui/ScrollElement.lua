@@ -134,16 +134,10 @@ end
 -- Extra margins due to scroll bar
 function ScrollElement:scrollBarMargins()
 	if self.showScrollBars then
-		local right, bottom = 0, 0
-		if self.horizontal then
-			bottom = 1
-		end
-		if self.vertical then
-			right = 1
-		end
+		local right = self.vertical and 1 or 0
+		local bottom = self.horizontal and 1 or 0
 		return Margins:new(0, right, bottom, 0)
 	end
-
 	return Margins:new(0)
 end
 
