@@ -283,6 +283,9 @@ end
 function Element:drawUnsafe(x, y, text, fgColor, bgColor)
 	-- Draw on parent
 	if self.isVisible and self.parent ~= nil then
+		-- Fill in transparency
+		fgColor = fgColor ~= 0 and fgColor or self.foreground
+		bgColor = bgColor ~= 0 and bgColor or self.background
 		self.parent:drawUnsafe(x, y, text, fgColor, bgColor)
 	end
 end

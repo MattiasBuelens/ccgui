@@ -24,8 +24,8 @@ require "ccgui.TextViewer"
 require "ccgui.Slider"
 require "ccgui.ScrollElement"
 
+require "ccgui.BufferedTerminal"
 require "ccgui.Page"
-require "ccgui.PaintLayer"
 
 -- Exports
 return _G.ccgui
