@@ -43,8 +43,10 @@ function HorizontalSlider:getValue()
 	return self.parent.scrollPosition.x
 end
 function HorizontalSlider:rawSetValue(newValue)
-	self.parent.scrollPosition.x = newValue
-	self.parent:markRepaint()
+	if self.parent.scrollPosition.x ~= newValue then
+		self.parent.scrollPosition.x = newValue
+		self.parent:markRepaint()
+	end
 end
 function HorizontalSlider:getSpan()
 	return self.parent:scrollVisible().x
@@ -70,8 +72,10 @@ function VerticalSlider:getValue()
 	return self.parent.scrollPosition.y
 end
 function VerticalSlider:rawSetValue(newValue)
-	self.parent.scrollPosition.y = newValue
-	self.parent:markRepaint()
+	if self.parent.scrollPosition.y ~= newValue then
+		self.parent.scrollPosition.y = newValue
+		self.parent:markRepaint()
+	end
 end
 function VerticalSlider:getSpan()
 	return self.parent:scrollVisible().y
