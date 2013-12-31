@@ -9,64 +9,170 @@
 --]]
 
 local Object	= require "objectlua.Object"
-local Rectangle	= require "ccgui.geom.Rectangle"
 
-local BufferedPaint = Object:subclass("ccgui.BufferedPaint")
-function BufferedPaint:initialize(str, x, text, back)
+local Strip = Object:subclass("ccgui.paint.Strip")
+function Strip:initialize(str, x, y, text, back)
 	self.str = str
 	self.x = x
+	self.y = y
 	self.text = text
 	self.back = back
+	self.dirty = true
 end
-function BufferedPaint:left()
+function Strip:left()
 	return self.x
 end
-function BufferedPaint:right()
+function Strip:right()
 	return self.x + #self.str
 end
-function BufferedPaint:intersects(other)
-	return self:left() < other:right()
+function Strip:intersects(other)
+	return self.y == other.y
+	   and self:left() < other:right()
 	   and self:right() > other:left()
 end
-function BufferedPaint:contains(other)
-	return self:left() <= other:left()
-	   and self:right() >= other:right()
-end
-function BufferedPaint:matchesColor(other)
+function Strip:matchesColor(other)
 	return self.text == other.text
 	   and self.back == other.back
 end
-function BufferedPaint:canMergeLeft(other)
-	return self:left() == other:right()
+function Strip:canAppend(other)
+	return self.y == other.y
+	   and self:right() == other:left()
 	   and self:matchesColor(other)
 end
-function BufferedPaint:canMergeRight(other)
-	return self:right() == other:left()
+function Strip:canPrepend(other)
+	return self.y == other.y
+	   and self:left() == other:right()
 	   and self:matchesColor(other)
 end
-function BufferedPaint:append(other)
+function Strip:append(other)
 	self.str = self.str .. other.str
+	self.dirty = true
 end
-function BufferedPaint:prepend(other)
+function Strip:prepend(other)
 	self.str = other.str .. self.str
 	self.x = other.x
+	self.dirty = true
+end
+function Strip:__tostring()
+	return "Strip["
+		.."y="..self.y
+		..",l="..self:left()
+		..",r="..self:right()
+		..",t="..self.text
+		..",b="..self.back
+		..",d="..(self.dirty and "T" or "F")
+		..",s="..self.str
+		.."]"
+end
+
+local Screen = Object:subclass("ccgui.paint.Screen")
+function Screen:initialize()
+	-- Paint strips, grouped by y and sorted by x
+	self.strips = {}
+end
+
+function Screen:getLine(strip)
+	local y = strip.y
+	local line = self.strips[y]
+	if line == nil then
+		line = {}
+		self.strips[y] = line
+	end
+	return line
+end
+
+-- Add to screen
+function Screen:add(newStrip)
+	-- Ignore empty strips
+	if #newStrip.str == 0 then return end
+	-- Split intersecting existing paints
+	local line, i = self:getLine(newStrip), 1
+	while i <= #line do
+		local strip = line[i]
+		-- Resolve intersections
+		if newStrip:intersects(strip) then
+			local leftLen = math.max(0, newStrip:left() - strip:left())
+			local rightLen = math.max(0, strip:right() - newStrip:right())
+			local leftStr = string.sub(strip.str, 1, leftLen)
+			local rightStr = string.sub(strip.str, -rightLen)
+			local hasLeft, hasRight = leftLen > 0, rightLen > 0
+			strip.dirty = true
+			if hasLeft then
+				-- Replace original strip with left strip
+				strip.str = leftStr
+				if hasRight then
+					-- Also create right strip
+					local rightStrip = Strip:new(rightStr, newStrip:right(), strip.y, strip.text, strip.back)
+					table.insert(line, i+1, rightStrip)
+				end
+			elseif hasRight then
+				-- Replace original strip with right strip
+				strip.str = rightStr
+				strip.x = newStrip:right()
+			else
+				-- Original strip fully covered by new strip, remove it
+				table.remove(line, i)
+				i = i - 1
+			end
+		end
+		i = i + 1
+	end
+	-- Find insert position
+	local pos = nil
+	for i=1,#line do
+		if newStrip:left() <= line[i]:left() then
+			pos = i
+			break
+		end
+	end
+	if pos == nil then pos = #line+1 end
+	-- Merge with surrounding strips
+	local merged = false
+	if pos > 1 and line[pos-1]:canAppend(newStrip) then
+		-- Append to strip on left
+		pos = pos-1
+		line[pos]:append(newStrip)
+		newStrip = line[pos]
+		merged = true
+	end
+	if pos < #line and line[pos+1]:canPrepend(newStrip) then
+		if merged then
+			-- Multiple merges, append and remove
+			newStrip:append(line[pos+1])
+			table.remove(line, pos+1)
+		else
+			-- Not yet merged, prepend to strip on right
+			line[pos+1]:prepend(newStrip)
+			newStrip = line[pos+1]
+		end
+		merged = true
+	end
+	-- Insert if not yet merged
+	if not merged then
+		table.insert(line, pos, newStrip)
+	end
+	-- Return inserted or merged strip
+	return newStrip
+end
+
+function Screen:clear()
+	self.strips = {}
 end
 
 local BufferedTerminal = Object:subclass("ccgui.BufferedTerminal")
 function BufferedTerminal:initialize(out)
 	-- Output device
 	self.out = out or term
-	-- Queued paints, grouped by y and sorted by x
-	self.queue = {}
+	-- Screen
+	self.screen = Screen:new()
 	-- State to restore after draw
 	self.curX, self.curY = self.out.getCursorPos()
 	self.text = colours.white
 	self.back = colours.black
 	self.blink = false
 	-- Delegate terminal methods
-	for k,v in pairs(self.out) do
+	for k,f in pairs(self.out) do
 		if self[k] == nil then
-			local f = v -- for scope
 			self[k] = function(self, ...)
 				return f(...)
 			end
@@ -76,10 +182,9 @@ function BufferedTerminal:initialize(out)
 	self.term = {}
 	local me = self
 	for k,v in pairs(self.out) do
-		-- Wrap own method
-		local f = me[k] -- for scope
+		-- Redirect to own method
 		self.term[k] = function(...)
-			return f(me, ...)
+			return me[k](me, ...)
 		end
 	end
 end
@@ -88,116 +193,66 @@ function BufferedTerminal:asTerm()
 	return self.term
 end
 
-function BufferedTerminal:getBounds()
-	local width, height = self.out.getSize()
-	return Rectangle:new(1, 1, width, height)
+function BufferedTerminal:getWidth()
+	local width,_ = self.out.getSize()
+	return width
+end
+function BufferedTerminal:getHeight()
+	local _,height = self.out.getSize()
+	return height
 end
 
-function BufferedTerminal:getQueueLine(y)
-	local line = self.queue[y]
-	if line == nil then
-		line = {}
-		self.queue[y] = line
-	end
-	return line
+function BufferedTerminal:writeBuffer(str, x, y, text, back)
+	return self.screen:add(Strip:new(str, x, y, text, back))
 end
 
--- Write to buffer
-function BufferedTerminal:writeBuffered(str, x, y, text, back)
-	-- Create paint
-	local paint = BufferedPaint:new(str, x, text, back)
-	-- Split intersecting existing paints
-	local line = self:getQueueLine(y)
-	local pos = nil
-	local i = 1
-	while i <= #line do
-		local linePaint = line[i]
-		-- Resolve intersections
-		if paint:intersects(linePaint) then
-			local leftLen = math.max(0, paint:left() - linePaint:left())
-			local rightLen = math.max(0, linePaint:right() - paint:right())
-			local leftStr = string.sub(linePaint.str, leftLen)
-			local rightStr = string.sub(linePaint.str, -rightLen)
-			local hasLeft, hasRight = leftLen > 0, rightLen > 0
-			if hasLeft then
-				-- Replace original paint with left part
-				linePaint.str = leftStr
-				if hasRight then
-					-- Also create right paint
-					local rightPaint = BufferedPaint:new(rightStr, paint:right(), linePaint.text, linePaint.back)
-					table.insert(line, i+1, rightPaint)
-				end
-				print()
-			elseif hasRight then
-				-- Replace original paint with right paint
-				linePaint.str = rightStr
-				linePaint.x = paint:right()
-			else
-				-- Original paint fully covered by new paint, remove it
-				table.remove(line, i)
-				i = i-1
-			end
-		end
-		-- Find insert position
-		if pos == nil and paint:left() < linePaint:left() then
-			pos = i
-		end
-		i = i + 1
-	end
-	if pos == nil then pos = #line+1 end
-	-- Merge with surrounding paints
-	local merged = false
-	--[[if pos > 1 and paint:canMergeLeft(line[pos-1]) then
-		-- Append to paint on left
-		line[pos-1]:append(paint)
-		merged = true
-	end
-	if pos < #line and paint:canMergeRight(line[pos+1]) then
-		if merged then
-			-- Double merge, remove
-			paint:append(line[pos+1])
-			table.remove(line, pos+1)
-		else
-			-- Prepend to paint on right
-			line[pos+1]:prepend(paint)
-		end
-		merged = true
-	end]]--
-	-- Insert if not yet merged
-	if not merged then
-		table.insert(line, pos, paint)
-	end
+function BufferedTerminal:paint()
+	self:draw(false)
+end
+function BufferedTerminal:repaint()
+	self:draw(true)
 end
 
--- Draw buffer
-function BufferedTerminal:draw()
+-- Draw screen
+function BufferedTerminal:draw(redraw)
+	redraw = not not redraw
 	-- Get current state
 	local x, y = self.out.getCursorPos()
 	local text, back = self.text, self.back
 	self.out.setTextColor(text)
 	self.out.setBackgroundColor(back)
 	self.out.setCursorBlink(false)
-	-- Draw each paint in the queue
-	for lineY,line in ipairs(self.queue) do
-		for i,paint in ipairs(line) do
-			if x ~= paint:left() or y ~= lineY then
-				self.out.setCursorPos(paint:left(), lineY)
-				x, y = paint:left(), lineY
+	-- Draw each strip in the screen
+	local nStrips = 0 -- TODO DEBUG
+	for lineY,line in ipairs(self.screen.strips) do
+		for i,strip in ipairs(line) do
+			if redraw or strip.dirty then
+				if x ~= strip:left() or y ~= lineY then
+					self.out.setCursorPos(strip:left(), lineY)
+					x, y = strip:left(), lineY
+				end
+				if text ~= strip.text then
+					self.out.setTextColor(strip.text)
+					text = strip.text
+				end
+				if back ~= strip.back then
+					self.out.setBackgroundColor(strip.back)
+					back = strip.back
+				end
+				self.out.write(strip.str)
+				strip.dirty = false
+				x = strip:right()
+				nStrips = nStrips + 1
 			end
-			if text ~= paint.text then
-				self.out.setTextColor(paint.text)
-				text = paint.text
-			end
-			if back ~= paint.back then
-				self.out.setBackgroundColor(paint.back)
-				back = paint.back
-			end
-			self.out.write(paint.str)
-			x = paint:right()
 		end
 	end
-	-- Clear queue
-	self.queue = {}
+	-- TODO DEBUG
+	self.count = (self.count or 0) + 1
+	x, y, text, back = 1, 1, colours.yellow, colours.black
+	self.out.setCursorPos(x, y)
+	self.out.setTextColor(text)
+	self.out.setBackgroundColor(back)
+	self.out.write(string.format("%02d|%02d", self.count, nStrips))
 	-- Restore state
 	if x ~= self.curX or y ~= self.curY then
 		self.out.setCursorPos(self.curX, self.curY)
@@ -213,8 +268,9 @@ end
 
 -- Delegated methods to capture changes
 function BufferedTerminal:write(str)
+	local strip = self:writeBuffer(str, self.curX, self.curY, self.text, self.back)
+	strip.dirty = false
 	self.out.write(str)
-	self:writeBuffered(str, self.curX, self.curY, self.text, self.back)
 	self.curX, self.curY = self.out.getCursorPos()
 end
 function BufferedTerminal:setCursorPos(x, y)
@@ -236,12 +292,33 @@ function BufferedTerminal:setCursorBlink(blink)
 	self.out.setCursorBlink(blink)
 end
 function BufferedTerminal:clearLine(y)
-	self.queue[y] = {}
+	local str = string.rep(" ", self:getWidth())
+	local strip = self:writeBuffer(str, 1, self.curY, self.text, self.back)
+	strip.dirty = false
 	self.out.clearLine(y)
 end
 function BufferedTerminal:clear()
-	self.queue = {}
+	local str = string.rep(" ", self:getWidth())
+	local h = self:getHeight()
+	for y=1,h do
+		local strip = self:writeBuffer(str, 1, y, self.text, self.back)
+		strip.dirty = false
+	end
 	self.out.clear()
+end
+
+-- TODO DEBUG
+function BufferedTerminal:dump()
+	local res = "{\n"
+	for y,line in ipairs(self.screen.strips) do
+		res = res .. "\t"..y.." = {\n"
+		for i,strip in ipairs(line) do
+			res = res .. "\t\t" .. tostring(strip) .. "\n"
+		end
+		res = res .. "\t}\n"
+	end
+	res = res .. "}"
+	return res
 end
 
 -- Exports
