@@ -43,10 +43,7 @@ function HorizontalSlider:getValue()
 	return self.parent.scrollPosition.x
 end
 function HorizontalSlider:rawSetValue(newValue)
-	if self.parent.scrollPosition.x ~= newValue then
-		self.parent.scrollPosition.x = newValue
-		self.parent:markRepaint()
-	end
+	self.parent:setScrollX(newValue)
 end
 function HorizontalSlider:getSpan()
 	return self.parent:scrollVisible().x
@@ -72,10 +69,7 @@ function VerticalSlider:getValue()
 	return self.parent.scrollPosition.y
 end
 function VerticalSlider:rawSetValue(newValue)
-	if self.parent.scrollPosition.y ~= newValue then
-		self.parent.scrollPosition.y = newValue
-		self.parent:markRepaint()
-	end
+	self.parent:setScrollY(newValue)
 end
 function VerticalSlider:getSpan()
 	return self.parent:scrollVisible().y
@@ -127,6 +121,25 @@ end
 
 function ScrollElement:canScroll()
 	return true
+end
+
+function ScrollElement:setScrollX(scrollX)
+	if self.scrollPosition.x ~= scrollX then
+		self.scrollPosition.x = scrollX
+		self:markRepaint()
+	end
+end
+
+function ScrollElement:setScrollY(scrollY)
+	if self.scrollPosition.y ~= scrollY then
+		self.scrollPosition.y = scrollY
+		self:markRepaint()
+	end
+end
+
+function ScrollElement:setScrollPosition(scrollX, scrollY)
+	self:setScrollX(scrollX)
+	self:setScrollY(scrollY)
 end
 
 -- Relative visible scroll region

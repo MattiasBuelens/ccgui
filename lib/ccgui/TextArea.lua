@@ -174,6 +174,7 @@ function TextArea:setCursor(x, y)
 
 	self.cursorChar = x
 	self.cursorLine = y
+	self:drawCursor()
 
 	-- Adjust scroll position
 	local scrollX, scrollY = self.scrollPosition.x, self.scrollPosition.y
@@ -191,7 +192,7 @@ function TextArea:setCursor(x, y)
 		scrollY = y - scrollVis.y
 	end
 
-	self.scrollPosition = vector.new(scrollX, scrollY)
+	self:setScrollPosition(scrollX, scrollY)
 end
 
 --[[
@@ -205,6 +206,7 @@ function TextArea:insert(char)
 	local line = self.lines[self.cursorLine]
 	line = string.sub(line, 1, self.cursorChar-1) .. char .. string.sub(line, self.cursorChar, -1)
 	self.lines[self.cursorLine] = line
+	self:markRepaint()
 	-- Move cursor
 	self:moveCursor(1, 0)
 	self:updateScroll()
@@ -244,6 +246,8 @@ function TextArea:delete(before)
 			self.lines[self.cursorLine] = line
 		end
 	end
+	self:markRepaint()
+
 	self:updateScroll()
 end
 
@@ -254,6 +258,7 @@ function TextArea:newline()
 	local line = self.lines[self.cursorLine]
 	self.lines[self.cursorLine] = string.sub(line, 1,self.cursorChar-1)
 	table.insert(self.lines, self.cursorLine + 1, string.sub(line, self.cursorChar, -1))
+	self:markRepaint()
 
 	-- Move to new next line
 	self:setCursor(1, self.cursorLine + 1)
@@ -343,16 +348,12 @@ function TextArea:textKey(key)
 			self:newline()
 		end
 	end
-	-- Mark for repaint
-	self:markRepaint()
 end
 
 function TextArea:textChar(char)
 	if not self:readonly() then
 		-- Insert character
 		self:insert(char)
-		-- Mark for repaint
-		self:markRepaint()
 	end
 end
 
