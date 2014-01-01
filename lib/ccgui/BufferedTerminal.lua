@@ -82,9 +82,13 @@ function Screen:add(y, newStrip)
 	-- Ignore empty strips
 	if #newStrip.str == 0 then return end
 	-- Split intersecting existing paints
-	local line, i = self:getLine(y), 1
+	local line, i, pos = self:getLine(y), 1, nil
 	while i <= #line do
 		local strip = line[i]
+		-- Find insert position
+		if pos == nil and newStrip:left() <= strip:left() then
+			pos = i
+		end
 		-- Resolve intersections
 		if newStrip:intersects(strip) then
 			local leftLen = math.max(0, newStrip:left() - strip:left())
@@ -112,14 +116,6 @@ function Screen:add(y, newStrip)
 			end
 		end
 		i = i + 1
-	end
-	-- Find insert position
-	local pos = nil
-	for i=1,#line do
-		if newStrip:left() <= line[i]:left() then
-			pos = i
-			break
-		end
 	end
 	if pos == nil then pos = #line+1 end
 	-- Merge with surrounding strips
