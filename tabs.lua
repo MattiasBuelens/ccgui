@@ -74,7 +74,6 @@ screen:paint()
 while isRunning do
 	local event, p1, p2, p3, p4, p5 = os.pullEvent()
 	screen:trigger(event, p1, p2, p3, p4, p5)
-	screen:paint()
 end
 
 -- Restore

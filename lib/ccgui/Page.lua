@@ -15,10 +15,18 @@ function Page:initialize(opts)
 	super.initialize(self, opts)
 
 	self.term = BufferedTerminal:new(self.output)
+	-- Frames per second
+	self.fps = opts.fps or 8
+	-- Identifier of frame timer
+	self.frameTimer = nil
 
 	self:on("key", self.pageKey, self)
 	self:on("beforepaint", self.pageLayout, self)
 	self:on("afterpaint", self.pagePaint, self)
+	self:on("timer", self.pageFrameTimer, self)
+
+	-- Start frame timer
+	self:startFrameTimer()
 end
 
 function Page:getOutput()
@@ -42,6 +50,38 @@ function Page:drawUnsafe(x, y, text, fgColor, bgColor)
 	self.term:writeBuffer(text, x, y, fgColor, bgColor)
 end
 
+function Page:show()
+	if super.show(self) then
+		self:startFrameTimer()
+	end
+end
+
+function Page:hide()
+	self:stopFrameTimer()
+	super.hide(self)
+end
+
+function Page:startFrameTimer()
+	if self.frameTimer == nil then
+		self:restartFrameTimer()
+	end
+end
+
+function Page:restartFrameTimer()
+	self.frameTimer = os.startTimer(1 / self.fps)
+end
+
+function Page:stopFrameTimer()
+	self.frameTimer = nil
+end
+
+function Page:pageFrameTimer(timerId)
+	if timerId == self.frameTimer then
+		self:paint()
+		self:restartFrameTimer()
+	end
+end
+
 function Page:pagePaint()
 	self.term:paint()
 end
@@ -58,6 +98,7 @@ function Page:pageKey(key)
 end
 
 function Page:reset()
+	self:stopFrameTimer()
 	self.term:setBackgroundColor(colours.black)
 	self.term:clear()
 	self.term:setCursorPos(1, 1)
