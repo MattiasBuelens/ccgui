@@ -6,6 +6,43 @@
 --]]
 
 local FlowContainer	= require "ccgui.FlowContainer"
+local RadioButton	= require "ccgui.RadioButton"
+local RadioGroup	= require "ccgui.RadioGroup"
+
+local TabButton = RadioButton:subclass("ccgui.TabButton")
+function TabButton:initialize(opts)
+	-- Default style
+	opts.radioOnPrefix = opts.radioOnPrefix or ""
+	opts.radioOffPrefix = opts.radioOffPrefix or ""
+
+	super.initialize(self, opts)
+
+	-- Tab button on/off styles
+	self.tabOnStyle = opts.tabOnStyle or {
+		foreground = self.foreground,
+		background = self.background
+	}
+	self.tabOffStyle = opts.tabOffStyle or {
+		foreground = self.background,
+		background = self.foreground
+	}
+	self:setOffStyle()
+
+	self:on("select", self.setOnStyle, self)
+	self:on("unselect", self.setOffStyle, self)
+end
+function TabButton:setStyle(opts)
+	for k,v in pairs(opts) do
+		self[k] = v
+	end
+	self:markRepaint()
+end
+function TabButton:setOnStyle()
+	self:setStyle(self.tabOnStyle)
+end
+function TabButton:setOffStyle()
+	self:setStyle(self.tabOffStyle)
+end
 
 local TabContainer = FlowContainer:subclass("ccgui.TabContainer")
 function TabContainer:initialize(opts)
@@ -19,12 +56,12 @@ function TabContainer:initialize(opts)
 	-- Stretch tab panes
 	self.tabStretch = (type(opts.tabStretch) == "nil") or (not not opts.tabStretch)
 	-- Class for tab buttons
-	self.tabClass = opts.tabClass or ccgui.Button
+	self.tabClass = opts.tabClass or TabButton
 	-- Extra options (styling) for tab buttons
 	self.tabOpts = opts.tabOpts or {}
 
-	-- Current tab
-	self.currentTab = nil
+	-- Tab radio group
+	self.tabRadioGroup = RadioGroup:new()
 	-- Tab bar
 	self.tabBar = ccgui.FlowContainer:new{
 		horizontal = not self.horizontal,
@@ -39,11 +76,24 @@ function TabContainer:initialize(opts)
 	}
 	self:add(self.tabBar, self.tabPane)
 
-	self:on("beforepaint", self.updateVisibleTab, self)
+	self.tabRadioGroup:on("select", self.updateVisibleTab, self)
+	self.tabRadioGroup:on("unselect", self.updateVisibleTab, self)
 end
 
 function TabContainer:tabCount()
 	return #self.tabPane.children
+end
+
+function TabContainer:getCurrentTab()
+	local tabButton = self.tabRadioGroup:getSelected()
+	return tabButton and tabButton.tab or nil
+end
+function TabContainer:setCurrentTab(tab)
+	if tab == nil then
+		self.tabRadioGroup:unselect()
+	else
+		self.tabRadioGroup:select(tab.tabButton)
+	end
 end
 
 function TabContainer:addTab(label, tab)
@@ -52,51 +102,38 @@ function TabContainer:addTab(label, tab)
 		return tab
 	end
 	
-	-- Add tab pane
+	-- Add tab and tab button
 	self.tabPane:add(tab)
-
-	-- Add tab button
 	local tabButton = self:addButton(label)
 
-	-- Link button and pane
+	-- Link tab and tab button
 	tab.tabButton = tabButton
 	tabButton.tab = tab
 
-	-- Bind button to pane
-	local container = self
-	tabButton:on("buttonpress", function(self)
-		container:setCurrentTab(self.tab)
-	end, tabButton)
-
-	self:updateVisibleTab()
+	-- Select if nothing selected yet
+	if self:getCurrentTab() == nil then
+		self:setCurrentTab(tab)
+	end
 
 	return tab
 end
-
 function TabContainer:addButton(label)
-	local tabButton = self.tabClass:new{
-		text = label
+	local opts = {
+		text = label,
+		radioGroup = self.tabRadioGroup
 	}
 	for k,v in pairs(self.tabOpts) do
-		tabButton[k] = v
+		opts[k] = v
 	end
+	local tabButton = self.tabClass:new(opts)
 	self.tabBar:add(tabButton)
 	return tabButton
 end
 
-function TabContainer:setCurrentTab(tab)
-	if type(tab) ~= "table" then return false end
-
-	-- Set as current tab
-	self.currentTab = tab
-
-	self:updateVisibleTab()
-	self.tabPane:markRepaint()
-	return true
-end
-
 function TabContainer:removeTab(tab)
-	if self.currentTab == tab then
+	assert(tab ~= nil, "tab cannot be nil")
+
+	if tab == self:getCurrentTab() then
 		-- Current tab removed
 		local i, n = self.tabPane:find(tab), self:tabCount()
 		if n > 1 then
@@ -109,27 +146,23 @@ function TabContainer:removeTab(tab)
 			self:setCurrentTab(self.tabPane.children[i])
 		else
 			-- No new current tab
-			self.currentTab = nil
+			self:setCurrentTab(nil)
 		end
 	end
 
-	-- Remove tab
+	-- Remove tab and tab button
 	self.tabPane:remove(tab)
-
-	-- Remove tab button
 	self.tabBar:remove(tab.tabButton)
+	self.tabRadioGroup:remove(tab.tabButton)
 
 	self:updateVisibleTab()
 end
 
 function TabContainer:updateVisibleTab()
-	if self.currentTab == nil and self:tabCount() > 0 then
-		self.currentTab = self.tabPane.children[1]
-	end
-
 	-- Show current tab and hide others
+	local currentTab = self:getCurrentTab()
 	self.tabPane:each(function(child)
-		if child == self.currentTab then
+		if child == currentTab then
 			child:show()
 		else
 			child:hide()
