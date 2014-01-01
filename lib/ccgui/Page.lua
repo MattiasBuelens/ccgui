@@ -20,7 +20,6 @@ function Page:initialize(opts)
 	-- Identifier of frame timer
 	self.frameTimer = nil
 
-	self:on("key", self.pageKey, self)
 	self:on("beforepaint", self.pageLayout, self)
 	self:on("afterpaint", self.pagePaint, self)
 	self:on("timer", self.pageFrameTimer, self)
@@ -84,17 +83,6 @@ end
 
 function Page:pagePaint()
 	self.term:paint()
-end
-
--- TODO DEBUG
-function Page:pageKey(key)
-	if key == keys.leftShift then
-		-- Dump terminal to file
-		local buffer = self.term:dump()
-		local fh = fs.open("/buffer.dmp", "w")
-		fh.write(buffer)
-		fh.close()
-	end
 end
 
 function Page:reset()

@@ -51,16 +51,6 @@ function Strip:merge(other)
 		self.dirty = true
 	end
 end
-function Strip:__tostring()
-	return "Strip["
-		.."l="..self:left()
-		..",r="..self:right()
-		..",t="..self.text
-		..",b="..self.back
-		..",d="..(self.dirty and "T" or "F")
-		..",s="..self.str
-		.."]"
-end
 
 local Screen = Object:subclass("ccgui.paint.Screen")
 function Screen:initialize()
@@ -215,7 +205,6 @@ function BufferedTerminal:draw(redraw)
 	self.out.setBackgroundColor(back)
 	self.out.setCursorBlink(false)
 	-- Draw each strip in the screen
-	local nStrips = 0 -- TODO DEBUG
 	for lineY,line in ipairs(self.screen.strips) do
 		for i,strip in ipairs(line) do
 			if redraw or strip.dirty then
@@ -234,17 +223,9 @@ function BufferedTerminal:draw(redraw)
 				self.out.write(strip.str)
 				strip.dirty = false
 				x = strip:right()
-				nStrips = nStrips + 1
 			end
 		end
 	end
-	-- TODO DEBUG
-	self.count = (self.count or 0) + 1
-	x, y, text, back = 1, 1, colours.yellow, colours.black
-	self.out.setCursorPos(x, y)
-	self.out.setTextColor(text)
-	self.out.setBackgroundColor(back)
-	self.out.write(string.format("%02d|%02d", self.count, nStrips))
 	-- Restore state
 	if x ~= self.curX or y ~= self.curY then
 		self.out.setCursorPos(self.curX, self.curY)
@@ -297,20 +278,6 @@ function BufferedTerminal:clear()
 		strip.dirty = false
 	end
 	self.out.clear()
-end
-
--- TODO DEBUG
-function BufferedTerminal:dump()
-	local res = "{\n"
-	for y,line in ipairs(self.screen.strips) do
-		res = res .. "\t"..y.." = {\n"
-		for i,strip in ipairs(line) do
-			res = res .. "\t\t" .. tostring(strip) .. "\n"
-		end
-		res = res .. "\t}\n"
-	end
-	res = res .. "}"
-	return res
 end
 
 -- Exports
