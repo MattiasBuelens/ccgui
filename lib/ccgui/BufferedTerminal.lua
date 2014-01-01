@@ -11,10 +11,9 @@
 local Object	= require "objectlua.Object"
 
 local Strip = Object:subclass("ccgui.paint.Strip")
-function Strip:initialize(str, x, y, text, back)
+function Strip:initialize(str, x, text, back)
 	self.str = str
 	self.x = x
-	self.y = y
 	self.text = text
 	self.back = back
 	self.dirty = true
@@ -26,37 +25,35 @@ function Strip:right()
 	return self.x + #self.str
 end
 function Strip:intersects(other)
-	return self.y == other.y
-	   and self:left() < other:right()
+	return self:left() < other:right()
 	   and self:right() > other:left()
 end
 function Strip:matchesColor(other)
 	return self.text == other.text
 	   and self.back == other.back
 end
-function Strip:canAppend(other)
-	return self.y == other.y
-	   and self:right() == other:left()
+function Strip:canMerge(other)
+	return self:left() <= other:right()
+	   and self:right() >= other:left()
 	   and self:matchesColor(other)
 end
-function Strip:canPrepend(other)
-	return self.y == other.y
-	   and self:left() == other:right()
-	   and self:matchesColor(other)
-end
-function Strip:append(other)
-	self.str = self.str .. other.str
-	self.dirty = true
-end
-function Strip:prepend(other)
-	self.str = other.str .. self.str
-	self.x = other.x
-	self.dirty = true
+function Strip:merge(other)
+	local start = math.max(0, other.x - self.x)
+	local stop = start + #other.str
+	local newStr = string.sub(self.str, 1, start) .. other.str .. string.sub(self.str, stop)
+	if newStr ~= self.str then
+		self.str = newStr
+		self.dirty = true
+	end
+	local newX = math.min(self.x, other.x)
+	if self.x ~= newX then
+		self.x = newX
+		self.dirty = true
+	end
 end
 function Strip:__tostring()
 	return "Strip["
-		.."y="..self.y
-		..",l="..self:left()
+		.."l="..self:left()
 		..",r="..self:right()
 		..",t="..self.text
 		..",b="..self.back
@@ -71,8 +68,7 @@ function Screen:initialize()
 	self.strips = {}
 end
 
-function Screen:getLine(strip)
-	local y = strip.y
+function Screen:getLine(y)
 	local line = self.strips[y]
 	if line == nil then
 		line = {}
@@ -82,11 +78,11 @@ function Screen:getLine(strip)
 end
 
 -- Add to screen
-function Screen:add(newStrip)
+function Screen:add(y, newStrip)
 	-- Ignore empty strips
 	if #newStrip.str == 0 then return end
 	-- Split intersecting existing paints
-	local line, i = self:getLine(newStrip), 1
+	local line, i = self:getLine(y), 1
 	while i <= #line do
 		local strip = line[i]
 		-- Resolve intersections
@@ -96,13 +92,13 @@ function Screen:add(newStrip)
 			local leftStr = string.sub(strip.str, 1, leftLen)
 			local rightStr = string.sub(strip.str, -rightLen)
 			local hasLeft, hasRight = leftLen > 0, rightLen > 0
-			strip.dirty = true
 			if hasLeft then
 				-- Replace original strip with left strip
 				strip.str = leftStr
 				if hasRight then
 					-- Also create right strip
-					local rightStrip = Strip:new(rightStr, newStrip:right(), strip.y, strip.text, strip.back)
+					local rightStrip = Strip:new(rightStr, newStrip:right(), strip.text, strip.back)
+					rightStrip.dirty = strip.dirty
 					table.insert(line, i+1, rightStrip)
 				end
 			elseif hasRight then
@@ -128,21 +124,21 @@ function Screen:add(newStrip)
 	if pos == nil then pos = #line+1 end
 	-- Merge with surrounding strips
 	local merged = false
-	if pos > 1 and line[pos-1]:canAppend(newStrip) then
-		-- Append to strip on left
+	if pos > 1 and line[pos-1]:canMerge(newStrip) then
+		-- Merge with strip on left
 		pos = pos-1
-		line[pos]:append(newStrip)
+		line[pos]:merge(newStrip)
 		newStrip = line[pos]
 		merged = true
 	end
-	if pos < #line and line[pos+1]:canPrepend(newStrip) then
+	if pos < #line and line[pos+1]:canMerge(newStrip) then
 		if merged then
-			-- Multiple merges, append and remove
-			newStrip:append(line[pos+1])
+			-- Already merged, merge and remove
+			newStrip:merge(line[pos+1])
 			table.remove(line, pos+1)
 		else
-			-- Not yet merged, prepend to strip on right
-			line[pos+1]:prepend(newStrip)
+			-- Not yet merged, merge with strip on right
+			line[pos+1]:merge(newStrip)
 			newStrip = line[pos+1]
 		end
 		merged = true
@@ -203,7 +199,7 @@ function BufferedTerminal:getHeight()
 end
 
 function BufferedTerminal:writeBuffer(str, x, y, text, back)
-	return self.screen:add(Strip:new(str, x, y, text, back))
+	return self.screen:add(y, Strip:new(str, x, text, back))
 end
 
 function BufferedTerminal:paint()
