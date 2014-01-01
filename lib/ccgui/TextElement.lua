@@ -15,7 +15,7 @@ function TextElement:initialize(opts)
 	super.initialize(self, opts)
 
 	-- Text
-	self:setText(opts.text)
+	self:setText(opts.text or "")
 	-- Text alignment
 	self.align = opts.align or Align.Left
 	self.valign = opts.valign or VAlign.Top
@@ -24,9 +24,11 @@ function TextElement:initialize(opts)
 end
 
 function TextElement:setText(text)
-	self.text = text or ""
-	self.lines = {}
-	self:markRepaint()
+	if text ~= self.text then
+		self.text = text
+		self.lines = {}
+		self:markRepaint()
+	end
 end
 
 local function wrapLine(str, limit)

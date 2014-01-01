@@ -40,7 +40,7 @@ function Container:find(elem, deep)
 		if child == elem then
 			return i
 		elseif (deep and type(child.find) == "function") then
-			if child:find(elem) ~= nil then
+			if child:find(elem, deep) ~= nil then
 				return i
 			end
 		end
