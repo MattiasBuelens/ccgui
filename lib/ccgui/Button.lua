@@ -12,7 +12,7 @@ function Button:initialize(opts)
 	-- Default style
 	opts.foreground = opts.foreground or colours.grey
 	opts.background = opts.background or colours.lightGrey
-	opts.padding = (opts.padding == nil and 1) or tonumber(opts.padding)
+	opts.padding = (opts.padding == nil) and 1 or opts.padding
 
 	super.initialize(self, opts)
 
