@@ -32,6 +32,7 @@ function TextElement:setText(text)
 end
 
 local function wrapLine(str, limit)
+	assert(limit > 0, "TextElement.wrapLine: limit must be positive")
 	-- Wrap in words
 	str = string.gsub(str, "(%S+)",
 		function(word)
