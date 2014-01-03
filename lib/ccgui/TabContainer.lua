@@ -76,6 +76,7 @@ function TabContainer:initialize(opts)
 	}
 	self:add(self.tabBar, self.tabPane)
 
+	-- Update visible tab when tab selection changes
 	self.tabRadioGroup:on("select", self.updateVisibleTab, self)
 	self.tabRadioGroup:on("unselect", self.updateVisibleTab, self)
 end
@@ -110,9 +111,12 @@ function TabContainer:addTab(label, tab)
 	tab.tabButton = tabButton
 	tabButton.tab = tab
 
-	-- Select if nothing selected yet
 	if self:getCurrentTab() == nil then
+		-- Select if nothing selected yet
 		self:setCurrentTab(tab)
+	else
+		-- Otherwise, hide tab
+		tab:hide()
 	end
 
 	return tab
