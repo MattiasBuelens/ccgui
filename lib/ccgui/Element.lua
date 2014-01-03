@@ -23,7 +23,7 @@ function Element:initialize(opts)
 	-- Parent element
 	self.parent = opts.parent or nil
 	-- Visibility
-	self.isVisible = (type(opts.isVisible) == "nil") or (not not opts.isVisible)
+	self.isVisible = (opts.isVisible == nil) or (not not opts.isVisible)
 	-- Colors
 	self.foreground = opts.foreground or colours.black
 	self.background = opts.background or 0

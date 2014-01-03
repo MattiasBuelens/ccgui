@@ -132,7 +132,7 @@ function Slider:initialize(opts)
 	super.initialize(self, opts)
 
 	-- Arrow buttons
-	self.showArrows = (type(opts.showArrows) == "nil") or (not not opts.showArrows)
+	self.showArrows = (opts.showArrows == nil) or (not not opts.showArrows)
 	self.arrowLabels = opts.arrowLabels or { "-", "+" }
 	-- Colors
 	self.colorForeground = opts.colorForeground or colours.grey

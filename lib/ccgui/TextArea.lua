@@ -14,9 +14,9 @@ function TextArea:initialize(opts)
 	-- Default style
 	opts.background = opts.background or colours.white
 	-- Scroll horizontally by default as well
-	opts.horizontal = (type(opts.horizontal) == "nil") or (not not opts.horizontal)
+	opts.horizontal = (opts.horizontal == nil) or (not not opts.horizontal)
 	-- Mouse scroll by default
-	opts.mouseScroll = (type(opts.mouseScroll) == "nil") or (not not opts.mouseScroll)
+	opts.mouseScroll = (opts.mouseScroll == nil) or (not not opts.mouseScroll)
 
 	super.initialize(self, opts)
 

@@ -41,7 +41,7 @@ function TabContainer:initialize(opts)
 	self.tabBackground = opts.tabBackground or 0
 
 	-- Stretch tab panes
-	self.tabStretch = (type(opts.tabStretch) == "nil") or (not not opts.tabStretch)
+	self.tabStretch = (opts.tabStretch == nil) or (not not opts.tabStretch)
 	-- Class for tab buttons
 	self.tabClass = opts.tabClass or TabButton
 	-- Extra options (styling) for tab buttons

@@ -84,9 +84,9 @@ function ScrollElement:initialize(opts)
 
 	-- Orientation
 	self.horizontal = not not opts.horizontal
-	self.vertical = (type(opts.vertical) == "nil") or (not not opts.vertical)
+	self.vertical = (opts.vertical == nil) or (not not opts.vertical)
 	-- Show scroll bars
-	self.showScrollBars = (type(opts.showScrollBars) == "nil") or (not not opts.showScrollBars)
+	self.showScrollBars = (opts.showScrollBars == nil) or (not not opts.showScrollBars)
 	-- Mouse scroll
 	self.mouseScroll = not not opts.mouseScroll
 	-- Colors
