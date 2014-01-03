@@ -63,9 +63,11 @@ local tabs = ccgui.TabContainer:new{
 	_name = "tabs"
 }
 tabs:addTab("Read", ccgui.TextViewer:new{
-	text = "Foo\nbar"
+	text = "Foo\nbar",
+	_name = "textViewer"
 })
 tabs:addTab("Write", ccgui.TextArea:new{
+	_name = "textArea"
 })
 
 screen:add(header, tabs, footer)
