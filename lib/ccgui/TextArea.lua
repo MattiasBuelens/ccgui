@@ -145,36 +145,51 @@ end
 ]]--
 
 function TextArea:moveCursor(dx, dy)
-	return self:setCursor(self.cursorChar + dx, self.cursorLine + dy)
+	local x, y = self.cursorChar, self.cursorLine
+	if dy ~= 0 then
+		-- Moving vertically, don't switch lines
+		y = y + dy
+	else
+		-- Moving horizontally, switch lines if needed
+		x = x + dx
+		if x <= 0 then
+			if y > 1 then
+				-- Move to end of previous line
+				y = y - 1
+				x = #(self.lines[y]) + 1
+			else
+				-- Clip to start of first line
+				x = 1
+			end
+		elseif x > #(self.lines[y]) + 1 then
+			if y < #self.lines then
+				-- Move to start of next line
+				y = y + 1
+				x = 1
+			else
+				-- Clip to end of last line
+				x = #(self.lines[y]) + 1
+			end
+		end
+	end
+	self:setCursor(x, y)
+end
+
+function TextArea:movePage(delta)
+	local x, y = self.cursorChar, self.cursorLine
+	-- Move per scroll page
+	y = y + delta * self:scrollVisible().y
+	self:setCursor(x, y)
 end
 
 function TextArea:setCursor(x, y)
+	-- Keep in text bounds
 	y = math.max(1, math.min(y, #self.lines))
+	x = math.max(1, math.min(x, #(self.lines[y]) + 1))
 
-	-- Keep cursor in text bounds
-	if x <= 0 then
-		if y > 1 then
-			-- Move to end of previous line
-			y = y - 1
-			x = #(self.lines[y]) + 1
-		else
-			-- Clip to start of first line
-			x = 1
-		end
-	elseif x > #(self.lines[y]) + 1 then
-		if y < #self.lines then
-			-- Move to start of next line
-			y = y + 1
-			x = 1
-		else
-			-- Clip to end of last line
-			x = #(self.lines[y]) + 1
-		end
-	end
-
+	-- Update cursor position
 	self.cursorChar = x
 	self.cursorLine = y
-	self:drawCursor()
 
 	-- Adjust scroll position
 	local scrollX, scrollY = self.scrollPosition.x, self.scrollPosition.y
@@ -193,6 +208,9 @@ function TextArea:setCursor(x, y)
 	end
 
 	self:setScrollPosition(scrollX, scrollY)
+
+	-- Draw cursor
+	self:drawCursor()
 end
 
 --[[
@@ -339,6 +357,10 @@ function TextArea:textKey(key)
 		self:setCursor(1, self.cursorLine)
 	elseif key == keys["end"] then
 		self:setCursor(#(self.lines[self.cursorLine]) + 1, self.cursorLine)
+	elseif key == keys.pageUp then
+		self:movePage(-1)
+	elseif key == keys.pageDown then
+		self:movePage(1)
 	elseif not self:readonly() then
 		if key == keys.backspace then
 			self:delete(true)
