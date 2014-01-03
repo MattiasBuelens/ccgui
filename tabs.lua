@@ -57,8 +57,14 @@ local tabs = ccgui.TabContainer:new{
 	tabSpacing = 1,
 	tabBackground = colours.lightBlue,
 	tabOpts = {
-		foreground = colours.black,
-		background = colours.white
+		tabOnStyle = {
+			foreground = colours.black,
+			background = colours.white
+		},
+		tabOffStyle = {
+			foreground = colours.grey,
+			background = colours.lightGrey
+		}
 	},
 	_name = "tabs"
 }

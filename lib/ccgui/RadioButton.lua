@@ -22,9 +22,18 @@ function RadioButton:initialize(opts)
 	self.radioOffPrefix = opts.radioOffPrefix or "[ ] "
 	-- Radio label
 	self:setLabel(opts.radioLabel or self.text)
-
 	self:on("select", self.radioUpdateText, self)
 	self:on("unselect", self.radioUpdateText, self)
+
+	-- Radio on/off styles
+	self.radioOnStyle = opts.radioOnStyle or {}
+	self.radioOffStyle = opts.radioOffStyle or {}
+	self:radioUpdateStyle()
+
+	self:on("select", self.radioUpdateStyle, self)
+	self:on("unselect", self.radioUpdateStyle, self)
+
+	-- Select on click
 	self:on("buttonpress", self.select, self)
 end
 
@@ -49,6 +58,14 @@ function RadioButton:radioUpdateText()
 		text = self.radioOffPrefix .. text
 	end
 	self:setText(text)
+end
+
+function RadioButton:radioUpdateStyle()
+	local style = self:isSelected() and self.radioOnStyle or self.radioOffStyle
+	for k,v in pairs(style) do
+		self[k] = v
+	end
+	self:markRepaint()
 end
 
 -- Exports

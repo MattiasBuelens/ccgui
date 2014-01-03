@@ -14,34 +14,20 @@ function TabButton:initialize(opts)
 	-- Default style
 	opts.radioOnPrefix = opts.radioOnPrefix or ""
 	opts.radioOffPrefix = opts.radioOffPrefix or ""
+	opts.radioOnStyle = opts.tabOnStyle or opts.radioOnStyle or {
+		foreground = opts.foreground or colours.black,
+		background = self.background or colours.lightGrey
+	}
+	opts.radioOffStyle = opts.tabOffStyle or opts.radioOffStyle or {
+		foreground = opts.foreground or colours.grey,
+		background = self.background or colours.lightGrey
+	}
 
 	super.initialize(self, opts)
 
-	-- Tab button on/off styles
-	self.tabOnStyle = opts.tabOnStyle or {
-		foreground = self.foreground,
-		background = self.background
-	}
-	self.tabOffStyle = opts.tabOffStyle or {
-		foreground = self.background,
-		background = self.foreground
-	}
-	self:setOffStyle()
-
-	self:on("select", self.setOnStyle, self)
-	self:on("unselect", self.setOffStyle, self)
-end
-function TabButton:setStyle(opts)
-	for k,v in pairs(opts) do
-		self[k] = v
-	end
-	self:markRepaint()
-end
-function TabButton:setOnStyle()
-	self:setStyle(self.tabOnStyle)
-end
-function TabButton:setOffStyle()
-	self:setStyle(self.tabOffStyle)
+	-- Alias tab styles
+	self.tabOnStyle = self.radioOnStyle
+	self.tabOffStyle = self.radioOffStyle
 end
 
 local TabContainer = FlowContainer:subclass("ccgui.TabContainer")
