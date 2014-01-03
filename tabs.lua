@@ -52,7 +52,7 @@ local footer = ccgui.TextElement:new{
 }
 local tabs = ccgui.TabContainer:new{
 	horizontal = false,
-	tabStretch = true,
+	stretch = true,
 	tabPadding = ccgui.geom.Margins:new(1, 1, 0),
 	tabSpacing = 1,
 	tabBackground = colours.lightBlue,
@@ -75,6 +75,28 @@ tabs:addTab("Read", ccgui.TextViewer:new{
 tabs:addTab("Write", ccgui.TextArea:new{
 	_name = "textArea"
 })
+local labelChoice = ccgui.TextElement:new{
+	text = "Choice:"
+}
+local radioGroupChoice = ccgui.RadioGroup:new()
+local radioOne = ccgui.RadioButton:new{
+	radioLabel = "One",
+	radioGroup = radioGroupChoice
+}
+local radioTwo = ccgui.RadioButton:new{
+	radioLabel = "Two",
+	radioGroup = radioGroupChoice
+}
+local radioThree = ccgui.RadioButton:new{
+	radioLabel = "Three",
+	radioGroup = radioGroupChoice
+}
+local form = ccgui.FlowContainer:new{
+	horizontal = false,
+	_name = "form"
+}
+form:add(labelChoice, radioOne, radioTwo, radioThree)
+tabs:addTab("Form", form)
 
 screen:add(header, tabs, footer)
 

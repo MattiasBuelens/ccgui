@@ -12,6 +12,7 @@ local RadioGroup	= require "ccgui.RadioGroup"
 local TabButton = RadioButton:subclass("ccgui.TabButton")
 function TabButton:initialize(opts)
 	-- Default style
+	opts.padding = opts.padding or 1
 	opts.radioOnPrefix = opts.radioOnPrefix or ""
 	opts.radioOffPrefix = opts.radioOffPrefix or ""
 	opts.radioOnStyle = opts.tabOnStyle or opts.radioOnStyle or {
@@ -57,7 +58,7 @@ function TabContainer:initialize(opts)
 	}
 	-- Tab pane
 	self.tabPane = ccgui.FlowContainer:new{
-		horizontal = not self.horizontal,
+		horizontal = self.horizontal,
 		stretch = tabStretch
 	}
 	self:add(self.tabBar, self.tabPane)
@@ -88,6 +89,9 @@ function TabContainer:addTab(label, tab)
 		-- Tab already contained
 		return tab
 	end
+	
+	-- Tab fills tab pane
+	tab.stretch = true
 	
 	-- Add tab and tab button
 	self.tabPane:add(tab)

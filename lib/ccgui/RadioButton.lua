@@ -10,6 +10,10 @@ local RadioGroup	= require "ccgui.RadioGroup"
 
 local RadioButton = Button:subclass("ccgui.RadioButton")
 function RadioButton:initialize(opts)
+	-- Default style
+	opts.foreground = opts.foreground or colours.black
+	opts.background = opts.background or 0
+	opts.padding = opts.padding or 0
 	super.initialize(self, opts)
 
 	-- Radio group
