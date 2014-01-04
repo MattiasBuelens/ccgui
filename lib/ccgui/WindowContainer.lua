@@ -11,11 +11,17 @@ local WindowContainer = Container:subclass("ccgui.WindowContainer")
 function WindowContainer:initialize(opts)
 	super.initialize(self, opts)
 
+	self.foregroundWindow = nil
+
 	self:on("mouse_click", self.windowsClick, self, 1000)
 	self:on("mouse_drag", self.windowsDrag, self, 1000)
 	
 	self:on("add", self.markPaint, self)
 	self:on("remove", self.markRepaint, self)
+
+	self:on("add", self.updateForeground, self)
+	self:on("remove", self.updateForeground, self)
+	self:on("beforeremove", self.backgroundOnRemove, self)
 end
 
 function WindowContainer:getWindowCount()
@@ -24,15 +30,34 @@ end
 function WindowContainer:getWindow(i)
 	return self.children[i]
 end
-function WindowContainer:getForegroundWindow()
-	return self:getWindow(self:getWindowCount())
-end
 
+function WindowContainer:getForegroundWindow()
+	return self.foregroundWindow
+end
 function WindowContainer:bringToForeground(window)
 	self:getForegroundWindow():trigger("window_background")
 	self:move(window, self:getWindowCount())
+	self.foregroundWindow = window
 	window:trigger("window_foreground")
 	self:markRepaint()
+end
+function WindowContainer:updateForeground()
+	local n = self:getWindowCount()
+	local oldForeground = self:getForegroundWindow()
+	local newForeground = (n > 0 and self.children[n]) or nil
+	if oldForeground ~= newForeground then
+		if oldForeground ~= nil then
+			oldForeground:trigger("window_background")
+		end
+		if newForeground ~= nil then
+			newForeground:trigger("window_foreground")
+		end
+		self.foregroundWindow = newForeground
+		self:markRepaint()
+	end
+end
+function WindowContainer:backgroundOnRemove(removedWindow)
+	removedWindow:trigger("window_background")
 end
 
 function WindowContainer:getWindowAt(x, y)
@@ -108,7 +133,8 @@ function WindowContainer:handleSink(event, ...)
 end
 function WindowContainer:handleFocusSink(event, ...)
 	-- Only sink focus when focused is on foreground
-	if self.childFocus == self:getWindowCount() then
+	local focused = self.childFocus and self.children[self.childFocus] or nil
+	if self:visible() and focused ~= nil and focused == self:getForegroundWindow() then
 		super.handleFocusSink(self, event, ...)
 	end
 end

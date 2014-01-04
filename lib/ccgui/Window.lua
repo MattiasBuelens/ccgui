@@ -256,8 +256,8 @@ function Window:storeCursorBlink(blink, x, y, color)
 	end
 end
 function Window:updateCursorBlink()
-	if self.storedBlink and self.parent ~= nil then
-		if self:isForeground() then
+	if self:isForeground() then
+		if self.storedBlink then
 			return self:showCursorBlink()
 		else
 			return self:hideCursorBlink()
