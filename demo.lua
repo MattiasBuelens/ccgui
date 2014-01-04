@@ -16,33 +16,22 @@ local isRunning = true
 
 local screen = ccgui.Page:new{
 	horizontal = false,
-	background = colours.white,
 	_name = "screen"
 }
-local header = require("ccgui.FlowContainer"):new{
-	horizontal = true,
-	_name = "header"
-}
-local headerTitle = ccgui.TextElement:new{
-	text = "CCGUI :: Demonstration",
-	align = ccgui.Align.Center,
+local container = ccgui.WindowContainer:new{
 	stretch = true,
-	foreground = colours.white,
-	background = colours.blue,
-	_name = "headerTitle"
+	background = colours.lightBlue,
+	_name = "container"
 }
-local btnQuit = ccgui.Button:new{
-	text = "x",
-	align = ccgui.Align.Right,
-	padding = 0,
-	foreground = colours.white,
-	background = colours.red,
-	_name = "btnQuit"
+local window = ccgui.Window:new{
+	title = "CCGUI :: Demonstration",
+	background = colours.white,
+	windowBox = ccgui.geom.Rectangle:new(1, 1, 45, 15),
+	_name = "window"
 }
-btnQuit:on("buttonpress", function()
+window:on("close", function()
 	isRunning = false
 end)
-header:add(headerTitle, btnQuit)
 
 local footer = ccgui.TextElement:new{
 	text = "Ready",
@@ -99,7 +88,10 @@ local textMessage = ccgui.TextArea:new{
 	stretch = true,
 	_name = "textMessage"
 }
-screen:add(header, toolbar, fieldAddress, textMessage, footer)
+window:content():add(toolbar, fieldAddress, textMessage, footer)
+container:add(window)
+screen:add(container)
+window:maximize()
 
 screen:paint()
 while isRunning do
