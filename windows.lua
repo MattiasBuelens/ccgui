@@ -16,11 +16,11 @@ local isRunning = true
 
 local screen = ccgui.Page:new{
 	horizontal = false,
+	background = colours.lightBlue,
 	_name = "screen"
 }
 local container = ccgui.WindowContainer:new{
 	stretch = true,
-	background = colours.lightBlue,
 	_name = "container"
 }
 container:on("remove", function()
@@ -51,7 +51,7 @@ local window2 = ccgui.Window:new{
 	title = "Window 2",
 	foreground = colours.black,
 	background = colours.white,
-	windowBox = ccgui.geom.Rectangle:new(10, 3, 15, 10),
+	windowBox = ccgui.geom.Rectangle:new(10, 3, 20, 10),
 	_name = "window2"
 }
 local textFoo = ccgui.TextArea:new{

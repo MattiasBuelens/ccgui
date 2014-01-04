@@ -11,7 +11,6 @@ local Rectangle			= require "ccgui.geom.Rectangle"
 
 local Page = FlowContainer:subclass("ccgui.Page")
 function Page:initialize(opts)
-	opts.background = colors.white
 	super.initialize(self, opts)
 
 	self.term = BufferedTerminal:new(self.output)

@@ -16,11 +16,11 @@ local isRunning = true
 
 local screen = ccgui.Page:new{
 	horizontal = false,
+	background = colours.lightBlue,
 	_name = "screen"
 }
 local container = ccgui.WindowContainer:new{
 	stretch = true,
-	background = colours.lightBlue,
 	_name = "container"
 }
 local window = ccgui.Window:new{
