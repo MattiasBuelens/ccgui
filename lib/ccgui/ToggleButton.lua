@@ -20,7 +20,7 @@ function ToggleButton:initialize(opts)
 	self.toggleState = false
 	self:updateLabel()
 
-	self:on("buttonpress", self.togglePress, self)
+	self:on("buttonpress", self.toggle, self)
 end
 
 function ToggleButton:isOn()
@@ -32,8 +32,15 @@ function ToggleButton:isOff()
 end
 
 function ToggleButton:setState(state)
-	self.toggleState = not not state
-	self:updateLabel()
+	if self.toggleState ~= state then
+		self.toggleState = not not state
+		if self.toggleState then
+			self:trigger("toggleon")
+		else
+			self:trigger("toggleoff")
+		end
+		self:updateLabel()
+	end
 end
 
 function ToggleButton:toggle()
@@ -55,15 +62,6 @@ function ToggleButton:updateLabel()
 		self:setText(self.labelOn)
 	else
 		self:setText(self.labelOff)
-	end
-end
-
-function ToggleButton:togglePress()
-	self:toggle()
-	if self:isOn() then
-		self:trigger("toggleon")
-	else
-		self:trigger("toggleoff")
 	end
 end
 

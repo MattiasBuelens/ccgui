@@ -60,8 +60,8 @@ local textFoo = ccgui.TextArea:new{
 	_name = "textFoo"
 }
 window2:content():add(textFoo)
-screen:add(container)
 container:add(window1, window2)
+screen:add(container)
 
 screen:paint()
 while isRunning do

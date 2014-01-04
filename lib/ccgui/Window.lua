@@ -68,6 +68,9 @@ function TitleBar:setMaximizable(value)
 		self.minmaxButton:hide()
 	end
 end
+function TitleBar:updateMaximized()
+	self.minmaxButton:setState(self.parent.isMaximized)
+end
 function TitleBar:isClosable()
 	return self.closable
 end
@@ -146,6 +149,8 @@ function Window:initialize(opts)
 
 	self:add(self.titleBar, self.contentPane)
 
+	self:on("maximize", self.titleBar.updateMaximized, self.titleBar)
+	self:on("restore", self.titleBar.updateMaximized, self.titleBar)
 	self:on("click", self.bringToFront, self)
 end
 
@@ -173,12 +178,14 @@ function Window:maximize()
 	if not self.isMaximized then
 		self.isMaximized = true
 		self:bringToFront()
+		self:trigger("maximize")
 	end
 end
 function Window:restoreSize()
 	if self.isMaximized then
 		self.isMaximized = false
 		self:bringToFront()
+		self:trigger("restore")
 	end
 end
 function Window:bringToFront()
@@ -186,6 +193,7 @@ function Window:bringToFront()
 	self:markRepaint()
 end
 function Window:close()
+	self:trigger("close")
 	self.parent:remove(self)
 end
 
