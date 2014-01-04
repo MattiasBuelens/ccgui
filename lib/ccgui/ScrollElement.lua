@@ -224,7 +224,7 @@ function ScrollElement:sinkEvent(event)
 				self.sliderVerti:trigger(event, ...)
 			end
 		end
-	end, self)
+	end, self, 1000)
 end
 
 -- Exports

@@ -64,6 +64,7 @@ end
 function TextArea:setText(text)
 	-- Split lines
 	self.lines = splitLines(text or "")
+	self:updateScroll()
 	-- Reset cursor
 	if self.bbox then
 		self:setCursor(1, 1)
