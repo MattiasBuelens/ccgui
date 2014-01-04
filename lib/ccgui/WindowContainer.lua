@@ -28,14 +28,31 @@ function WindowContainer:getForegroundWindow()
 	return self:getWindow(self:getWindowCount())
 end
 
-function WindowContainer:bringToFront(window)
+function WindowContainer:bringToForeground(window)
+	self:getForegroundWindow():trigger("window_background")
 	self:move(window, self:getWindowCount())
+	window:trigger("window_foreground")
 	self:markRepaint()
 end
 
+function WindowContainer:getWindowAt(x, y)
+	if type(x) == "table" then
+		-- Position given as vector
+		x, y = x.x, x.y
+	end
+	-- Find window from foreground to background
+	for i=self:getWindowCount(),1,-1 do
+		local window = self:getWindow(i)
+		if window:visible() and window:contains(x, y) then
+			return window
+		end
+	end
+	-- Not found
+	return nil
+end
+
 function WindowContainer:markPaint()
-	-- Temporarily ignore markPaint requests
-	-- to prevent infinite recursion
+	-- Temporarily ignore markPaint requests to prevent infinite recursion
 	if self.ignorePaints then return end
 	self.ignorePaints = true
 
@@ -66,13 +83,11 @@ function WindowContainer:calcLayout(bbox)
 end
 
 function WindowContainer:windowsClick(button, x, y, ...)
-	-- Click on most front window
+	-- Click on containing window
 	if self:visible() and self:contains(x, y) then
-		for i=self:getWindowCount(),1,-1 do
-			local window = self:getWindow(i)
-			if window:visible() and window:contains(x, y) then
-				return window:trigger("mouse_click", button, x, y, ...)
-			end
+		local window = self:getWindowAt(x, y)
+		if window ~= nil then
+			return window:trigger("mouse_click", button, x, y, ...)
 		end
 	end
 end

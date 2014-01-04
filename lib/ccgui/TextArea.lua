@@ -122,7 +122,7 @@ function TextArea:textFocus()
 end
 
 function TextArea:textBlur()
-	self:getOutput().setCursorBlink(false)
+	self:setCursorBlink(false)
 end
 
 function TextArea:textClick(button, x, y)
@@ -315,18 +315,14 @@ end
 
 function TextArea:drawCursor()
 	if self.hasFocus then
-		local out = self:getOutput()
 		-- Get screen position
 		local pos = self:toScreen(self.cursorChar, self.cursorLine)
 		if self:contains(pos) then
 			-- Show blinking cursor
-			out.setTextColor(self.foreground)
-			out.setBackgroundColor(self.background)
-			out.setCursorPos(pos.x, pos.y)
-			out.setCursorBlink(true)
+			self:setCursorBlink(true, pos.x, pos.y, self.foreground)
 		else
 			-- Hide blinking cursor
-			out.setCursorBlink(false)
+			self:setCursorBlink(false)
 		end
 	end
 end

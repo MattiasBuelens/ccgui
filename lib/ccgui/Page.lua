@@ -27,8 +27,16 @@ function Page:initialize(opts)
 	self:startFrameTimer()
 end
 
-function Page:getOutput()
-	return self.term:asTerm()
+function Page:setCursorBlink(blink, x, y, color)
+	if blink then
+		color = self.term:isColor() and color or colours.white
+		self.term:setCursorPos(x, y)
+		self.term:setTextColor(color)
+		self.term:setCursorBlink(true)
+	else
+		self.term:setCursorBlink(false)
+	end
+	return true
 end
 
 function Page:pageLayout()

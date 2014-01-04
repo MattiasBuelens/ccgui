@@ -201,10 +201,11 @@ end
 
 ]]--
 
--- Get the output device for drawing
-function Element:getOutput()
-	-- Bubble up to parent
-	return self.parent:getOutput()
+function Element:setCursorBlink(blink, x, y, color)
+	if self.parent ~= nil then
+		return self.parent:setCursorBlink(blink, x, y, color)
+	end
+	return false
 end
 
 function Element:markPaint()

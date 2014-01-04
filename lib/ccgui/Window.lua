@@ -142,6 +142,8 @@ function Window:initialize(opts)
 		closable = opts.closable
 	}
 	self:setTitle(opts.title or "")
+	self:on("maximize", self.titleBar.updateMaximized, self.titleBar)
+	self:on("restore", self.titleBar.updateMaximized, self.titleBar)
 
 	-- Content pane
 	self.contentPane = FlowContainer:new(opts)
@@ -149,9 +151,9 @@ function Window:initialize(opts)
 
 	self:add(self.titleBar, self.contentPane)
 
-	self:on("maximize", self.titleBar.updateMaximized, self.titleBar)
-	self:on("restore", self.titleBar.updateMaximized, self.titleBar)
-	self:on("mouse_click", self.windowClick, self)
+	self:on("mouse_click", self.foregroundOnClick, self)
+	self:on("window_background", self.hideCursorBlink, self)
+	self:on("window_foreground", self.showCursorBlink, self)
 end
 
 function Window:content()
@@ -177,19 +179,25 @@ end
 function Window:maximize()
 	if not self.isMaximized then
 		self.isMaximized = true
-		self:bringToFront()
+		self:bringToForeground()
 		self:trigger("maximize")
 	end
 end
 function Window:restoreSize()
 	if self.isMaximized then
 		self.isMaximized = false
-		self:bringToFront()
+		self:bringToForeground()
 		self:trigger("restore")
 	end
 end
-function Window:bringToFront()
-	self.parent:bringToFront(self)
+function Window:isForeground()
+	if self.parent ~= nil then
+		return self == self.parent:getForegroundWindow()
+	end
+	return true
+end
+function Window:bringToForeground()
+	self.parent:bringToForeground(self)
 end
 function Window:close()
 	self:trigger("close")
@@ -229,10 +237,46 @@ function Window:calcLayout(bbox)
 	super.calcLayout(self, bbox)
 end
 
-function Window:windowClick(button, x, y)
+-- Bring to foreground on click
+function Window:foregroundOnClick(button, x, y)
 	if button == 1 and self:visible() and self:contains(x, y) then
-		self:bringToFront()
+		self:bringToForeground()
 	end
+end
+
+function Window:setCursorBlink(blink, x, y, color)
+	self:storeCursorBlink(blink, x, y, color)
+	return self:updateCursorBlink()
+end
+function Window:storeCursorBlink(blink, x, y, color)
+	if blink then
+		self.storedBlink = { x, y, color }
+	else
+		self.storedBlink = nil
+	end
+end
+function Window:updateCursorBlink()
+	if self.storedBlink and self.parent ~= nil then
+		if self:isForeground() then
+			return self:showCursorBlink()
+		else
+			return self:hideCursorBlink()
+		end
+	end
+	return false
+end
+function Window:showCursorBlink()
+	if self.storedBlink and self.parent ~= nil then
+		local x, y, color = unpack(self.storedBlink)
+		return super.setCursorBlink(self, true, x, y, color)
+	end
+	return false
+end
+function Window:hideCursorBlink()
+	if self.storedBlink and self.parent ~= nil then
+		return super.setCursorBlink(self, false)
+	end
+	return false
 end
 
 -- Exports
