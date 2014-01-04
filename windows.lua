@@ -39,6 +39,30 @@ local labelHello = ccgui.TextElement:new{
 	text = "Hello, world!",
 	_name = "labelHello"
 }
+local toolbar = ccgui.FlowContainer:new{
+	horizontal = true,
+	spacing = 1,
+	_name = "toolbar"
+}
+local btnNew = ccgui.Button:new{
+	text = "New",
+	_name = "btnNew"
+}
+btnNew:on("buttonpress", function()
+	local window = ccgui.Window:new{
+		title = "New window",
+		foreground = colours.black,
+		background = colours.white,
+		windowPos = vector.new(10, 5),
+		titleBackground = colours.green
+	}
+	local labelHello = ccgui.TextElement:new{
+		stretch = true,
+		text = "A brand new window!"
+	}
+	window:content():add(labelHello)
+	container:add(window)
+end)
 local btnQuit = ccgui.Button:new{
 	text = "Quit",
 	_name = "btnQuit"
@@ -46,12 +70,14 @@ local btnQuit = ccgui.Button:new{
 btnQuit:on("buttonpress", function()
 	isRunning = false
 end)
-window1:content():add(labelHello, btnQuit)
+toolbar:add(btnNew, btnQuit)
+window1:content():add(labelHello, toolbar)
 local window2 = ccgui.Window:new{
 	title = "Window 2",
 	foreground = colours.black,
 	background = colours.white,
-	windowBox = ccgui.geom.Rectangle:new(10, 3, 20, 10),
+	windowPos = vector.new(25, 3),
+	windowSize = vector.new(20, 10),
 	_name = "window2"
 }
 local textFoo = ccgui.TextArea:new{

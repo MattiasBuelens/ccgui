@@ -132,7 +132,9 @@ function Window:initialize(opts)
 	})
 
 	-- Window positioning
-	self.windowBox = opts.windowBox or Rectangle:new(0, 0, 15, 10)
+	local pos = opts.windowPos or vector.new(0, 0)
+	local size = opts.windowSize or vector.new(15, 10)
+	self.windowBox = opts.windowBox or Rectangle:new(pos, size)
 
 	-- Title bar
 	self.titleBar = TitleBar:new{
@@ -204,13 +206,36 @@ function Window:close()
 	self.parent:remove(self)
 end
 
-function Window:getPosition(pos)
+function Window:getPosition()
 	return self.windowBox:tl()
 end
-function Window:setPosition(pos)
-	assert(not self.isMaximized, "cannot set position when maximized")
-	if self.windowBox.x ~= pos.x or self.windowBox.y ~= pos.y then
-		self.windowBox.x, self.windowBox.y = pos.x, pos.y
+function Window:setPosition(x, y)
+	assert(not self.isMaximized, "cannot change position when maximized")
+	if type(x) == "table" then
+		-- Vector
+		x, y = x.x, x.y
+	end
+	if self.windowBox.x ~= x or self.windowBox.y ~= y then
+		self.windowBox.x, self.windowBox.y = x, y
+		self:markRepaint()
+	end
+end
+function Window:getSize()
+	return self.windowBox:size()
+end
+function Window:setSize(w, h)
+	assert(not self.isMaximized, "cannot change size when maximized")
+	if type(w) == "table" then
+		if w.w then
+			-- Rectangle
+			w, h = w.w, w.h
+		else
+			-- Vector
+			w, h = w.x, w.y
+		end
+	end
+	if self.windowBox.w ~= w or self.windowBox.h ~= h then
+		self.windowBox.w, self.windowBox.h = w, h
 		self:markRepaint()
 	end
 end
