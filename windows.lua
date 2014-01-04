@@ -24,7 +24,7 @@ local container = ccgui.WindowContainer:new{
 	_name = "container"
 }
 container:on("remove", function()
-	if container:windowCount() == 0 then
+	if container:getWindowCount() == 0 then
 		isRunning = false
 	end
 end)
