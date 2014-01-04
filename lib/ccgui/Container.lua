@@ -14,6 +14,10 @@ function Container:initialize(opts)
 	-- Children
 	self.children = {}
 	self.childFocus = nil
+	
+	-- Sunk events
+	self.sunkEvents = {}
+	self.sunkFocusEvents = {}
 
 	-- Paint
 	self:on("paint", self.drawChildren, self)
@@ -23,11 +27,11 @@ function Container:initialize(opts)
 	-- Mouse
 	self:sinkEvent("mouse_click")
 	self:sinkEvent("mouse_drag")
-	self:sinkEventToCurrent("mouse_scroll")
+	self:sinkFocusEvent("mouse_scroll")
 
 	-- Keyboard
-	self:sinkEventToCurrent("key")
-	self:sinkEventToCurrent("char")
+	self:sinkFocusEvent("key")
+	self:sinkFocusEvent("char")
 end
 
 function Container:find(elem, deep)
@@ -84,6 +88,25 @@ function Container:add(...)
 	end
 
 	return #self.children
+end
+
+function Container:move(child, newIndex)
+	local i = self:find(child, false)
+	assert(i ~= nil, "cannot move non-child element")
+	if i == newIndex then return end
+
+	-- Reinsert
+	table.remove(self.children, i)
+	table.insert(self.children, newIndex, child)
+
+	-- Fix focused child
+	if self.childFocus ~= nil then
+		if self.childFocus == i then
+			self.childFocus = newIndex
+		elseif i < self.childFocus and self.childFocus <= newIndex then
+			self.childFocus = self.childFocus - 1
+		end
+	end
 end
 
 function Container:remove(child)
@@ -177,22 +200,40 @@ end
 ]]--
 
 function Container:sinkEvent(event)
-	self:on(event, function(self, ...)
+	if self.sunkEvents[event] then return end
+	local handler = function(self, ...)
 		if self:visible() then
 			local args = { ... }
 			self:each(function(child)
 				child:trigger(event, unpack(args))
 			end)
 		end
-	end, self, 1000)
+	end
+	self.sunkEvents[event] = handler
+	self:on(event, handler, self, 1000)
 end
 
-function Container:sinkEventToCurrent(event)
-	self:on(event, function(self, ...)
+function Container:unsinkEvent(event)
+	if not self.sunkEvents[event] then return end
+	self:off(event, self.sunkEvents[event], self, 1000)
+	self.sunkEvents[event] = nil
+end
+
+function Container:sinkFocusEvent(event)
+	if self.sunkFocusEvents[event] then return end
+	local handler = function(self, ...)
 		if self:visible() and self.childFocus ~= nil then
 			self.children[self.childFocus]:trigger(event, ...)
 		end
-	end, self, 1000)
+	end
+	self.sunkFocusEvents[event] = handler
+	self:on(event, handler, self, 1000)
+end
+
+function Container:unsinkFocusEvent(event)
+	if not self.sunkFocusEvents[event] then return end
+	self:off(event, self.sunkFocusEvents[event], self, 1000)
+	self.sunkFocusEvents[event] = nil
 end
 
 -- Exports

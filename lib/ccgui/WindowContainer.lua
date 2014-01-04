@@ -11,28 +11,28 @@ local WindowContainer = Container:subclass("ccgui.WindowContainer")
 function WindowContainer:initialize(opts)
 	super.initialize(self, opts)
 	
+	self.sunkMouseEvents = {}
+	self:unsinkEvent("mouse_click")
+	self:unsinkEvent("mouse_drag")
+	self:on("mouse_click", self.windowsClick, self, 1000)
+	self:on("mouse_drag", self.windowsDrag, self, 1000)
+	
 	self:on("add", self.markPaint, self)
 	self:on("remove", self.markRepaint, self)
 end
 
-function WindowContainer:windowCount()
+function WindowContainer:getWindowCount()
 	return #self.children
+end
+function WindowContainer:getWindow(i)
+	return self.children[i]
+end
+function WindowContainer:getForegroundWindow()
+	return self:getWindow(self:getWindowCount())
 end
 
 function WindowContainer:bringToFront(window)
-	local i = self:find(window, false)
-	assert(i ~= nil, "cannot bring non-child window to front")
-	-- Reinsert at end
-	table.remove(self.children, i)
-	table.insert(self.children, window)
-	-- Update focused child index
-	if self.childFocus ~= nil then
-		if self.childFocus == i then
-			self.childFocus = #self.children
-		elseif self.childFocus > i then
-			self.childFocus = self.childFocus - 1
-		end
-	end
+	self:move(window, self:getWindowCount())
 	self:markRepaint()
 end
 
@@ -53,9 +53,6 @@ function WindowContainer:markPaint()
 			repaint = true
 		end
 	end)
-	if repaint then
-		self:markRepaint()
-	end
 
 	-- Re-enable paints
 	self.ignorePaints = false
@@ -69,6 +66,26 @@ function WindowContainer:calcLayout(bbox)
 	self:each(function(window)
 		window:updateLayout(bbox)
 	end)
+end
+
+function WindowContainer:windowsClick(button, x, y, ...)
+	-- Click on most front window
+	if self:visible() and self:contains(x, y) then
+		for i=self:getWindowCount(),1,-1 do
+			local window = self:getWindow(i)
+			if window:visible() and window:contains(x, y) then
+				return window:trigger("mouse_click", button, x, y, ...)
+			end
+		end
+	end
+end
+
+function WindowContainer:windowsDrag(button, x, y, ...)
+	-- Drag foreground window
+	local window = self:getForegroundWindow()
+	if window ~= nil and window:visible() then
+		window:trigger("mouse_drag", button, x, y, ...)
+	end
 end
 
 -- Exports

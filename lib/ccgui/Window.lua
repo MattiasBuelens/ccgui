@@ -151,7 +151,7 @@ function Window:initialize(opts)
 
 	self:on("maximize", self.titleBar.updateMaximized, self.titleBar)
 	self:on("restore", self.titleBar.updateMaximized, self.titleBar)
-	self:on("click", self.bringToFront, self)
+	self:on("mouse_click", self.windowClick, self)
 end
 
 function Window:content()
@@ -190,7 +190,6 @@ function Window:restoreSize()
 end
 function Window:bringToFront()
 	self.parent:bringToFront(self)
-	self:markRepaint()
 end
 function Window:close()
 	self:trigger("close")
@@ -207,6 +206,16 @@ function Window:setPosition(pos)
 		self:markRepaint()
 	end
 end
+
+function Window:markRepaint()
+	if not self.needsRepaint then
+		-- Repaint parent window container
+		if self.parent ~= nil then
+			self.parent:markRepaint()
+		end
+	end
+	super.markRepaint(self)
+end
 function Window:calcSize(size)
 	if not self.isMaximized then
 		size = Rectangle:new(self.windowBox)
@@ -218,6 +227,12 @@ function Window:calcLayout(bbox)
 		bbox = self.windowBox:shift(bbox:tl())
 	end
 	super.calcLayout(self, bbox)
+end
+
+function Window:windowClick(button, x, y)
+	if button == 1 and self:visible() and self:contains(x, y) then
+		self:bringToFront()
+	end
 end
 
 -- Exports

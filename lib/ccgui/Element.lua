@@ -35,7 +35,7 @@ function Element:initialize(opts)
 	self.size = opts.size or nil
 	self.bbox = opts.bbox or nil
 	-- Mouse
-	self:on("mouse_click", self.mouseClick, self)
+	self:on("mouse_click", self.focusOnClick, self)
 	-- Paint
 	self:on("repaint", self.clear, self)
 	self:on("paint", self.drawBorder, self)
@@ -185,7 +185,7 @@ function Element:updateFocus(newFocus)
 	end
 end
 
-function Element:mouseClick(button, x, y)
+function Element:focusOnClick(button, x, y)
 	if button == 1 then
 		-- Left mouse button
 		-- Take focus when focusable and contains mouse pointer
