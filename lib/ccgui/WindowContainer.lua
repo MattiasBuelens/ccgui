@@ -26,10 +26,12 @@ function WindowContainer:bringToFront(window)
 	table.remove(self.children, i)
 	table.insert(self.children, window)
 	-- Update focused child index
-	if self.childFocus == i then
-		self.childFocus = #self.children
-	elseif self.childFocus > i then
-		self.childFocus = self.childFocus - 1
+	if self.childFocus ~= nil then
+		if self.childFocus == i then
+			self.childFocus = #self.children
+		elseif self.childFocus > i then
+			self.childFocus = self.childFocus - 1
+		end
 	end
 	self:markRepaint()
 end
