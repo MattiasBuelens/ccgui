@@ -10,10 +10,7 @@ local Container	= require "ccgui.Container"
 local WindowContainer = Container:subclass("ccgui.WindowContainer")
 function WindowContainer:initialize(opts)
 	super.initialize(self, opts)
-	
-	self.sunkMouseEvents = {}
-	self:unsinkEvent("mouse_click")
-	self:unsinkEvent("mouse_drag")
+
 	self:on("mouse_click", self.windowsClick, self, 1000)
 	self:on("mouse_drag", self.windowsDrag, self, 1000)
 	
@@ -79,7 +76,6 @@ function WindowContainer:windowsClick(button, x, y, ...)
 		end
 	end
 end
-
 function WindowContainer:windowsDrag(button, x, y, ...)
 	-- Drag foreground window
 	local window = self:getForegroundWindow()
@@ -88,6 +84,13 @@ function WindowContainer:windowsDrag(button, x, y, ...)
 	end
 end
 
+function WindowContainer:handleSink(event, ...)
+	-- Prevent sinking mouse_click and mouse_drag to all windows
+	-- Manually handled in windowsClick and windowsDrag
+	if event ~= "mouse_click" and event ~= "mouse_drag" then
+		return super.handleSink(self, event, ...)
+	end
+end
 function WindowContainer:handleFocusSink(event, ...)
 	-- Only sink focus when focused is on foreground
 	if self.childFocus == self:getWindowCount() then

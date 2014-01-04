@@ -14,10 +14,6 @@ function Container:initialize(opts)
 	-- Children
 	self.children = {}
 	self.childFocus = nil
-	
-	-- Sunk events
-	self.sunkEvents = {}
-	self.sunkFocusEvents = {}
 
 	-- Paint
 	self:on("paint", self.drawChildren, self)
@@ -208,17 +204,9 @@ function Container:handleSink(event, ...)
 	end
 end
 function Container:sinkEvent(event)
-	if self.sunkEvents[event] then return end
-	local handler = function(self, ...)
+	self:on(event, function(self, ...)
 		self:handleSink(event, ...)
-	end
-	self.sunkEvents[event] = handler
-	self:on(event, handler, self, 1000)
-end
-function Container:unsinkEvent(event)
-	if not self.sunkEvents[event] then return end
-	self:off(event, self.sunkEvents[event], self, 1000)
-	self.sunkEvents[event] = nil
+	end, self, 1000)
 end
 
 function Container:handleFocusSink(event, ...)
@@ -227,17 +215,9 @@ function Container:handleFocusSink(event, ...)
 	end
 end
 function Container:sinkFocusEvent(event)
-	if self.sunkFocusEvents[event] then return end
-	local handler = function(self, ...)
+	self:on(event, function(self, ...)
 		self:handleFocusSink(event, ...)
-	end
-	self.sunkFocusEvents[event] = handler
-	self:on(event, handler, self, 1000)
-end
-function Container:unsinkFocusEvent(event)
-	if not self.sunkFocusEvents[event] then return end
-	self:off(event, self.sunkFocusEvents[event], self, 1000)
-	self.sunkFocusEvents[event] = nil
+	end, self, 1000)
 end
 
 -- Exports
