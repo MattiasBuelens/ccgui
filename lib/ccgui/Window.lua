@@ -181,6 +181,7 @@ end
 function Window:maximize()
 	if not self.isMaximized then
 		self.isMaximized = true
+		self:markRepaint()
 		self:bringToForeground()
 		self:trigger("maximize")
 	end
@@ -188,6 +189,7 @@ end
 function Window:restoreSize()
 	if self.isMaximized then
 		self.isMaximized = false
+		self:markRepaint()
 		self:bringToForeground()
 		self:trigger("restore")
 	end
