@@ -88,5 +88,12 @@ function WindowContainer:windowsDrag(button, x, y, ...)
 	end
 end
 
+function WindowContainer:handleFocusSink(event, ...)
+	-- Only sink focus when focused is on foreground
+	if self.childFocus == self:getWindowCount() then
+		super.handleFocusSink(self, event, ...)
+	end
+end
+
 -- Exports
 return Window
