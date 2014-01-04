@@ -34,12 +34,15 @@ end
 function WindowContainer:getForegroundWindow()
 	return self.foregroundWindow
 end
-function WindowContainer:bringToForeground(window)
-	self:getForegroundWindow():trigger("window_background")
-	self:move(window, self:getWindowCount())
-	self.foregroundWindow = window
-	window:trigger("window_foreground")
-	self:markRepaint()
+function WindowContainer:bringToForeground(newForeground)
+	local oldForeground = self:getForegroundWindow()
+	if newForeground ~= oldForeground then
+		oldForeground:trigger("window_background")
+		self:move(newForeground, self:getWindowCount())
+		self.foregroundWindow = newForeground
+		newForeground:trigger("window_foreground")
+		self:markRepaint()
+	end
 end
 function WindowContainer:updateForeground()
 	local n = self:getWindowCount()
