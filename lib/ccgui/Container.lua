@@ -80,6 +80,7 @@ function Container:add(...)
 	for i,child in ipairs(children) do
 		child.parent = self
 		table.insert(self.children, child)
+		self:trigger("add", child)
 	end
 
 	return #self.children
@@ -89,27 +90,28 @@ function Container:remove(child)
 	if child.parent ~= self then
 		return false
 	end
-
-	-- Remove as parent
-	child.parent = nil
+	self:trigger("beforeremove", child)
 
 	-- Remove from children
 	local i = self:find(child, false)
 	if i ~= nil then
-		table.remove(self.children, i)
 		-- Fix focused child
 		if self.childFocus ~= nil then
 			if self.childFocus == i then
 				-- Currently focused child removed
-				self.childFocus = nil
 				self:updateFocus(nil)
 			elseif self.childFocus > i then
 				-- Adjust focused child index
 				self.childFocus = self.childFocus - 1
 			end
 		end
+		table.remove(self.children, i)
 	end
 
+	-- Remove as parent
+	child.parent = nil
+
+	self:trigger("remove", child)
 	return true
 end
 

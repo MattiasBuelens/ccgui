@@ -11,7 +11,7 @@ local Margins = require "ccgui.geom.Margins"
 local Line = require "ccgui.geom.Line"
 local Polygon = require "ccgui.geom.Polygon"
 
-local Rectangle = Polygon:subclass("ccgui.Rectangle")
+local Rectangle = Polygon:subclass("ccgui.geom.Rectangle")
 function Rectangle:initialize(x, y, w, h)
 	if type(x) == "table" then
 		if(x.w) then

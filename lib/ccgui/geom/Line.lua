@@ -9,7 +9,7 @@ os.loadAPI("/rom/apis/vector")
 
 local Object = require "objectlua.Object"
 
-local Line = Object:subclass("ccgui.Line")
+local Line = Object:subclass("ccgui.geom.Line")
 function Line:initialize(start, stop)
 	self.start = start
 	self.stop = stop

@@ -10,7 +10,7 @@ os.loadAPI("/rom/apis/vector")
 local Object = require "objectlua.Object"
 local Line = require "ccgui.geom.Line"
 
-local Polygon = Object:subclass("ccgui.Polygon")
+local Polygon = Object:subclass("ccgui.geom.Polygon")
 function Polygon:initialize(vertices)
 	vertices = vertices or {}
 
