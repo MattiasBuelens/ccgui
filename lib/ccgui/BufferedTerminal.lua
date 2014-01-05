@@ -11,12 +11,12 @@
 local Object	= require "objectlua.Object"
 
 local Strip = Object:subclass("ccgui.paint.Strip")
-function Strip:initialize(str, x, text, back)
+function Strip:initialize(str, x, text, back, dirty)
 	self.str = str
 	self.x = x
 	self.text = text
 	self.back = back
-	self.dirty = true
+	self.dirty = (dirty == nil) or (not not dirty)
 end
 function Strip:left()
 	return self.x
@@ -53,26 +53,22 @@ function Strip:merge(other)
 end
 
 local Screen = Object:subclass("ccgui.paint.Screen")
-function Screen:initialize()
+function Screen:initialize(width, height)
+	self.width = width
+	self.height = height
 	-- Paint strips, grouped by y and sorted by x
 	self.strips = {}
-end
-
-function Screen:getLine(y)
-	local line = self.strips[y]
-	if line == nil then
-		line = {}
-		self.strips[y] = line
+	for y=1,self.height do
+		self.strips[y] = {}
 	end
-	return line
 end
 
--- Add to screen
+-- Add strip to screen
 function Screen:add(y, newStrip)
 	-- Ignore empty strips
 	if #newStrip.str == 0 then return end
 	-- Split intersecting existing paints
-	local line, i, pos = self:getLine(y), 1, nil
+	local line, i, pos = self.strips[y], 1, nil
 	while i <= #line do
 		local strip = line[i]
 		-- Find insert position
@@ -91,8 +87,7 @@ function Screen:add(y, newStrip)
 				strip.str = leftStr
 				if hasRight then
 					-- Also create right strip
-					local rightStrip = Strip:new(rightStr, newStrip:right(), strip.text, strip.back)
-					rightStrip.dirty = strip.dirty
+					local rightStrip = Strip:new(rightStr, newStrip:right(), strip.text, strip.back, strip.dirty)
 					table.insert(line, i+1, rightStrip)
 				end
 			elseif hasRight then
@@ -137,8 +132,55 @@ function Screen:add(y, newStrip)
 	return newStrip
 end
 
-function Screen:clear()
-	self.strips = {}
+-- Create and add strip to screen
+function Screen:write(str, x, y, text, back, dirty)
+	return self:add(y, Strip:new(str, x, text, back, dirty))
+end
+
+-- Scroll screen (empty lines are filled with back color)
+function Screen:scroll(n, back, dirty)
+	local empty = string.rep(" ", self.width)
+	function scrollLine(i)
+		local j = i + n
+		if 1 <= j and j <= self.height then
+			self.strips[i] = self.strips[j]
+		else
+			self.strips[i] = { Strip:new(empty, 1, colours.black, back) }
+		end
+		if dirty then
+			for _,strip in ipairs(self.strips[i]) do
+				strip.dirty = true
+			end
+		end
+	end
+
+	if n == 0 then return
+	elseif n > 0 then
+		-- Scrolling down, bottom becomes top
+		-- Iterate top to bottom
+		for i=1,self.height do
+			scrollLine(i)
+		end
+	else
+		-- Scrolling up, top becomes bottom
+		-- Iterate bottom to top
+		for i=self.height,1,-1 do
+			scrollLine(i)
+		end
+	end
+end
+
+-- Clear single line
+function Screen:clearLine(y, back, dirty)
+	local empty = string.rep(" ", self.width)
+	return self:write(empty, 1, y, colours.white, back, dirty)
+end
+
+-- Clear screen
+function Screen:clear(back, dirty)
+	for y=1,self.height do
+		self:clearLine(y, back, dirty)
+	end
 end
 
 local BufferedTerminal = Object:subclass("ccgui.BufferedTerminal")
@@ -146,7 +188,7 @@ function BufferedTerminal:initialize(out)
 	-- Output device
 	self.out = out or term
 	-- Screen
-	self.screen = Screen:new()
+	self.screen = Screen:new(self.out.getSize())
 	-- State to restore after draw
 	self.curX, self.curY = self.out.getCursorPos()
 	self.text = colours.white
@@ -184,8 +226,8 @@ function BufferedTerminal:getHeight()
 	return height
 end
 
-function BufferedTerminal:writeBuffer(str, x, y, text, back)
-	return self.screen:add(y, Strip:new(str, x, text, back))
+function BufferedTerminal:writeBuffer(str, x, y, text, back, dirty)
+	return self.screen:write(str, x, y, text, back, dirty)
 end
 
 function BufferedTerminal:paint()
@@ -241,8 +283,7 @@ end
 
 -- Delegated methods to capture changes
 function BufferedTerminal:write(str)
-	local strip = self:writeBuffer(str, self.curX, self.curY, self.text, self.back)
-	strip.dirty = false
+	local strip = self:writeBuffer(str, self.curX, self.curY, self.text, self.back, false)
 	self.out.write(str)
 	self.curX, self.curY = self.out.getCursorPos()
 end
@@ -265,19 +306,16 @@ function BufferedTerminal:setCursorBlink(blink)
 	self.out.setCursorBlink(blink)
 end
 function BufferedTerminal:clearLine(y)
-	local str = string.rep(" ", self:getWidth())
-	local strip = self:writeBuffer(str, 1, self.curY, self.text, self.back)
-	strip.dirty = false
+	self.screen:clearLine(y, self.back, false)
 	self.out.clearLine(y)
 end
 function BufferedTerminal:clear()
-	local str = string.rep(" ", self:getWidth())
-	local h = self:getHeight()
-	for y=1,h do
-		local strip = self:writeBuffer(str, 1, y, self.text, self.back)
-		strip.dirty = false
-	end
+	self.screen:clear(self.back, false)
 	self.out.clear()
+end
+function BufferedTerminal:scroll(n)
+	self.screen:scroll(n, self.back, false)
+	self.out.scroll(n)
 end
 
 -- Exports
