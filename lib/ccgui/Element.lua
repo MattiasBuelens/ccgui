@@ -89,13 +89,6 @@ end
 
 -- Inner bounding box, without border and padding
 function Element:inner(bbox)
-	if bbox == nil then
-		print("invalid bbox")
-		for k,v in pairs(self) do
-			print(tostring(k).."="..tostring(v))
-		end
-		error()
-	end
 	assert(bbox ~= nil, "invalid bbox")
 	assert(self.padding ~= nil, "invalid padding")
 	assert(self.border ~= nil, "invalid border")
