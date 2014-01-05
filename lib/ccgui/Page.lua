@@ -6,7 +6,7 @@
 --]]
 
 local FlowContainer		= require "ccgui.FlowContainer"
-local BufferedTerminal	= require "ccgui.BufferedTerminal"
+local BufferedTerminal	= require "ccgui.paint.BufferedTerminal"
 local Rectangle			= require "ccgui.geom.Rectangle"
 
 local Page = FlowContainer:subclass("ccgui.Page")

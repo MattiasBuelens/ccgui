@@ -1,10 +1,7 @@
 --[[
 
 	ComputerCraft GUI
-	Buffered terminal
-
-	IBuffer API, by Symmetryc
-	https://github.com/Symmetryc/Buffer
+	Buffered screen
 
 --]]
 
@@ -52,8 +49,8 @@ function Strip:merge(other)
 	end
 end
 
-local Screen = Object:subclass("ccgui.paint.Screen")
-function Screen:initialize(width, height)
+local BufferedScreen = Object:subclass("ccgui.paint.BufferedScreen")
+function BufferedScreen:initialize(width, height)
 	self.width = width
 	self.height = height
 	-- Paint strips, grouped by y and sorted by x
@@ -64,7 +61,7 @@ function Screen:initialize(width, height)
 end
 
 -- Add strip to screen
-function Screen:add(y, newStrip)
+function BufferedScreen:add(y, newStrip)
 	-- Ignore empty strips
 	if #newStrip.str == 0 then return end
 	-- Split intersecting existing paints
@@ -133,12 +130,12 @@ function Screen:add(y, newStrip)
 end
 
 -- Create and add strip to screen
-function Screen:write(str, x, y, text, back, dirty)
+function BufferedScreen:write(str, x, y, text, back, dirty)
 	return self:add(y, Strip:new(str, x, text, back, dirty))
 end
 
 -- Scroll screen (empty lines are filled with back color)
-function Screen:scroll(n, back, dirty)
+function BufferedScreen:scroll(n, back, dirty)
 	local empty = string.rep(" ", self.width)
 	function scrollLine(i)
 		local j = i + n
@@ -171,152 +168,17 @@ function Screen:scroll(n, back, dirty)
 end
 
 -- Clear single line
-function Screen:clearLine(y, back, dirty)
+function BufferedScreen:clearLine(y, back, dirty)
 	local empty = string.rep(" ", self.width)
 	return self:write(empty, 1, y, colours.white, back, dirty)
 end
 
 -- Clear screen
-function Screen:clear(back, dirty)
+function BufferedScreen:clear(back, dirty)
 	for y=1,self.height do
 		self:clearLine(y, back, dirty)
 	end
 end
 
-local BufferedTerminal = Object:subclass("ccgui.BufferedTerminal")
-function BufferedTerminal:initialize(out)
-	-- Output device
-	self.out = out or term
-	-- Screen
-	self.screen = Screen:new(self.out.getSize())
-	-- State to restore after draw
-	self.curX, self.curY = self.out.getCursorPos()
-	self.text = colours.white
-	self.back = colours.black
-	self.blink = false
-	-- Delegate terminal methods
-	for k,f in pairs(self.out) do
-		if self[k] == nil then
-			self[k] = function(self, ...)
-				return f(...)
-			end
-		end
-	end
-	-- Create delegate which matches the term API
-	self.term = {}
-	local me = self
-	for k,v in pairs(self.out) do
-		-- Redirect to own method
-		self.term[k] = function(...)
-			return me[k](me, ...)
-		end
-	end
-end
-
-function BufferedTerminal:asTerm()
-	return self.term
-end
-
-function BufferedTerminal:getWidth()
-	local width,_ = self.out.getSize()
-	return width
-end
-function BufferedTerminal:getHeight()
-	local _,height = self.out.getSize()
-	return height
-end
-
-function BufferedTerminal:writeBuffer(str, x, y, text, back, dirty)
-	return self.screen:write(str, x, y, text, back, dirty)
-end
-
-function BufferedTerminal:paint()
-	self:draw(false)
-end
-function BufferedTerminal:repaint()
-	self:draw(true)
-end
-
--- Draw screen
-function BufferedTerminal:draw(redraw)
-	redraw = not not redraw
-	-- Get current state
-	local x, y = self.out.getCursorPos()
-	local text, back = self.text, self.back
-	self.out.setTextColor(text)
-	self.out.setBackgroundColor(back)
-	self.out.setCursorBlink(false)
-	-- Draw each strip in the screen
-	for lineY,line in ipairs(self.screen.strips) do
-		for i,strip in ipairs(line) do
-			if redraw or strip.dirty then
-				if x ~= strip:left() or y ~= lineY then
-					self.out.setCursorPos(strip:left(), lineY)
-					x, y = strip:left(), lineY
-				end
-				if text ~= strip.text then
-					self.out.setTextColor(strip.text)
-					text = strip.text
-				end
-				if back ~= strip.back then
-					self.out.setBackgroundColor(strip.back)
-					back = strip.back
-				end
-				self.out.write(strip.str)
-				strip.dirty = false
-				x = strip:right()
-			end
-		end
-	end
-	-- Restore state
-	if x ~= self.curX or y ~= self.curY then
-		self.out.setCursorPos(self.curX, self.curY)
-	end
-	if text ~= self.text then
-		self.out.setTextColor(self.text)
-	end
-	if back ~= self.back then
-		self.out.setBackgroundColor(self.back)
-	end
-	self.out.setCursorBlink(self.blink)
-end
-
--- Delegated methods to capture changes
-function BufferedTerminal:write(str)
-	local strip = self:writeBuffer(str, self.curX, self.curY, self.text, self.back, false)
-	self.out.write(str)
-	self.curX, self.curY = self.out.getCursorPos()
-end
-function BufferedTerminal:setCursorPos(x, y)
-	self.curX, self.curY = x, y
-	self.out.setCursorPos(x, y)
-end
-function BufferedTerminal:setTextColor(text)
-	self.text = text
-	self.out.setTextColor(text)
-end
-BufferedTerminal.setTextColour = BufferedTerminal.setTextColor
-function BufferedTerminal:setBackgroundColor(back)
-	self.back = back
-	self.out.setBackgroundColor(back)
-end
-BufferedTerminal.setBackgroundColour = BufferedTerminal.setBackgroundColor
-function BufferedTerminal:setCursorBlink(blink)
-	self.blink = blink or false
-	self.out.setCursorBlink(blink)
-end
-function BufferedTerminal:clearLine(y)
-	self.screen:clearLine(y, self.back, false)
-	self.out.clearLine(y)
-end
-function BufferedTerminal:clear()
-	self.screen:clear(self.back, false)
-	self.out.clear()
-end
-function BufferedTerminal:scroll(n)
-	self.screen:scroll(n, self.back, false)
-	self.out.scroll(n)
-end
-
 -- Exports
-return BufferedTerminal
+return BufferedScreen

@@ -27,7 +27,6 @@ require "ccgui.ScrollElement"
 require "ccgui.Window"
 require "ccgui.WindowContainer"
 
-require "ccgui.BufferedTerminal"
 require "ccgui.Page"
 
 -- Exports
