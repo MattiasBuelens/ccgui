@@ -39,6 +39,7 @@ function Thread.class:sleep(nTime)
 end
 
 function Thread:join()
+	assert(self.co ~= coroutine.running(), "cannot join with running thread")
     while self:isAlive() do
         Thread:sleep()
     end
