@@ -32,7 +32,7 @@ function Thread:start(scheduler)
 end
 
 function Thread.class:sleep(nTime)
-    local timer = os.startTimer(nTime or 0)
+	local timer = os.startTimer(nTime or 0)
 	repeat
 		local sEvent, param = os.pullEvent("timer")
 	until param == timer
@@ -40,9 +40,9 @@ end
 
 function Thread:join()
 	assert(self.co ~= coroutine.running(), "cannot join with running thread")
-    while self:isAlive() do
-        Thread:sleep()
-    end
+	while self:isAlive() do
+		Thread:sleep()
+	end
 	if self.error then
 		error(self.error)
 	end
@@ -57,7 +57,7 @@ function Thread:status()
 	end
 end
 function Thread:isAlive()
-    return self:status() ~= Thread.DEAD
+	return self:status() ~= Thread.DEAD
 end
 
 function Thread:callback(ok, data)
