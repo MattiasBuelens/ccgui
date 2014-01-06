@@ -19,11 +19,16 @@ function Thread:initialize(func)
 	super.initialize(self)
 	self.func = func
 	self.co = nil
+	self.result = nil
+	self.error = nil
 end
 
 function Thread:start(scheduler)
-	assert(self.co == nil, "thread already running")
-	self.co = scheduler:spawn(self.func, self)
+	assert(not self:isAlive(), "thread already running")
+	self.result, self.error = nil, nil
+	self.co = scheduler:spawn(self.func, function(...)
+		self:callback(...)
+	end)
 end
 
 function Thread.class:sleep(nTime)
@@ -37,18 +42,29 @@ function Thread:join()
     while self:isAlive() do
         Thread:sleep()
     end
+	if self.error then
+		error(self.error)
+	end
+	return unpack(self.result)
 end
 
 function Thread:status()
 	if self.co == nil then
-		return Thread.SUSPENDED
+		return Thread.DEAD
 	else
 		return coroutine.status(self.co)
 	end
 end
-
 function Thread:isAlive()
     return self:status() ~= Thread.DEAD
+end
+
+function Thread:callback(ok, data)
+	if ok then
+		self.result = data
+	else
+		self.error = data[1]
+	end
 end
 
 -- Exports

@@ -13,7 +13,8 @@ package.root = root
 local concurrent	= require "concurrent"
 
 local s = concurrent.Scheduler:new()
-local t1 = concurrent.Thread:new(function()
+-- Change text color
+local tColor = concurrent.Thread:new(function()
 	local tColorLookup = {}
 	for n=1,16 do
 		tColorLookup[string.sub("0123456789abcdef",n,n)] = bit.blshift(1, n-1) -- 2^(n-1)
@@ -26,12 +27,19 @@ local t1 = concurrent.Thread:new(function()
 		end
 	end
 end)
-local t2 = concurrent.Thread:new(function()
-	t1:start(s)
+-- Read text
+local tRead = concurrent.Thread:new(function()
+	local str = read()
+	return str
+end)
+-- Output text
+local tWrite = concurrent.Thread:new(function()
 	while true do
-		local str = read()
-		print("Entered: "..str)
+		tRead:start(s)
+		local str = tRead:join()
+		print("Read: "..str)
 	end
 end)
-t2:start(s)
+tColor:start(s)
+tWrite:start(s)
 s:run()
