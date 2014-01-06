@@ -22,7 +22,7 @@ function Thread:initialize(func)
 end
 
 function Thread:start(scheduler)
-	assert(not self:isAlive(), "thread already running")
+	assert(self.co == nil, "thread already running")
 	self.co = scheduler:spawn(self.func, self)
 end
 

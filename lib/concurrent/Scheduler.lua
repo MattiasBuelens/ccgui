@@ -6,6 +6,7 @@
 --]]
 
 local Object		= require "objectlua.Object"
+local Thread		= require "concurrent.Thread"
 
 local ThreadState = Object:subclass("concurrent.ThreadState")
 function ThreadState:initialize(func, co, owner)
@@ -24,7 +25,7 @@ function Scheduler:initialize(errorHandler)
 	self.running = {}
 end
 
-function Scheduler.class:defaultErrorHandler(err)
+function Scheduler.class.defaultErrorHandler(err)
 	if term.isColor() then
 		term.setTextColor(colours.red)
 	end
@@ -37,7 +38,7 @@ function Scheduler:threadCount()
 end
 
 function Scheduler:spawn(func, owner)
-	local co = coroutine.create(function() xpcall(func, errorHandler) end)
+	local co = coroutine.create(func)
     local state = ThreadState:new(func, co, owner)
     table.insert(self.starting, state)
     return co
@@ -66,12 +67,10 @@ end
 
 function Scheduler:startThreads()
 	while #self.starting > 0 do
-		local state = self.starting[1]
+		local state = table.remove(self.starting, 1)
 		-- Start thread
 		local data = { coroutine.resume(state.co) }
 		local stillRunning = self:handleResult(state, data)
-		-- Remove thread from starting
-		table.remove(self.starting, 1)
 		if stillRunning then
 			-- Add to running
 			table.insert(self.running, state)
@@ -80,8 +79,8 @@ function Scheduler:startThreads()
 end
 
 function Scheduler:resumeThreads(event, ...)
-	local i = 0
-	while i < #self.running do
+	local i = 1
+	while i <= #self.running do
 		local state = self.running[i]
 		-- Resume thread
 		if state.filter == nil or state.filter == event or event == "terminate" then
@@ -109,7 +108,7 @@ function Scheduler:run()
 		self:resumeThreads(unpack(eventData))
 		-- Terminate
 		if eventData[1] == "terminate" then
-			error("Terminated")
+			error("Terminated", 0)
 		end
 	end
 end
