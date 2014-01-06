@@ -12,8 +12,6 @@ package.root = root
 
 local ccgui	= require "ccgui"
 
-local isRunning = true
-
 local screen = ccgui.Page:new{
 	horizontal = false,
 	background = colours.lightBlue,
@@ -25,7 +23,7 @@ local container = ccgui.WindowContainer:new{
 }
 container:on("remove", function()
 	if container:getWindowCount() == 0 then
-		isRunning = false
+		screen:stop()
 	end
 end)
 local window1 = ccgui.Window:new{
@@ -68,7 +66,7 @@ local btnQuit = ccgui.Button:new{
 	_name = "btnQuit"
 }
 btnQuit:on("buttonpress", function()
-	isRunning = false
+	screen:stop()
 end)
 toolbar:add(btnNew, btnQuit)
 window1:content():add(labelHello, toolbar)
@@ -89,11 +87,7 @@ window2:content():add(textFoo)
 container:add(window1, window2)
 screen:add(container)
 
-screen:paint()
-while isRunning do
-	local event, p1, p2, p3, p4, p5 = os.pullEvent()
-	screen:trigger(event, p1, p2, p3, p4, p5)
-end
+screen:run()
 
 -- Restore
 screen:reset()

@@ -12,8 +12,6 @@ package.root = root
 
 local ccgui	= require "ccgui"
 
-local isRunning = true
-
 local screen = ccgui.Page:new{
 	horizontal = false,
 	background = colours.white,
@@ -40,7 +38,7 @@ local btnQuit = ccgui.Button:new{
 	_name = "btnQuit"
 }
 btnQuit:on("buttonpress", function()
-	isRunning = false
+	screen:stop()
 end)
 header:add(headerTitle, btnQuit)
 
@@ -100,11 +98,7 @@ tabs:addTab("Form", form)
 
 screen:add(header, tabs, footer)
 
-screen:paint()
-while isRunning do
-	local event, p1, p2, p3, p4, p5 = os.pullEvent()
-	screen:trigger(event, p1, p2, p3, p4, p5)
-end
+screen:run()
 
 -- Restore
 screen:reset()

@@ -12,8 +12,6 @@ package.root = root
 
 local ccgui	= require "ccgui"
 
-local isRunning = true
-
 local screen = ccgui.Page:new{
 	horizontal = false,
 	background = colours.lightBlue,
@@ -30,7 +28,7 @@ local window = ccgui.Window:new{
 	_name = "window"
 }
 window:on("close", function()
-	isRunning = false
+	screen:stop()
 end)
 
 local footer = ccgui.TextElement:new{
@@ -93,11 +91,7 @@ container:add(window)
 screen:add(container)
 window:maximize()
 
-screen:paint()
-while isRunning do
-	local event, p1, p2, p3, p4, p5 = os.pullEvent()
-	screen:trigger(event, p1, p2, p3, p4, p5)
-end
+screen:run()
 
 -- Restore
 screen:reset()

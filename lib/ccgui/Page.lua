@@ -8,6 +8,8 @@
 local FlowContainer		= require "ccgui.FlowContainer"
 local BufferedTerminal	= require "ccgui.paint.BufferedTerminal"
 local Rectangle			= require "ccgui.geom.Rectangle"
+local Thread			= require "concurrent.Thread"
+local Scheduler			= require "concurrent.Scheduler"
 
 local Page = FlowContainer:subclass("ccgui.Page")
 function Page:initialize(opts)
@@ -18,13 +20,16 @@ function Page:initialize(opts)
 	self.fps = opts.fps or 8
 	-- Identifier of frame timer
 	self.frameTimer = nil
+	-- Thread
+	self.scheduler = opts.scheduler or Scheduler:new()
+	self.pageThread = Thread:new(function()
+		self:loop()
+	end)
+	self.pageRunning = false
 
 	self:on("beforepaint", self.pageLayout, self)
 	self:on("afterpaint", self.pagePaint, self)
 	self:on("timer", self.pageFrameTimer, self)
-
-	-- Start frame timer
-	self:startFrameTimer()
 end
 
 function Page:setCursorBlink(blink, x, y, color)
@@ -97,6 +102,38 @@ function Page:reset()
 	self.term:setBackgroundColor(colours.black)
 	self.term:clear()
 	self.term:setCursorPos(1, 1)
+end
+
+function Page:schedule(thread)
+	thread:start(self.scheduler)
+end
+function Page:isRunning()
+	return self.pageThread:isAlive()
+end
+function Page:start()
+	self.pageRunning = true
+	if not self:isRunning() then
+		self:schedule(self.pageThread)
+	end
+end
+function Page:stop()
+	self.pageRunning = false
+end
+function Page:run()
+	self:start()
+	self.scheduler:run()
+	self:stop()
+end
+function Page:loop()
+	-- Setup
+	self:paint()
+	self:startFrameTimer()
+	-- Event loop
+	while self.pageRunning do
+		self:trigger(os.pullEvent())
+	end
+	-- Teardown
+	self:stopFrameTimer()
 end
 
 -- Exports
