@@ -28,6 +28,8 @@ function Container:initialize(opts)
 	-- Keyboard
 	self:sinkFocusEvent("key")
 	self:sinkFocusEvent("char")
+
+	self:sinkEvent("terminate")
 end
 
 function Container:find(elem, deep)

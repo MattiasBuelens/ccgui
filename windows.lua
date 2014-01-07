@@ -95,8 +95,6 @@ local window3 = ccgui.ProgramWindow:new{
 container:add(window1, window2, window3)
 screen:add(container)
 
-window3:startProgram()
-
 screen:run()
 
 -- Restore

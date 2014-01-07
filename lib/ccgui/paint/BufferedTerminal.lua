@@ -129,9 +129,9 @@ function BufferedTerminal:setCursorBlink(blink)
 	self.blink = blink or false
 	self.out.setCursorBlink(blink)
 end
-function BufferedTerminal:clearLine(y)
-	self.screen:clearLine(y, self.back, false)
-	self.out.clearLine(y)
+function BufferedTerminal:clearLine()
+	self.screen:clearLine(self.curY, self.back, false)
+	self.out.clearLine()
 end
 function BufferedTerminal:clear()
 	self.screen:clear(self.back, false)

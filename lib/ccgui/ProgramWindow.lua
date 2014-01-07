@@ -8,62 +8,87 @@
 local Element			= require "ccgui.Element"
 local Window			= require "ccgui.Window"
 local Thread			= require "concurrent.Thread"
-local ElementTerminal	= require "ccgui.paint.ElementTerminal"
+local TerminalElement	= require "ccgui.TerminalElement"
+local TerminalFunctions	= require "ccgui.TerminalFunctions"
 
-local ProgramPane = Element:subclass("ccgui.ProgramPane")
+local ProgramPane = TerminalElement:subclass("ccgui.ProgramPane")
 function ProgramPane:initialize(opts)
 	super.initialize(self, opts)
 	
-	-- Terminal
-	self.term = ElementTerminal:new(self)
-	
 	-- Program
-	if type(opts.func) == "function" then
-		self.func = opts.func
-	elseif type(opts.program) == "string" then
-		self.func, err = loadfile(opts.program)
-		if err then error(err) end
-	end
+	self.program = opts.program or (function() end)
 	
 	-- Program thread
 	self.programThread = self:createProgramThread()
 	
-	self:on("beforepaint", self.programResize, self)
-	self:on("paint", self.programPaint, self)
+	self:on("beforepaint", self.startProgram, self)
 	self:on("terminate", self.terminateProgram, self)
 end
 
 function ProgramPane:createProgramThread()
-	local term = self.term:export()
-	local f = self.func
-	local env = {
-		["term"] = term,
-		["shell"] = false
-	}
-	setmetatable(env, { __index = getfenv(f) })
-	env._G = env
-	setfenv(f, env)
+	local f = self:loadProgram(self.program)
 	return Thread:new(f)
 end
+
+-- Install the rest of the OS api
+local function runProgram(env, path)
+    local fnFile, err = loadfile( sPath )
+    if fnFile then
+        local tEnv = _tEnv
+        setfenv( fnFile, tEnv )
+        local ok, err = pcall( function()
+        	fnFile( unpack( tArgs ) )
+        end )
+        if not ok then
+        	if err and err ~= "" then
+	        	printError( err )
+	        end
+        	return false
+        end
+        return true
+    end
+    if err and err ~= "" then
+		printError( err )
+	end
+    return false
+end
+
+function ProgramPane:loadProgram(program)
+	local _term = self:asTerm()
+
+	return function()
+		local program = program
+		-- Create new environment
+		local env = TerminalFunctions:new(_term).env
+		env.shell = nil
+		env._G = env
+		-- Setup environment
+		setmetatable(env, { __index = _G })
+		setfenv(1, env)
+		term.clear()
+		-- Load program
+		local func = nil
+		if type(program) == "function" then
+			func = program
+		elseif type(program) == "string" then
+			func, err = loadfile(program)
+			if not func then error(err) end
+		end
+		setfenv(func, env)
+		func()
+	end
+end
 function ProgramPane:startProgram()
-	-- Schedule program thread
-	self.programThread:start(self:getScheduler())
+	if not self.hasProgramStarted then
+		-- Schedule program thread
+		self.programThread:start(self:getScheduler())
+		self.hasProgramStarted = true
+	end
 end
 function ProgramPane:terminateProgram()
 	-- Terminate if still running
 	if self.programThread:isAlive() then
 		self.programThread:terminate()
-	end
-end
-
-function ProgramPane:programResize()
-	self.term:updateSize()
-end
-function ProgramPane:programPaint()
-	if self.needsRepaint then
-		self.term:repaint()
-	else
-		self.term:paint()
 	end
 end
 

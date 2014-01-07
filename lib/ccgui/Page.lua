@@ -131,7 +131,11 @@ function Page:loop()
 	self:startFrameTimer()
 	-- Event loop
 	while self.pageRunning do
-		self:trigger(os.pullEvent())
+		local eventData = { os.pullEventRaw() }
+		self:trigger(unpack(eventData))
+		if eventData[1] == "terminate" then
+			error("Terminated", 0)
+		end
 	end
 	-- Teardown
 	self:stopFrameTimer()

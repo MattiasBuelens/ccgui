@@ -51,8 +51,8 @@ end
 
 local BufferedScreen = Object:subclass("ccgui.paint.BufferedScreen")
 function BufferedScreen:initialize(width, height)
-	self.width = width
-	self.height = height
+	self.width = width or 0
+	self.height = height or 0
 	-- Paint strips, grouped by y and sorted by x
 	self.strips = {}
 	for y=1,self.height do
@@ -60,14 +60,14 @@ function BufferedScreen:initialize(width, height)
 	end
 end
 
-function BufferedScreen:updateSize(newWidth, newHeight, dirty)
+function BufferedScreen:updateSize(newWidth, newHeight, back, dirty)
 	dirty = (dirty == nil) or (not not dirty)
 	-- Update height
 	if newHeight > self.height then
 		-- Fill extra lines
 		for y=self.height,newHeight do
 			self.strips[y] = {}
-			self:clearLine(y, self.back, dirty)
+			self:clearLine(y, back, dirty)
 		end
 	elseif newHeight < self.height then
 		-- Remove excess lines
@@ -79,9 +79,9 @@ function BufferedScreen:updateSize(newWidth, newHeight, dirty)
 	-- Update width
 	if newWidth > self.width then
 		-- Fill extra width
-		local empty = string.rep(" ", newWidth - self.width)
+		local empty = string.rep(" ", newWidth - self.width + 1)
 		for y=1,self.height do
-			self:write(empty, self.width, y, self.text, self.back, dirty)
+			self:write(empty, self.width, y, colours.white, back, dirty)
 		end
 	elseif newWidth < self.width then
 		-- Trim strips
@@ -98,7 +98,7 @@ function BufferedScreen:updateSize(newWidth, newHeight, dirty)
 					break
 				else
 					-- Trim
-					strip.str = string.sub(strip.str, 1, newWidth - strip:left())
+					strip.str = string.sub(strip.str, 1, newWidth - strip:left() + 1)
 					strip.dirty = strip.dirty or dirty
 				end
 				i = i - 1
@@ -110,11 +110,12 @@ end
 
 -- Add strip to screen
 function BufferedScreen:add(y, newStrip)
+	-- Trim to width
+	--local newLen = math.min(#newStrip.str, math.max(0, self.width - newStrip:left() + 1))
+	--newStrip.str = string.sub(newStrip.str, 1, newLen)
 	-- Ignore empty strips
 	if #newStrip.str == 0 then return end
-	-- Trim to width
-	local newLen = math.min(#newStrip.str, math.max(0, self.width - newStrip:left()))
-	newStrip.str = string.sub(newStrip.str, 1, newLen)
+	if y < 1 or y > self.height then return end
 	-- Split intersecting existing paints
 	local line, i, pos = self.strips[y], 1, nil
 	while i <= #line do
