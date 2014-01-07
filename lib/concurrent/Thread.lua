@@ -18,6 +18,7 @@ Thread.class.DEAD = "dead"
 function Thread:initialize(func)
 	super.initialize(self)
 	self.func = func
+	self.scheduler = nil
 	self.co = nil
 	self.result = nil
 	self.error = nil
@@ -25,10 +26,16 @@ end
 
 function Thread:start(scheduler)
 	assert(not self:isAlive(), "thread already running")
+	self.scheduler = scheduler
 	self.result, self.error = nil, nil
 	self.co = scheduler:spawn(self.func, function(...)
 		self:callback(...)
 	end)
+end
+
+function Thread:terminate()
+	assert(self:isAlive(), "thread already terminated")
+	self.scheduler:terminate(self.co)
 end
 
 function Thread.class:sleep(nTime)
@@ -61,11 +68,14 @@ function Thread:isAlive()
 end
 
 function Thread:callback(ok, data)
+	-- Store result
 	if ok then
 		self.result = data
 	else
 		self.error = data[1]
 	end
+	-- Clean up
+	self.scheduler = nil
 end
 
 -- Exports

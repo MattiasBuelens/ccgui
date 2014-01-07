@@ -20,26 +20,25 @@ function BufferedTerminal:initialize(out)
 	self.back = colours.black
 	self.blink = false
 	-- Delegate terminal methods
-	for k,f in pairs(self.out) do
+	for k,f in pairs(term) do
 		if self[k] == nil then
 			self[k] = function(self, ...)
 				return f(...)
 			end
 		end
 	end
-	-- Create delegate which matches the term API
-	self.term = {}
-	local me = self
-	for k,v in pairs(self.out) do
-		-- Redirect to own method
-		self.term[k] = function(...)
-			return me[k](me, ...)
-		end
-	end
 end
 
-function BufferedTerminal:asTerm()
-	return self.term
+function BufferedTerminal:export()
+	-- Create delegate which matches the term API
+	local exported = {}
+	for k,v in pairs(term) do
+		-- Redirect to own method
+		exported[k] = function(...)
+			return self[k](self, ...)
+		end
+	end
+	return exported
 end
 
 function BufferedTerminal:getWidth()

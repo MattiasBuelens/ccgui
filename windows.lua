@@ -84,8 +84,18 @@ local textFoo = ccgui.TextArea:new{
 	_name = "textFoo"
 }
 window2:content():add(textFoo)
-container:add(window1, window2)
+local window3 = ccgui.ProgramWindow:new{
+	title = "Shell",
+	program = "/rom/programs/shell",
+	foreground = colours.black,
+	background = colours.white,
+	windowPos = vector.new(2, 8),
+	_name = "window3"
+}
+container:add(window1, window2, window3)
 screen:add(container)
+
+window3:startProgram()
 
 screen:run()
 

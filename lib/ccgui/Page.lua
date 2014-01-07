@@ -94,7 +94,11 @@ function Page:pageFrameTimer(timerId)
 end
 
 function Page:pagePaint()
-	self.term:paint()
+	if self.needsRepaint then
+		self.term:repaint()
+	else
+		self.term:paint()
+	end
 end
 
 function Page:reset()
@@ -104,16 +108,13 @@ function Page:reset()
 	self.term:setCursorPos(1, 1)
 end
 
-function Page:schedule(thread)
-	thread:start(self.scheduler)
-end
 function Page:isRunning()
 	return self.pageThread:isAlive()
 end
 function Page:start()
 	self.pageRunning = true
 	if not self:isRunning() then
-		self:schedule(self.pageThread)
+		self.pageThread:start(self:getScheduler())
 	end
 end
 function Page:stop()

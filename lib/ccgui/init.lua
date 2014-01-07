@@ -26,6 +26,7 @@ require "ccgui.ScrollElement"
 
 require "ccgui.Window"
 require "ccgui.WindowContainer"
+require "ccgui.ProgramWindow"
 
 require "ccgui.Page"
 

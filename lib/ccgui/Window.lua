@@ -148,7 +148,8 @@ function Window:initialize(opts)
 	self:on("restore", self.titleBar.updateMaximized, self.titleBar)
 
 	-- Content pane
-	self.contentPane = FlowContainer:new(opts)
+	self.contentPane = opts.contentPane or FlowContainer:new(opts)
+	self.contentPane.stretch = true
 	-- TODO Status bar, resize handle?
 
 	self:add(self.titleBar, self.contentPane)

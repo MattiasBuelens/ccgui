@@ -45,6 +45,33 @@ function Scheduler:spawn(func, callback)
 	return co
 end
 
+function Scheduler:terminate(co)
+	local state = self.stateByCo[co]
+	assert(state ~= nil, "cannot find thread to terminate")
+	local err = "Terminated"
+	if state.started then
+		-- Already started, terminate
+		local ok, param = coroutine.resume(state.co, "terminate")
+		if not ok then
+			err = param
+		end
+	end
+	-- Remove
+	self:finishThread(state, false, err)
+	self:remove(state)
+end
+
+function Scheduler:remove(state)
+	local t = state.started and state.running or state.starting
+	for i=1,#t do
+		if t[i] == state then
+			table.remove(t, i)
+			return true
+		end
+	end
+	return false
+end
+
 function Scheduler:handleResume(state, data)
 	local ok = table.remove(data, 1)
 	if ok then

@@ -60,10 +60,61 @@ function BufferedScreen:initialize(width, height)
 	end
 end
 
+function BufferedScreen:updateSize(newWidth, newHeight, dirty)
+	dirty = (dirty == nil) or (not not dirty)
+	-- Update height
+	if newHeight > self.height then
+		-- Fill extra lines
+		for y=self.height,newHeight do
+			self.strips[y] = {}
+			self:clearLine(y, self.back, dirty)
+		end
+	elseif newHeight < self.height then
+		-- Remove excess lines
+		while #self.strips > newHeight do
+			table.remove(self.strips, #self.strips)
+		end
+	end
+	self.height = newHeight
+	-- Update width
+	if newWidth > self.width then
+		-- Fill extra width
+		local empty = string.rep(" ", newWidth - self.width)
+		for y=1,self.height do
+			self:write(empty, self.width, y, self.text, self.back, dirty)
+		end
+	elseif newWidth < self.width then
+		-- Trim strips
+		for y=1,self.height do
+			local line = self.strips[y]
+			local i = #line
+			while i > 0 do
+				local strip = line[i]
+				if strip:left() > newWidth then
+					-- Fully past new width, remove
+					table.remove(line, i)
+				elseif strip:right() <= newWidth then
+					-- Fully before new width, done
+					break
+				else
+					-- Trim
+					strip.str = string.sub(strip.str, 1, newWidth - strip:left())
+					strip.dirty = strip.dirty or dirty
+				end
+				i = i - 1
+			end
+		end
+	end
+	self.width = newWidth
+end
+
 -- Add strip to screen
 function BufferedScreen:add(y, newStrip)
 	-- Ignore empty strips
 	if #newStrip.str == 0 then return end
+	-- Trim to width
+	local newLen = math.min(#newStrip.str, math.max(0, self.width - newStrip:left()))
+	newStrip.str = string.sub(newStrip.str, 1, newLen)
 	-- Split intersecting existing paints
 	local line, i, pos = self.strips[y], 1, nil
 	while i <= #line do

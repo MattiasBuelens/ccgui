@@ -81,6 +81,16 @@ function Element:hide()
 	return false
 end
 
+function Element:getScheduler()
+	if self.scheduler ~= nil then
+		return self.scheduler
+	end
+	if self.parent ~= nil then
+		return self.parent:getScheduler()
+	end
+	return nil
+end
+
 --[[
 
 	Bounding box
