@@ -154,7 +154,6 @@ local ProgramWindow = Window:subclass("ccgui.ProgramWindow")
 function ProgramWindow:initialize(opts)
 	-- Program pane
 	opts.contentPane = opts.contentPane or ProgramPane:new({
-		func = opts.func,
 		program = opts.program
 	})
 	
