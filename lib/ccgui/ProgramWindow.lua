@@ -82,7 +82,7 @@ function ProgramPane:wrapProgram(func)
 				end
 			else
 				-- Error
-				error(unpack(output))
+				error(output[1], 0)
 			end
 		end
 	end
@@ -112,11 +112,21 @@ function ProgramPane:filterProgramEvent(eventData)
 		return eventData
 	end
 end
+function ProgramPane:handleProgramResult(thread, ok, data)
+	if not ok then
+		-- Print error on program terminal
+		term.redirect(self:asTerm())
+		printError(data[1])
+		term.restore()
+	end
+end
 
 -- Program running
 function ProgramPane:createProgramThread()
 	local f = self:loadProgram(self.program)
-	return Thread:new(f)
+	return Thread:new(f, function(...)
+		self:handleProgramResult(...)
+	end)
 end
 function ProgramPane:startProgram()
 	if not self.hasProgramStarted then

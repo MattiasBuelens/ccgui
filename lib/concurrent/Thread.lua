@@ -15,9 +15,10 @@ Thread.class.RUNNING = "running"
 Thread.class.NORMAL = "normal"
 Thread.class.DEAD = "dead"
 
-function Thread:initialize(func)
+function Thread:initialize(func, callback)
 	super.initialize(self)
 	self.func = func
+	self.callback = callback or nil
 	self.scheduler = nil
 	self.co = nil
 	self.result = nil
@@ -29,7 +30,7 @@ function Thread:start(scheduler)
 	self.scheduler = scheduler
 	self.result, self.error = nil, nil
 	self.co = scheduler:spawn(self.func, function(...)
-		self:callback(...)
+		self:handleResult(...)
 	end)
 end
 
@@ -67,7 +68,7 @@ function Thread:isAlive()
 	return self:status() ~= Thread.DEAD
 end
 
-function Thread:callback(ok, data)
+function Thread:handleResult(ok, data)
 	-- Store result
 	if ok then
 		self.result = data
@@ -76,6 +77,10 @@ function Thread:callback(ok, data)
 	end
 	-- Clean up
 	self.scheduler = nil
+	-- Callback
+	if self.callback then
+		self.callback(self, ok, data)
+	end
 end
 
 -- Exports

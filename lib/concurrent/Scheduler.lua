@@ -19,7 +19,7 @@ end
 local Scheduler = Object:subclass("concurrent.Scheduler")
 function Scheduler:initialize(errorHandler)
 	super.initialize(self)
-	self.errorHandler = errorHandler or Scheduler.defaultErrorHandler
+	self.errorHandler = errorHandler or nil
 	self.stateByCo = {}
 	self.starting = {}
 	self.running = {}
