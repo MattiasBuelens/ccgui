@@ -9,7 +9,6 @@ local Element			= require "ccgui.Element"
 local Window			= require "ccgui.Window"
 local Thread			= require "concurrent.Thread"
 local TerminalElement	= require "ccgui.TerminalElement"
-local TerminalFunctions	= require "ccgui.TerminalFunctions"
 
 local ProgramPane = TerminalElement:subclass("ccgui.ProgramPane")
 function ProgramPane:initialize(opts)
@@ -30,51 +29,51 @@ function ProgramPane:createProgramThread()
 	return Thread:new(f)
 end
 
--- Install the rest of the OS api
-local function runProgram(env, path)
-    local fnFile, err = loadfile( sPath )
-    if fnFile then
-        local tEnv = _tEnv
-        setfenv( fnFile, tEnv )
-        local ok, err = pcall( function()
-        	fnFile( unpack( tArgs ) )
-        end )
-        if not ok then
-        	if err and err ~= "" then
-	        	printError( err )
-	        end
-        	return false
-        end
-        return true
-    end
-    if err and err ~= "" then
-		printError( err )
+function ProgramPane:redirectTerm(func, out)
+	return function(...)
+		local co = coroutine.create(func)
+		local input = { ... }
+		while true do
+			term.redirect(out)
+			local output = { coroutine.resume(co, unpack(input)) }
+			term.restore()
+			local ok = table.remove(output, 1)
+			if ok then
+				if coroutine.status(co) == "dead" then
+					-- Returned
+					return unpack(output)
+				else
+					-- Yielded
+					input = { coroutine.yield(unpack(output)) }
+				end
+			else
+				-- Error
+				error(unpack(output))
+			end
+		end
 	end
-    return false
 end
 
 function ProgramPane:loadProgram(program)
-	local _term = self:asTerm()
-
-	return function()
-		local program = program
-		-- Create new environment
-		local env = TerminalFunctions:new(_term, _G).env
-		env.shell = nil
-		-- Setup environment
-		setfenv(1, env)
-		term.clear()
-		-- Load program
-		local func = nil
-		if type(program) == "function" then
-			func = program
-		elseif type(program) == "string" then
-			func, err = loadfile(program)
-			if not func then error(err) end
-		end
-		setfenv(func, env)
-		func()
+	-- Load program
+	local func = nil
+	if type(program) == "function" then
+		func = program
+	elseif type(program) == "string" then
+		func, err = loadfile(program)
+		if not func then error(err) end
 	end
+	
+	-- Redirect terminal
+	local programTerm = self:asTerm()
+	local redirected = self:redirectTerm(function()
+		term.clear()
+		term.setCursorPos(1, 1)
+		term.setCursorBlink(true)
+		func()
+	end, programTerm)
+
+	return redirected
 end
 function ProgramPane:startProgram()
 	if not self.hasProgramStarted then
