@@ -26,6 +26,9 @@ container:on("remove", function()
 		screen:stop()
 	end
 end)
+local taskBar = ccgui.TaskBar:new{
+	_name = "taskBar"
+}
 local window1 = ccgui.Window:new{
 	title = "Window 1",
 	foreground = colours.black,
@@ -83,7 +86,7 @@ local textFoo = ccgui.TextArea:new{
 	_name = "textFoo"
 }
 window2:content():add(textFoo)
-container:add(window1, window2)
+container:add(taskBar, window1, window2)
 screen:add(container)
 
 screen:run()

@@ -15,6 +15,11 @@ function Container:initialize(opts)
 	self.children = {}
 	self.childFocus = nil
 
+	-- General
+	self:sinkEvent("timer")
+	self:sinkEvent("alarm")
+	self:sinkEvent("terminate")
+
 	-- Paint
 	self:on("paint", self.drawChildren, self)
 	self:sinkEvent("beforepaint")
@@ -28,8 +33,6 @@ function Container:initialize(opts)
 	-- Keyboard
 	self:sinkFocusEvent("key")
 	self:sinkFocusEvent("char")
-
-	self:sinkEvent("terminate")
 end
 
 function Container:find(elem, deep)
