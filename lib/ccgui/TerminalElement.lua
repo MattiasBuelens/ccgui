@@ -55,11 +55,11 @@ function TerminalElement:terminalPaint()
 	-- Draw each strip in the screen
 	for lineY,line in ipairs(self.screen.strips) do
 		for i,strip in ipairs(line) do
-			--if self.needsRepaint or strip.dirty then
+			if self.needsRepaint or strip.dirty then
 				local x = bbox.x + strip:left() - 1
 				local y = bbox.y + lineY - 1
 				self:draw(x, y, strip.str, strip.text, strip.back, bbox)
-			--end
+			end
 		end
 	end
 	-- Update cursor blink

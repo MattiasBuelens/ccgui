@@ -9,7 +9,26 @@ local Object			= require "objectlua.Object"
 local BufferedScreen	= require "ccgui.paint.BufferedScreen"
 
 local TerminalFunctions = Object:subclass("ccgui.TerminalFunctions")
-function TerminalFunctions:initialize(term)
+function TerminalFunctions:initialize(term, parentEnv)
+	super.initialize(self)
+
+	term.native = term
+	local env = {
+		term = term
+	}
+	env._G = env
+	setmetatable(env, { __index = parentEnv })
+	self.env = env
+
+	self:envIO()
+	self:envOS()
+	self:loadAPIs()
+end
+
+function TerminalFunctions:envIO()
+	local env = self.env
+	local term = env.term
+
 	local function write( sText )
 		local w,h = term.getSize()		
 		local x,y = term.getCursorPos()
@@ -208,14 +227,32 @@ function TerminalFunctions:initialize(term)
 		return sLine
 	end
 	
+	-- Add to environment
+	env.write		= write
+	env.print		= print
+	env.printError	= printError
+	env.read		= read
+end
+
+function TerminalFunctions:envOS()
+	local env = self.env
+	local _os, os = os, {}
+
+	-- Add to environment
+	env.os = os
+	-- Delegate to original OS
+	setmetatable(os, { __index = _os })
+
+	setfenv(1, env)
+
 	-- Install the rest of the OS api
-	local function os_run( _tEnv, _sPath, ... )
+	function os.run( _tEnv, _sPath, ... )
 		local tArgs = { ... }
 		local fnFile, err = loadfile( _sPath )
 		if fnFile then
 			local tEnv = _tEnv
 			--setmetatable( tEnv, { __index = function(t,k) return _G[k] end } )
-			setmetatable( tEnv, { __index = getfenv(2) } ) -- changed: _G => getfenv(2)
+			setmetatable( tEnv, { __index = _G } )
 			setfenv( fnFile, tEnv )
 			local ok, err = pcall( function()
 				fnFile( unpack( tArgs ) )
@@ -235,7 +272,7 @@ function TerminalFunctions:initialize(term)
 	end
 
 	local tAPIsLoading = {}
-	function os_loadAPI( _sPath )
+	function os.loadAPI( _sPath )
 		local sName = fs.getName( _sPath )
 		if tAPIsLoading[sName] == true then
 			printError( "API "..sName.." is already being loaded" )
@@ -244,7 +281,7 @@ function TerminalFunctions:initialize(term)
 		tAPIsLoading[sName] = true
 			
 		local tEnv = {}
-		setmetatable( tEnv, { __index = getfenv(2) } ) -- changed: _G => getfenv(2)
+		setmetatable( tEnv, { __index = _G } )
 		local fnAPI, err = loadfile( _sPath )
 		if fnAPI then
 			setfenv( fnAPI, tEnv )
@@ -264,22 +301,33 @@ function TerminalFunctions:initialize(term)
 		tAPIsLoading[sName] = nil
 		return true
 	end
-	
-	local _os = {
-		["run"] = os_run,
-		["loadAPI"] = os_loadAPI
-	}
-	setmetatable(_os, { __index = os })
-	
-	-- Create environment
-	self.env = {
-		["term"]		= term,
-		["write"]		= write,
-		["print"]		= print,
-		["printError"]	= printError,
-		["read"]		= read,
-		["os"]			= _os
-	}
+end
+
+function TerminalFunctions:loadAPIs()
+	setfenv(1, self.env)
+
+	-- Load APIs
+	local tApis = fs.list( "rom/apis" )
+	for n,sFile in ipairs( tApis ) do
+		if string.sub( sFile, 1, 1 ) ~= "." then
+			local sPath = fs.combine( "rom/apis", sFile )
+			if not fs.isDir( sPath ) then
+				os.loadAPI( sPath )
+			end
+		end
+	end
+
+	if turtle then
+		local tApis = fs.list( "rom/apis/turtle" )
+		for n,sFile in ipairs( tApis ) do
+			if string.sub( sFile, 1, 1 ) ~= "." then
+				local sPath = fs.combine( "rom/apis/turtle", sFile )
+				if not fs.isDir( sPath ) then
+					os.loadAPI( sPath )
+				end
+			end
+		end
+	end
 end
 
 return TerminalFunctions

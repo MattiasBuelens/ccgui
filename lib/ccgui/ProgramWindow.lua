@@ -59,11 +59,9 @@ function ProgramPane:loadProgram(program)
 	return function()
 		local program = program
 		-- Create new environment
-		local env = TerminalFunctions:new(_term).env
+		local env = TerminalFunctions:new(_term, _G).env
 		env.shell = nil
-		env._G = env
 		-- Setup environment
-		setmetatable(env, { __index = _G })
 		setfenv(1, env)
 		term.clear()
 		-- Load program
