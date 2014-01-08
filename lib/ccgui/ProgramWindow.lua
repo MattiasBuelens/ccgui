@@ -91,6 +91,7 @@ function ProgramPane:filterProgramEvent(eventData)
 	local event = eventData[1]
 	if event == "key" or event == "char" then
 		-- Must have focus for keyboard event
+		-- TODO Check complete focus hierarchy?
 		if self:isForeground() and self.hasFocus then
 			return eventData
 		else
@@ -112,13 +113,21 @@ function ProgramPane:filterProgramEvent(eventData)
 		return eventData
 	end
 end
+
 function ProgramPane:handleProgramResult(thread, ok, data)
-	if not ok then
-		-- Print error on program terminal
-		term.redirect(self:asTerm())
+	-- Print result on program terminal
+	term.redirect(self:asTerm())
+	if ok then
+		term.setTextColour(colours.white)
+		if data and #data > 0 then
+			print("Exited with:", unpack(data))
+		else
+			print("Exited")
+		end
+	else
 		printError(data[1])
-		term.restore()
 	end
+	term.restore()
 end
 
 -- Program running
