@@ -15,6 +15,8 @@ local assert, error, getfenv, ipairs, loadfile, loadlib, pairs, setfenv, setmeta
 local find, format, gfind, gsub, sub = string.find, string.format, string.gfind or string.gmatch, string.gsub, string.sub
 local fs = fs
 
+_G.shell = shell
+
 --
 -- avoid overwriting the package table if it's already there
 --
