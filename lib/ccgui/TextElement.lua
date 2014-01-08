@@ -93,8 +93,7 @@ function TextElement:calcSize(size)
 	-- Get longest line length
 	local nw = 0
 	for i,line in ipairs(self.lines) do
-		local len = #line
-		if(len > nw) then nw = len end
+		nw = math.max(nw, #line)
 	end
 
 	-- Draw less lines if height limited

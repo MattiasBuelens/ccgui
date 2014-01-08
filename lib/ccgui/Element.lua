@@ -156,7 +156,7 @@ function Element:focused(elem)
 end
 
 function Element:checkFocused(elem)
-	if (elem == nil or elem == self) then
+	if elem == nil or elem == self then
 		-- Must have visible focus
 		return self:canFocus() and self.hasFocus and self.isVisible
 	end
@@ -316,7 +316,7 @@ end
 
 -- Draw single border
 function Element:drawSingleBorder(side)
-	if(self.border:has(side)) then
+	if self.border:has(side) then
 		self:drawLine(self.bbox[side](self.bbox), self.border:get(side))
 	end
 end

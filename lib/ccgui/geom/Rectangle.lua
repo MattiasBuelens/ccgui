@@ -14,7 +14,7 @@ local Polygon = require "ccgui.geom.Polygon"
 local Rectangle = Polygon:subclass("ccgui.geom.Rectangle")
 function Rectangle:initialize(x, y, w, h)
 	if type(x) == "table" then
-		if(x.w) then
+		if x.w then
 			-- Clone rectangle
 			x, y, w, h = x.x, x.y, x.w, x.h
 		else

@@ -164,7 +164,7 @@ function Container:focusedChild()
 end
 
 function Container:checkFocused(elem)
-	if (self.isVisible and self.childFocus ~= nil) then
+	if self.isVisible and self.childFocus ~= nil then
 		-- Check focused child
 		if elem == nil then
 			return true
