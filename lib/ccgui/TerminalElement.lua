@@ -23,7 +23,7 @@ function TerminalElement:initialize(opts)
 end
 
 function TerminalElement:asTerm()
-	return self.term:export()
+	return self.term:asTerm()
 end
 
 function TerminalElement:canFocus()

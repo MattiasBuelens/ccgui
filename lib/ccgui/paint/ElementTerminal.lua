@@ -20,25 +20,25 @@ function ElementTerminal:initialize(element)
 	self.text = colours.white
 	self.back = colours.black
 	self.blink = false
-end
-
-function ElementTerminal:export()
-	-- Export to term API
-	local exported = {}
+	-- Export as term API
+	self.term = {}
 	for k,v in pairs(term) do
 		if self[k] == nil then
 			-- Delegate to terminal
-			exported[k] = function(self, ...)
+			self.term[k] = function(self, ...)
 				f(...)
 			end
 		else
 			-- Redirect to own method
-			exported[k] = function(...)
+			self.term[k] = function(...)
 				return self[k](self, ...)
 			end
 		end
 	end
-	return exported
+end
+
+function ElementTerminal:asTerm()
+	return self.term
 end
 
 function ElementTerminal:draw(bbox, repaint)

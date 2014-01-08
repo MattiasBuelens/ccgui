@@ -27,18 +27,17 @@ function BufferedTerminal:initialize(out)
 			end
 		end
 	end
-end
-
-function BufferedTerminal:export()
-	-- Create delegate which matches the term API
-	local exported = {}
+	-- Export as term API
+	self.term = {}
 	for k,v in pairs(term) do
-		-- Redirect to own method
-		exported[k] = function(...)
+		self.term[k] = function(...)
 			return self[k](self, ...)
 		end
 	end
-	return exported
+end
+
+function BufferedTerminal:asTerm()
+	return self.term
 end
 
 function BufferedTerminal:getWidth()
