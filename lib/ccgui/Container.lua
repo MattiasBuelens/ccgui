@@ -159,12 +159,33 @@ end
 
 ]]
 
+function Container:focusedChild()
+	return self.childFocus and self.children[self.childFocus] or nil
+end
+
+function Container:checkFocused(elem)
+	if (self.isVisible and self.childFocus ~= nil) then
+		-- Check focused child
+		if elem == nil then
+			return true
+		else
+			return self:checkChildFocused(elem)
+		end
+	end
+	return super.checkFocused(self, elem)
+end
+
+function Container:checkChildFocused(child)
+	-- Must be focused child
+	return self:focusedChild() == child
+end
+
 function Container:updateFocus(newFocus)
 	local newIndex = self:find(newFocus)
 
 	-- Blur previously focused child
 	if self.childFocus ~= nil and self.childFocus ~= newIndex then
-		self.children[self.childFocus]:blur()
+		self:focusedChild():blur()
 	end
 
 	-- Set focused child
@@ -172,18 +193,14 @@ function Container:updateFocus(newFocus)
 
 	-- Bubble up to parent
 	if self.parent ~= nil then
-		if newFocus == nil then
-			self.parent:updateFocus(nil)
-		else
-			self.parent:updateFocus(self)
-		end
+		self.parent:updateFocus(newFocus and self or nil)
 	end
 end
 
 function Container:blur()
 	-- Blur previously focused child
 	if self.childFocus ~= nil then
-		self.children[self.childFocus]:blur()
+		self:focusedChild():blur()
 		self.childFocus = nil
 	end
 
@@ -212,8 +229,9 @@ function Container:sinkEvent(event)
 end
 
 function Container:handleFocusSink(event, ...)
-	if self:visible() and self.childFocus ~= nil then
-		self.children[self.childFocus]:trigger(event, ...)
+	local child = self:focusedChild()
+	if child and child:focused() then
+		child:trigger(event, ...)
 	end
 end
 function Container:sinkFocusEvent(event)

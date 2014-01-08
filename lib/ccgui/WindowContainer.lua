@@ -134,12 +134,11 @@ function WindowContainer:handleSink(event, ...)
 		return super.handleSink(self, event, ...)
 	end
 end
-function WindowContainer:handleFocusSink(event, ...)
-	-- Only sink focus when focused is on foreground
-	local focused = self.childFocus and self.children[self.childFocus] or nil
-	if self:visible() and focused ~= nil and focused == self:getForegroundWindow() then
-		super.handleFocusSink(self, event, ...)
-	end
+
+function WindowContainer:checkChildFocused(child)
+	-- Must be foreground child
+	return super.checkChildFocused(self, child)
+		and child == self:getForegroundWindow()
 end
 
 -- Exports

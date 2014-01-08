@@ -147,6 +147,21 @@ function Element:canFocus()
 	return false
 end
 
+function Element:focused(elem)
+	if self:checkFocused(elem) then
+		-- Bubble up to parent
+		return (self.parent == nil) or self.parent:focused(self)
+	end
+	return false
+end
+
+function Element:checkFocused(elem)
+	if (elem == nil or elem == self) then
+		-- Must have visible focus
+		return self:canFocus() and self.hasFocus and self.isVisible
+	end
+end
+
 function Element:focus()
 	if not self:canFocus() then
 		return false

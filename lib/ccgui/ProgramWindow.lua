@@ -91,8 +91,7 @@ function ProgramPane:filterProgramEvent(eventData)
 	local event = eventData[1]
 	if event == "key" or event == "char" then
 		-- Must have focus for keyboard event
-		-- TODO Check complete focus hierarchy?
-		if self:isForeground() and self.hasFocus then
+		if self:focused() then
 			return eventData
 		else
 			return nil

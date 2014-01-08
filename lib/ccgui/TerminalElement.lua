@@ -38,7 +38,7 @@ function TerminalElement:hideTerminalBlink()
 	self:setCursorBlink(false)
 end
 function TerminalElement:updateTerminalBlink()
-	if self.hasFocus then
+	if self:focused() then
 		self:showTerminalBlink()
 	else
 		self:hideTerminalBlink()
