@@ -15,8 +15,8 @@ function TerminalElement:initialize(opts)
 
 	self.term = ElementTerminal:new(self)
 
-	self:on("focus", self.updateTerminalBlink, self)
-	self:on("blur", self.updateTerminalBlink, self)
+	self:on("focus", self.showTerminalBlink, self)
+	self:on("blur", self.hideTerminalBlink, self)
 
 	self:on("beforepaint", self.terminalResize, self)
 	self:on("paint", self.terminalPaint, self)

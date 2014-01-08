@@ -62,30 +62,18 @@ end
 
 function BufferedScreen:updateSize(newWidth, newHeight, back, dirty)
 	dirty = (dirty == nil) or (not not dirty)
-	-- Update height
-	if newHeight > self.height then
-		-- Fill extra lines
-		for y=self.height,newHeight do
-			self.strips[y] = {}
-			self:clearLine(y, back, dirty)
-		end
-	elseif newHeight < self.height then
-		-- Remove excess lines
-		while #self.strips > newHeight do
-			table.remove(self.strips, #self.strips)
-		end
-	end
-	self.height = newHeight
+	local oldWidth, oldHeight = self.width, self.height
+	self.width, self.height = newWidth, newHeight
 	-- Update width
-	if newWidth > self.width then
+	if newWidth > oldWidth then
 		-- Fill extra width
-		local empty = string.rep(" ", newWidth - self.width + 1)
-		for y=1,self.height do
-			self:write(empty, self.width, y, colours.white, back, dirty)
+		local empty = string.rep(" ", newWidth - oldWidth + 1)
+		for y=1,oldHeight do
+			self:write(empty, oldWidth, y, colours.white, back, dirty)
 		end
-	elseif newWidth < self.width then
+	elseif newWidth < oldWidth then
 		-- Trim strips
-		for y=1,self.height do
+		for y=1,oldHeight do
 			local line = self.strips[y]
 			local i = #line
 			while i > 0 do
@@ -105,14 +93,26 @@ function BufferedScreen:updateSize(newWidth, newHeight, back, dirty)
 			end
 		end
 	end
-	self.width = newWidth
+	-- Update height
+	if newHeight > oldHeight then
+		-- Fill extra lines
+		for y=oldHeight,newHeight do
+			self.strips[y] = {}
+			self:clearLine(y, back, dirty)
+		end
+	elseif newHeight < oldHeight then
+		-- Remove excess lines
+		while #self.strips > newHeight do
+			table.remove(self.strips, #self.strips)
+		end
+	end
 end
 
 -- Add strip to screen
 function BufferedScreen:add(y, newStrip)
 	-- Trim to width
-	--local newLen = math.min(#newStrip.str, math.max(0, self.width - newStrip:left() + 1))
-	--newStrip.str = string.sub(newStrip.str, 1, newLen)
+	local newLen = math.min(#newStrip.str, math.max(0, self.width - newStrip:left() + 1))
+	newStrip.str = string.sub(newStrip.str, 1, newLen)
 	-- Ignore empty strips
 	if #newStrip.str == 0 then return end
 	if y < 1 or y > self.height then return end

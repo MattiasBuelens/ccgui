@@ -59,11 +59,15 @@ end
 function ElementTerminal:getBlinkState(bbox)
 	local x = bbox.x + self.curX - 1
 	local y = bbox.y + self.curY - 1
-	return self.blink, x, y, self.text
+	if bbox:contains(x, y) then
+		return self.blink, x, y, self.text
+	else
+		return false
+	end
 end
 
 function ElementTerminal:write(str)
-	--local len = math.min(#str, math.max(0, self:getWidth() - self.curX + 1))
+	local len = math.min(#str, math.max(0, self:getWidth() - self.curX + 1))
 	local len = #str
 	local strip = self.screen:write(str, self.curX, self.curY, self.text, self.back)
 	self.curX = self.curX + len

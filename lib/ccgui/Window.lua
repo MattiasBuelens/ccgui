@@ -196,6 +196,9 @@ function Window:restoreSize()
 	end
 end
 function Window:isForeground()
+	if not self:visible() then
+		return false
+	end
 	if self.parent ~= nil then
 		return self == self.parent:getForegroundWindow()
 	end
@@ -285,18 +288,15 @@ function Window:storeCursorBlink(blink, x, y, color)
 end
 function Window:updateCursorBlink()
 	if self:isForeground() then
-		if self.storedBlink then
-			return self:showCursorBlink()
-		else
-			return self:hideCursorBlink()
-		end
+		self:showCursorBlink()
 	end
 	return false
 end
 function Window:showCursorBlink()
-	if self.storedBlink and self.parent ~= nil then
-		local x, y, color = unpack(self.storedBlink)
-		return super.setCursorBlink(self, true, x, y, color)
+	if self.storedBlink then
+		return super.setCursorBlink(self, true, unpack(self.storedBlink))
+	else
+		return super.setCursorBlink(self, false)
 	end
 	return false
 end
