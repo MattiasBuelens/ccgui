@@ -30,11 +30,13 @@ local window1 = ccgui.Window:new{
 	title = "Window 1",
 	foreground = colours.black,
 	background = colours.white,
+	windowPos = vector.new(1, 1),
+	padding = 1,
 	_name = "window1"
 }
 local labelHello = ccgui.TextElement:new{
 	stretch = true,
-	text = "Hello, world!",
+	text = "Click New to open a shell",
 	_name = "labelHello"
 }
 local toolbar = ccgui.FlowContainer:new{
@@ -47,18 +49,15 @@ local btnNew = ccgui.Button:new{
 	_name = "btnNew"
 }
 btnNew:on("buttonpress", function()
-	local window = ccgui.Window:new{
-		title = "New window",
+	local window = ccgui.ProgramWindow:new{
+		title = "Shell",
+		program = "/rom/programs/shell",
 		foreground = colours.black,
 		background = colours.white,
+		titleBackground = colours.green,
 		windowPos = vector.new(10, 5),
-		titleBackground = colours.green
+		_name = "shell"
 	}
-	local labelHello = ccgui.TextElement:new{
-		stretch = true,
-		text = "A brand new window!"
-	}
-	window:content():add(labelHello)
 	container:add(window)
 end)
 local btnQuit = ccgui.Button:new{
@@ -74,25 +73,17 @@ local window2 = ccgui.Window:new{
 	title = "Window 2",
 	foreground = colours.black,
 	background = colours.white,
-	windowPos = vector.new(25, 3),
-	windowSize = vector.new(20, 10),
+	windowPos = vector.new(20, 1),
+	windowSize = vector.new(30, 10),
 	_name = "window2"
 }
 local textFoo = ccgui.TextArea:new{
 	stretch = true,
-	text = "Here is a longer text\nwith lots of interesting stuff!\n\nFoo\nBar\nBaz",
+	text = "This is a text area where\nyou can type some text.\n\nSupports scrolling and\nkeyboard/mouse navigation!",
 	_name = "textFoo"
 }
 window2:content():add(textFoo)
-local window3 = ccgui.ProgramWindow:new{
-	title = "Shell",
-	program = "/rom/programs/shell",
-	foreground = colours.black,
-	background = colours.white,
-	windowPos = vector.new(2, 8),
-	_name = "window3"
-}
-container:add(window1, window2, window3)
+container:add(window1, window2)
 screen:add(container)
 
 screen:run()
