@@ -119,12 +119,16 @@ function BufferedTerminal:setTextColor(text)
 	self.text = text
 	self.out.setTextColor(text)
 end
-BufferedTerminal.setTextColour = BufferedTerminal.setTextColor
+function BufferedTerminal:setTextColour(text)
+	return self:setTextColor(text)
+end
 function BufferedTerminal:setBackgroundColor(back)
 	self.back = back
 	self.out.setBackgroundColor(back)
 end
-BufferedTerminal.setBackgroundColour = BufferedTerminal.setBackgroundColor
+function BufferedTerminal:setBackgroundColour(back)
+	return self:setBackgroundColor(back)
+end
 function BufferedTerminal:setCursorBlink(blink)
 	self.blink = blink or false
 	self.out.setCursorBlink(blink)

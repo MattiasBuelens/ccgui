@@ -26,8 +26,30 @@ function TerminalElement:initialize(opts)
 			end
 		end
 	end
+	
+	self:on("focus", self.updateTerminalBlink, self)
+	self:on("blur", self.updateTerminalBlink, self)
+	
 	self:on("beforepaint", self.terminalResize, self)
 	self:on("paint", self.terminalPaint, self)
+end
+	
+function TerminalElement:canFocus()
+	return self:visible()
+end
+
+function TerminalElement:showTerminalBlink()
+	super:setCursorBlink(self.blink, self.curX, self.curY, self.text)
+end
+function TerminalElement:hideTerminalBlink()
+	super:setCursorBlink(false)
+end
+function TerminalElement:updateTerminalBlink()
+	if self.hasFocus then
+		self:showTerminalBlink()
+	else
+		self:hideTerminalBlink()
+	end
 end
 
 function TerminalElement:asTerm()
@@ -63,14 +85,11 @@ function TerminalElement:terminalPaint()
 		end
 	end
 	-- Update cursor blink
-	self:terminalUpdateBlink()
+	self:updateTerminalBlink()
 end
 function TerminalElement:terminalResize()
 	local bbox = self:inner(self.bbox)
 	self.screen:updateSize(bbox.w, bbox.h, self.back)
-end
-function TerminalElement:terminalUpdateBlink()
-	super:setCursorBlink(self.blink, self.curX, self.curY, self.text)
 end
 
 -- Delegated methods to capture changes
@@ -90,24 +109,30 @@ end
 function TerminalElement:isColor()
 	return true
 end
-TerminalElement.isColour = TerminalElement.isColour
+function TerminalElement:isColour()
+	return self:isColor()
+end
 function TerminalElement:setCursorPos(x, y)
 	self.curX, self.curY = x, y
-	self:terminalUpdateBlink()
+	self:markPaint()
 end
 function TerminalElement:setTextColor(text)
 	self.text = text
-	self:terminalUpdateBlink()
+	self:markPaint()
 end
-TerminalElement.setTextColour = TerminalElement.setTextColor
+function TerminalElement:setTextColour(text)
+	return self:setTextColor(text)
+end
 function TerminalElement:setBackgroundColor(back)
 	self.back = back
-	self:terminalUpdateBlink()
+	self:markPaint()
 end
-TerminalElement.setBackgroundColour = TerminalElement.setBackgroundColor
+function TerminalElement:setBackgroundColour(back)
+	return self:setBackgroundColor(back)
+end
 function TerminalElement:setCursorBlink(blink)
 	self.blink = blink or false
-	self:terminalUpdateBlink()
+	self:markPaint()
 end
 function TerminalElement:clearLine()
 	self.screen:clearLine(self.curY, self.back, false)

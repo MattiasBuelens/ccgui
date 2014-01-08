@@ -15,7 +15,7 @@ local Page = FlowContainer:subclass("ccgui.Page")
 function Page:initialize(opts)
 	super.initialize(self, opts)
 
-	self.term = BufferedTerminal:new(self.output)
+	self.term = BufferedTerminal:new(opts.term or term)
 	-- Frames per second
 	self.fps = opts.fps or 8
 	-- Identifier of frame timer
