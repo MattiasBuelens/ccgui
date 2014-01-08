@@ -79,7 +79,7 @@ local labelAddress = ccgui.TextElement:new{
 local textAddress = ccgui.TextInput:new{
 	_name = "textAddress"
 }
-textAddress:setText("mattias@island")
+textAddress:setText("steve@overworld.mc")
 fieldAddress:add(labelAddress, textAddress)
 
 local textMessage = ccgui.TextArea:new{

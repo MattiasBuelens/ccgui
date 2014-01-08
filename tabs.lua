@@ -42,12 +42,6 @@ btnQuit:on("buttonpress", function()
 end)
 header:add(headerTitle, btnQuit)
 
-local footer = ccgui.TextElement:new{
-	text = "Ready",
-	foreground = colours.white,
-	background = colours.lightGrey,
-	_name = "footer"
-}
 local tabs = ccgui.TabContainer:new{
 	horizontal = false,
 	stretch = true,
@@ -67,10 +61,11 @@ local tabs = ccgui.TabContainer:new{
 	_name = "tabs"
 }
 tabs:addTab("Read", ccgui.TextViewer:new{
-	text = "Foo\nbar",
+	text = "This is a read-only text viewer.\nYou can read, navigate and scroll here.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNothing to see here...",
 	_name = "textViewer"
 })
 tabs:addTab("Write", ccgui.TextArea:new{
+	text = "This is a text area.\nYou can read, edit, navigate and scroll here.",
 	_name = "textArea"
 })
 local labelChoice = ccgui.TextElement:new{
@@ -96,7 +91,7 @@ local form = ccgui.FlowContainer:new{
 form:add(labelChoice, radioOne, radioTwo, radioThree)
 tabs:addTab("Form", form)
 
-screen:add(header, tabs, footer)
+screen:add(header, tabs)
 
 screen:run()
 
