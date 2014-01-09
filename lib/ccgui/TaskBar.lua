@@ -7,26 +7,11 @@
 
 local FlowContainer	= require "ccgui.FlowContainer"
 local Button		= require "ccgui.Button"
-local TextElement	= require "ccgui.TextElement"
-local Margins		= require "ccgui.geom.Margins"
+local Menu			= require "ccgui.Menu"
 local ClockDisplay	= require "ccgui.ClockDisplay"
+local Margins		= require "ccgui.geom.Margins"
 
-local TaskMenuButton = Button:subclass("ccgui.TaskMenuButton")
-function TaskMenuButton:initialize(opts)
-	opts.padding = opts.padding or 0
-
-	super.initialize(self, opts)
-
-	self:on("buttonpress", self.hideMenu, self)
-end
-function TaskMenuButton:hideMenu()
-	-- Hide parent menu
-	if self.parent then
-		self.parent:hide()
-	end
-end
-
-local TaskMenu = FlowContainer:subclass("ccgui.TaskMenu")
+local TaskMenu = Menu:subclass("ccgui.TaskMenu")
 function TaskMenu:initialize(opts)
 	opts.horizontal = false
 	opts.padding = opts.padding or Margins:new(0, 1)
@@ -34,18 +19,13 @@ function TaskMenu:initialize(opts)
 
 	super.initialize(self, opts)
 
-	self.shutdownButton = TaskMenuButton:new{
-		text = "Shut down",
-		foreground = colours.red
-	}
-	self.exitButton = TaskMenuButton:new{
-		text = "Exit"
-	}
-	self:add(self.shutdownButton, self.exitButton)
-	
+	self.shutdownButton = self:addButton("Shut down")
+	self.shutdownButton.foreground = colours.red
 	self.shutdownButton:on("buttonpress", function()
 		os.shutdown()
 	end)
+
+	self.exitButton = self:addButton("Exit")
 end
 function TaskMenu:markRepaint()
 	if not self.needsRepaint then
@@ -55,11 +35,6 @@ function TaskMenu:markRepaint()
 		end
 	end
 	super.markRepaint(self)
-end
-function TaskMenu:calcLayout(bbox)
-	-- Clip to top left of parent container
-	bbox.y = bbox.y - bbox.h
-	super.calcLayout(self, bbox)
 end
 
 local TaskBar = FlowContainer:subclass("ccgui.TaskBar")
@@ -94,32 +69,29 @@ function TaskBar:initialize(opts)
 	}
 	self:add(self.startButton, self.bar, self.clockText)
 	
-	self.menu = TaskMenu:new{
-		parent = self,
-		absolute = true,
-		isVisible = false
-	}
+	self.menu = TaskMenu:new{}
 	self:add(self.menu)
 
 	self.startButton:on("buttonpress", self.toggleMenu, self)
-	self:on("window_background", self.hideMenu, self)
+	self:on("window_background", self.closeMenu, self)
 	self:on("mouse_click", self.foregroundOnClick, self)
 end
 
-function TaskBar:isMenuVisible()
-	return self.menu:visible()
+function TaskBar:isMenuOpen()
+	return self.menu:isMenuOpen()
 end
-function TaskBar:showMenu()
-	self.menu:show()
+function TaskBar:openMenu()
+	assert(self.bbox ~= nil, "taskbar missing layout")
+	self.menu:openMenu(self.bbox.x, self.bbox.y, true)
 end
-function TaskBar:hideMenu()
-	self.menu:hide()
+function TaskBar:closeMenu()
+	self.menu:closeMenu()
 end
 function TaskBar:toggleMenu()
-	if not self:isMenuVisible() then
-		self:showMenu()
+	if not self:isMenuOpen() then
+		self:openMenu()
 	else
-		self:hideMenu()
+		self:closeMenu()
 	end
 end
 
@@ -132,7 +104,7 @@ function TaskBar:calcLayout(bbox)
 	super.calcLayout(self, bbox)
 end
 function TaskBar:contains(x, y)
-	return super.contains(self, x, y) or (self:isMenuVisible() and self.menu:contains(x, y))
+	return super.contains(self, x, y) or (self:isMenuOpen() and self.menu:contains(x, y))
 end
 
 -- Window-like behaviour

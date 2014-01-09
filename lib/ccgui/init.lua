@@ -24,6 +24,7 @@ require "ccgui.TextViewer"
 require "ccgui.Slider"
 require "ccgui.ScrollElement"
 
+require "ccgui.Menu"
 require "ccgui.Window"
 require "ccgui.WindowContainer"
 
