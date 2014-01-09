@@ -55,6 +55,7 @@ btnNew:on("buttonpress", function()
 	local window = ccgui.ProgramWindow:new{
 		title = "Shell",
 		program = "shell",
+		programAutoStart = true,
 		foreground = colours.black,
 		background = colours.white,
 		titleBackground = colours.green,

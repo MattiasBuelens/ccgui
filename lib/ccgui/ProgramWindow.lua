@@ -20,7 +20,10 @@ function ProgramPane:initialize(opts)
 	-- Program thread
 	self.programThread = self:createProgramThread()
 	
-	self:on("beforepaint", self.startProgram, self)
+	-- Program auto-start
+	self.programAutoStart = opts.programAutoStart or false
+	
+	self:on("afterpaint", self.autoStartProgram, self)
 	self:on("terminate", self.terminateProgram, self)
 end
 
@@ -140,16 +143,25 @@ function ProgramPane:createProgramThread()
 		self:handleProgramResult(...)
 	end)
 end
+function ProgramPane:isProgramRunning()
+	return self.programThread:isAlive()
+end
 function ProgramPane:startProgram()
-	if not self.hasProgramStarted then
-		-- Schedule program thread
+	-- Schedule program thread
+	if not self:isProgramRunning() then
 		self.programThread:start(self:getScheduler())
-		self.hasProgramStarted = true
+	end
+end
+function ProgramPane:autoStartProgram()
+	-- Schedule program thread
+	if self.programAutoStart and not self.hasAutoStarted then
+		self:startProgram()
+		self.hasAutoStarted = true
 	end
 end
 function ProgramPane:terminateProgram()
 	-- Terminate if still running
-	if self.programThread:isAlive() then
+	if self:isProgramRunning() then
 		self.programThread:terminate()
 	end
 end
@@ -158,7 +170,8 @@ local ProgramWindow = Window:subclass("ccgui.ProgramWindow")
 function ProgramWindow:initialize(opts)
 	-- Program pane
 	opts.contentPane = opts.contentPane or ProgramPane:new({
-		program = opts.program
+		program = opts.program,
+		programAutoStart = opts.programAutoStart
 	})
 	
 	super.initialize(self, opts)
@@ -167,6 +180,9 @@ function ProgramWindow:initialize(opts)
 	self:on("close", self.terminateOnClose, self)
 end
 
+function ProgramWindow:isProgramRunning()
+	return self:content():isProgramRunning()
+end
 function ProgramWindow:startProgram()
 	self:content():startProgram()
 end
