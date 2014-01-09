@@ -1,6 +1,6 @@
 --[[
 
-	ComputerCraft GUI
+	ComputerCraft GUI OS
 	Clock display
 
 --]]
@@ -29,7 +29,7 @@ local function formatTime(nTime, bTwentyFourHour)
 	end
 end
 
-local ClockDisplay = TextElement:subclass("ccgui.ClockDisplay")
+local ClockDisplay = TextElement:subclass("ccgui.os.ClockDisplay")
 function ClockDisplay:initialize(opts)
 	super.initialize(self, opts)
 	

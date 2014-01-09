@@ -29,8 +29,6 @@ require "ccgui.Window"
 require "ccgui.WindowContainer"
 
 require "ccgui.ProgramWindow"
-require "ccgui.ClockDisplay"
-require "ccgui.TaskBar"
 
 require "ccgui.Page"
 

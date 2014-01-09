@@ -1,6 +1,6 @@
 --[[
 
-	ComputerCraft GUI
+	ComputerCraft GUI OS
 	Task bar
 
 --]]
@@ -8,10 +8,10 @@
 local FlowContainer	= require "ccgui.FlowContainer"
 local Button		= require "ccgui.Button"
 local Menu			= require "ccgui.Menu"
-local ClockDisplay	= require "ccgui.ClockDisplay"
 local Margins		= require "ccgui.geom.Margins"
+local ClockDisplay	= require "ccgui.os.ClockDisplay"
 
-local TaskMenu = Menu:subclass("ccgui.TaskMenu")
+local TaskMenu = Menu:subclass("ccgui.os.TaskMenu")
 function TaskMenu:initialize(opts)
 	opts.horizontal = false
 	opts.background = opts.background or colours.lightGrey
@@ -54,7 +54,7 @@ function TaskMenu:markRepaint()
 	super.markRepaint(self)
 end
 
-local TaskBar = FlowContainer:subclass("ccgui.TaskBar")
+local TaskBar = FlowContainer:subclass("ccgui.os.TaskBar")
 function TaskBar:initialize(opts)
 	opts.horizontal = true
 	opts.background = opts.background or colours.lightGrey

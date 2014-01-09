@@ -10,7 +10,8 @@ local root = fs.combine(shell.getRunningProgram(), "../lib/")
 dofile(fs.combine(root, "/compat.lua"))
 package.root = root
 
-local ccgui	= require "ccgui"
+local ccgui		= require "ccgui"
+local ccguios	= require "ccgui.os"
 
 local screen = ccgui.Page:new{
 	horizontal = false,
@@ -26,7 +27,7 @@ container:on("remove", function()
 		screen:stop()
 	end
 end)
-local taskBar = ccgui.TaskBar:new{
+local taskBar = ccguios.TaskBar:new{
 	_name = "taskBar"
 }
 local window1 = ccgui.Window:new{
