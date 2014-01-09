@@ -69,7 +69,7 @@ function SubMenuButton:openMenu(x, y, up)
 		local bbox, pbox = self.bbox, self.parent.bbox
 		x = pbox.x + pbox.w
 		y = bbox.y
-		up = false
+		up = self.parent.menuUp
 	end
 	return self:getMenu():openMenu(x, y, up)
 end
@@ -118,7 +118,6 @@ function Menu:initialize(opts)
 	self.subMenus = {}
 	self.openSubMenu = nil
 
-	self:bubbleEvent("menuopen")
 	self:on("menuopen", self.handleMenuOpen, self)
 	self:on("menuclose", self.handleMenuClose, self)
 end
@@ -164,6 +163,10 @@ function Menu:handleMenuOpen(openedMenu)
 	if self == openedMenu then
 		-- Show menu
 		self:show()
+		-- Bubble up to parent
+		if self.parent then
+			self.parent:trigger("menuopen", self)
+		end
 	elseif self.subMenus[openedMenu] then
 		-- Close previously opened child menu
 		if self.openedSubMenu and self.openedSubMenu ~= openedMenu then
@@ -187,10 +190,19 @@ function Menu:handleMenuClose()
 	self:hide()
 end
 
+function Menu:markRepaint()
+	if not self.needsRepaint then
+		-- Repaint parent menu
+		if self.parent ~= nil then
+			self.parent:markRepaint()
+		end
+	end
+	super.markRepaint(self)
+end
 function Menu:calcLayout(bbox)
 	-- Open at menu position
 	if self.menuUp then
-		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y - bbox.h
+		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y - bbox.h + 1
 	else
 		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y
 	end

@@ -17,6 +17,24 @@ function TaskMenu:initialize(opts)
 	opts.background = opts.background or colours.lightGrey
 
 	super.initialize(self, opts)
+	
+	self.fooMenu = Menu:new{}
+	self.fooMenu:addButton("Foo 1")
+	self.fooMenu:addButton("Foo 2")
+	self.fooMenu:addButton("Foo 3")
+	self.fooMenu:addButton("Foo 4")
+	self.fooMenu:addButton("Foo 5")
+	self.fooMenu:addButton("Foo 6")
+
+	self.barMenu = Menu:new{}
+	self.barMenu:addButton("Bar 1")
+	self.barMenu:addButton("Bar 2")
+	
+	self.programsMenu = Menu:new{}
+	self.programsMenu:addSubMenu("Foo", self.fooMenu)
+	self.programsMenu:addSubMenu("Bar", self.barMenu)
+	self.programsMenu:addButton("Baz")
+	self.programsSubMenu = self:addSubMenu("Programs", self.programsMenu)
 
 	self.shutdownButton = self:addButton("Shut down")
 	self.shutdownButton.foreground = colours.red
@@ -81,7 +99,7 @@ function TaskBar:isMenuOpen()
 end
 function TaskBar:openMenu()
 	assert(self.bbox ~= nil, "taskbar missing layout")
-	self.menu:openMenu(self.bbox.x, self.bbox.y, true)
+	self.menu:openMenu(self.bbox.x, self.bbox.y - 1, true)
 end
 function TaskBar:closeMenu()
 	self.menu:closeMenu()
