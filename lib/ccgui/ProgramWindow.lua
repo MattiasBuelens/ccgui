@@ -24,6 +24,8 @@ function ProgramPane:initialize(opts)
 	self.programAutoStart = opts.programAutoStart or false
 	
 	self:on("afterpaint", self.autoStartProgram, self)
+	self:on("start", self.autoStartProgram, self)
+	self:on("stop", self.terminateProgram, self)
 	self:on("terminate", self.terminateProgram, self)
 end
 

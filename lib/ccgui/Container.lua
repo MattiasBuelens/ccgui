@@ -16,6 +16,8 @@ function Container:initialize(opts)
 	self.childFocus = nil
 
 	-- General
+	self:sinkEvent("start")
+	self:sinkEvent("stop")
 	self:sinkEvent("timer")
 	self:sinkEvent("alarm")
 	self:sinkEvent("terminate")

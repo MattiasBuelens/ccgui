@@ -127,6 +127,7 @@ function Page:run()
 end
 function Page:loop()
 	-- Setup
+	self:trigger("start")
 	self:paint()
 	self:startFrameTimer()
 	-- Event loop
@@ -139,6 +140,7 @@ function Page:loop()
 	end
 	-- Teardown
 	self:stopFrameTimer()
+	self:trigger("stop")
 end
 
 -- Exports
