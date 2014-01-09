@@ -37,12 +37,16 @@ end
 -- Program loading
 function ProgramPane:loadProgram(program)
 	-- Load program
-	local func = nil
+	local func, err
 	if type(program) == "function" then
 		func = program
 	elseif type(program) == "string" then
-		func, err = loadfile(program)
-		if not func then error(err) end
+		local path = shell.resolveProgram(program)
+		assert(path, "Program not found: "..program)
+		func, err = loadfile(path)
+		assert(func, err)
+	else
+		error("Invalid program: "..tostring(program))
 	end
 	
 	-- Wrap program

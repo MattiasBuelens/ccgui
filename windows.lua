@@ -54,7 +54,7 @@ local btnNew = ccgui.Button:new{
 btnNew:on("buttonpress", function()
 	local window = ccgui.ProgramWindow:new{
 		title = "Shell",
-		program = "/rom/programs/shell",
+		program = "shell",
 		foreground = colours.black,
 		background = colours.white,
 		titleBackground = colours.green,
