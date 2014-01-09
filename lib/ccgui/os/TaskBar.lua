@@ -7,52 +7,9 @@
 
 local FlowContainer	= require "ccgui.FlowContainer"
 local Button		= require "ccgui.Button"
-local Menu			= require "ccgui.Menu"
 local Margins		= require "ccgui.geom.Margins"
+local StartMenu		= require "ccgui.os.StartMenu"
 local ClockDisplay	= require "ccgui.os.ClockDisplay"
-
-local TaskMenu = Menu:subclass("ccgui.os.TaskMenu")
-function TaskMenu:initialize(opts)
-	opts.horizontal = false
-	opts.background = opts.background or colours.lightGrey
-
-	super.initialize(self, opts)
-	
-	self.fooMenu = Menu:new{}
-	self.fooMenu:addButton("Foo 1")
-	self.fooMenu:addButton("Foo 2")
-	self.fooMenu:addButton("Foo 3")
-	self.fooMenu:addButton("Foo 4")
-	self.fooMenu:addButton("Foo 5")
-	self.fooMenu:addButton("Foo 6")
-
-	self.barMenu = Menu:new{}
-	self.barMenu:addButton("Bar 1")
-	self.barMenu:addButton("Bar 2")
-	
-	self.programsMenu = Menu:new{}
-	self.programsMenu:addSubMenu("Foo", self.fooMenu)
-	self.programsMenu:addSubMenu("Bar", self.barMenu)
-	self.programsMenu:addButton("Baz")
-	self.programsSubMenu = self:addSubMenu("Programs", self.programsMenu)
-
-	self.shutdownButton = self:addButton("Shut down")
-	self.shutdownButton.foreground = colours.red
-	self.shutdownButton:on("buttonpress", function()
-		os.shutdown()
-	end)
-
-	self.exitButton = self:addButton("Exit")
-end
-function TaskMenu:markRepaint()
-	if not self.needsRepaint then
-		-- Repaint parent task bar
-		if self.parent then
-			self.parent:markRepaint()
-		end
-	end
-	super.markRepaint(self)
-end
 
 local TaskBar = FlowContainer:subclass("ccgui.os.TaskBar")
 function TaskBar:initialize(opts)
@@ -60,6 +17,9 @@ function TaskBar:initialize(opts)
 	opts.background = opts.background or colours.lightGrey
 
 	super.initialize(self, opts)
+
+	-- Target window container
+	self.windows = opts.windows
 
 	self.startForeground = opts.startForeground or colours.white
 	self.startBackground = opts.startBackground or colours.grey
@@ -86,7 +46,9 @@ function TaskBar:initialize(opts)
 	}
 	self:add(self.startButton, self.bar, self.clockText)
 	
-	self.menu = TaskMenu:new{}
+	self.menu = StartMenu:new{
+		windows = self.windows
+	}
 	self:add(self.menu)
 
 	self.startButton:on("buttonpress", self.toggleMenu, self)

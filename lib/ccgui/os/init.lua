@@ -6,6 +6,7 @@
 --]]
 
 require "ccgui.os.ClockDisplay"
+require "ccgui.os.StartMenu"
 require "ccgui.os.TaskBar"
 
 -- Exports

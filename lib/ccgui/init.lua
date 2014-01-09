@@ -24,11 +24,13 @@ require "ccgui.TextViewer"
 require "ccgui.Slider"
 require "ccgui.ScrollElement"
 
-require "ccgui.Menu"
 require "ccgui.Window"
 require "ccgui.WindowContainer"
-
 require "ccgui.ProgramWindow"
+
+require "ccgui.MenuButton"
+require "ccgui.SubMenuButton"
+require "ccgui.Menu"
 
 require "ccgui.Page"
 

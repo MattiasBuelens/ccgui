@@ -28,6 +28,7 @@ container:on("remove", function()
 	end
 end)
 local taskBar = ccguios.TaskBar:new{
+	windows = container,
 	_name = "taskBar"
 }
 local window1 = ccgui.Window:new{
