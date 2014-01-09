@@ -14,7 +14,6 @@ local Margins		= require "ccgui.geom.Margins"
 local TaskMenu = Menu:subclass("ccgui.TaskMenu")
 function TaskMenu:initialize(opts)
 	opts.horizontal = false
-	opts.padding = opts.padding or Margins:new(0, 1)
 	opts.background = opts.background or colours.lightGrey
 
 	super.initialize(self, opts)

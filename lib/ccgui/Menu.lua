@@ -19,7 +19,7 @@ local Menu			= FlowContainer:subclass("ccgui.Menu")
 
 ]]--
 function MenuButton:initialize(opts)
-	opts.padding = opts.padding or 0
+	opts.padding = opts.padding or Margins:new(0, 1)
 
 	super.initialize(self, opts)
 
@@ -40,7 +40,7 @@ end
 
 ]]--
 function SubMenuButton:initialize(opts)
-	opts.padding = opts.padding or 0
+	opts.padding = opts.padding or Margins:new(0, 2, 0, 1)
 	opts.menu = opts.menu or Menu:new()
 
 	super.initialize(self, opts)
@@ -48,6 +48,7 @@ function SubMenuButton:initialize(opts)
 	self:forwardEvent("menuopen")
 	self:forwardEvent("menuclose")
 	self:on("buttonpress", self.toggleOnClick, self)
+	self:on("paint", self.drawArrow, self)
 end
 function SubMenuButton:getMenu()
 	return self.menu
@@ -61,14 +62,16 @@ end
 function SubMenuButton:isMenuOpen()
 	return self:getMenu():isMenuOpen()
 end
-function SubMenuButton:openMenu(x, y)
+function SubMenuButton:openMenu(x, y, up)
 	assert(self.bbox ~= nil, "submenu button missing layout")
 	if not x then
 		-- Open next to button
-		local corner = self.bbox:tr()
-		x, y = corner.x, corner.y
+		local bbox, pbox = self.bbox, self.parent.bbox
+		x = pbox.x + pbox.w
+		y = bbox.y
+		up = false
 	end
-	return self:getMenu():openMenu(x, y)
+	return self:getMenu():openMenu(x, y, up)
 end
 function SubMenuButton:closeMenu(...)
 	return self:getMenu():closeMenu(...)
@@ -77,6 +80,10 @@ function SubMenuButton:closeParentMenu(cascade)
 	if self.parent and self.parent.closeMenu then
 		self.parent:closeMenu(cascade)
 	end
+end
+function SubMenuButton:drawArrow()
+	-- Draw arrow
+	self:draw(self.bbox:tr(), ">")
 end
 
 function SubMenuButton:toggleOnClick()
@@ -101,7 +108,6 @@ function Menu:initialize(opts)
 	opts.horizontal = false
 	opts.isVisible = false
 	opts.absolute = true
-	opts.padding = opts.padding or Margins:new(0, 1)
 	opts.background = opts.background or colours.lightGrey
 
 	super.initialize(self, opts)
@@ -112,27 +118,30 @@ function Menu:initialize(opts)
 	self.subMenus = {}
 	self.openSubMenu = nil
 
-	self:sinkEvent("menuclose")
+	self:bubbleEvent("menuopen")
 	self:on("menuopen", self.handleMenuOpen, self)
 	self:on("menuclose", self.handleMenuClose, self)
 end
 
 function Menu:addButton(label)
-	local item = MenuButton:new{
+	local button = MenuButton:new{
 		text = label
 	}
-	self:add(item)
-	return item
+	self:add(button)
+	return button
 end
 function Menu:addSubMenu(label, menu)
-	local subMenu = SubMenuButton:new{
+	local button = SubMenuButton:new{
 		text = label,
 		menu = menu
 	}
-	self:add(subMenu)
+	menu = button:getMenu()
 	-- Store menu
-	self.subMenus[subMenu:getMenu()] = true
-	return subMenu
+	self.subMenus[menu] = true
+	-- Add both button and menu
+	self:add(button)
+	self:add(menu)
+	return button
 end
 
 function Menu:isMenuOpen()
@@ -162,14 +171,19 @@ function Menu:handleMenuOpen(openedMenu)
 		end
 		-- Store currently opened menu
 		self.openedSubMenu = openedMenu
+		self:markRepaint()
 	else
 		-- Not our menu
 		self:closeMenu()
 	end
 end
 function Menu:handleMenuClose()
+	-- Close opened child menu
+	if self.openedSubMenu then
+		self.openedSubMenu:closeMenu()
+		self.openedSubMenu = nil
+	end
 	-- Hide menu
-	self.openedSubMenu = nil
 	self:hide()
 end
 
