@@ -42,6 +42,12 @@ function FlowContainer:calcSize(size)
 	self:eachVisible(function(child, i, n)
 		-- No spacing on last child
 		local spacing = (i < n and self.spacing) or 0
+		-- Handle absolutely positioned children
+		if child.absolute then
+			-- Can occupy whole inner box
+			child:calcSize(Rectangle:new(cbox))
+			return
+		end
 		-- Handle stretched children later
 		if child.stretch then
 			-- Remove spacing from remaining
@@ -86,6 +92,9 @@ function FlowContainer:calcSize(size)
 
 	-- Enforce fixed size
 	self:eachVisible(function(child)
+		-- Ignore absolutely positioned children
+		if child.absolute then return end
+		-- Set fixed size
 		child.size[fixedDim] = maxFixed
 	end)
 
@@ -125,6 +134,12 @@ function FlowContainer:calcLayout(bbox)
 	-- Update layout of children
 	self:eachVisible(function(child, i, n)
 		local spacing = (i < n and self.spacing) or 0
+		-- Handle absolutely positioned children
+		if child.absolute then
+			-- Can position in top-left corner
+			child:calcLayout(Rectangle:new(cbox:tl(), child.size:size()))
+			return
+		end
 		-- Get child bounding box
 		child:calcLayout(Rectangle:new{
 			[flowCoord] = flowPos,

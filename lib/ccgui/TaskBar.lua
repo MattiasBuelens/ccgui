@@ -17,9 +17,9 @@ function TaskMenuButton:initialize(opts)
 
 	super.initialize(self, opts)
 
-	--self:on("buttonpress", self.hideMenu, self, 1000)
+	self:on("buttonpress", self.hideMenu, self)
 end
-function TaskMenuButton:hideMenu(bbox)
+function TaskMenuButton:hideMenu()
 	-- Hide parent menu
 	if self.parent then
 		self.parent:hide()
@@ -58,11 +58,7 @@ function TaskMenu:markRepaint()
 end
 function TaskMenu:calcLayout(bbox)
 	-- Clip to top left of parent container
-	if self.parent then
-		local pbox = self.parent.bbox
-		bbox.x = pbox.x
-		bbox.y = pbox.y - bbox.h
-	end
+	bbox.y = bbox.y - bbox.h
 	super.calcLayout(self, bbox)
 end
 
@@ -100,11 +96,12 @@ function TaskBar:initialize(opts)
 	
 	self.menu = TaskMenu:new{
 		parent = self,
+		absolute = true,
 		isVisible = false
 	}
+	self:add(self.menu)
 
 	self.startButton:on("buttonpress", self.toggleMenu, self)
-	self:on("paint", self.menuPaint, self)
 	self:on("window_background", self.hideMenu, self)
 	self:on("mouse_click", self.foregroundOnClick, self)
 end
@@ -126,21 +123,11 @@ function TaskBar:toggleMenu()
 	end
 end
 
-function TaskBar:menuPaint()
-	if self:isMenuVisible() then
-		self.menu:paint()
-	end
-end
-
 function TaskBar:calcLayout(bbox)
+	-- Clip to bottom of parent container
 	if self.parent then
 		local pbox = self.parent:inner(self.parent.bbox)
-		-- Clip to bottom of parent container
 		bbox.y = pbox.y + pbox.h - bbox.h
-		-- Layout menu
-		if self:isMenuVisible() then
-			self.menu:updateLayout(pbox)
-		end
 	end
 	super.calcLayout(self, bbox)
 end
