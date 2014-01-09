@@ -7,6 +7,28 @@
 
 local TextElement	= require "ccgui.TextElement"
 
+local function formatTime(nTime, bTwentyFourHour)
+	local sTOD = nil
+	if not bTwentyFourHour then
+		if nTime >= 12 then
+			sTOD = "PM"
+		else
+			sTOD = "AM"
+		end
+		if nTime >= 13 then
+			nTime = nTime - 12
+		end
+	end
+
+	local nHour = math.floor(nTime)
+	local nMinute = math.floor((nTime - nHour)*60)
+	if sTOD then
+		return string.format( "%02d:%02d %s", nHour, nMinute, sTOD )
+	else
+		return string.format( "%02d:%02d", nHour, nMinute )
+	end
+end
+
 local ClockDisplay = TextElement:subclass("ccgui.ClockDisplay")
 function ClockDisplay:initialize(opts)
 	super.initialize(self, opts)
@@ -49,7 +71,7 @@ function ClockDisplay:clockUpdateOnAlarm(alarmId)
 	end
 end
 function ClockDisplay:updateClock()
-	self:setText(textutils.formatTime(os.time(), true))
+	self:setText(formatTime(os.time(), true))
 end
 
 -- Exports
