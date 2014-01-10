@@ -22,7 +22,6 @@ function TextArea:initialize(opts)
 
 	-- Text lines
 	self:setText(opts.text)
-	self.longestLineLength = 0
 
 	-- Cursor position
 	self.cursorLine = 1 -- [1, #(lines)]
