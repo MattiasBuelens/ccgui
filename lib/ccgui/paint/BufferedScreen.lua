@@ -67,9 +67,9 @@ function BufferedScreen:updateSize(newWidth, newHeight, back, dirty)
 	-- Update width
 	if newWidth > oldWidth then
 		-- Fill extra width
-		local empty = string.rep(" ", newWidth - oldWidth + 1)
+		local empty = string.rep(" ", newWidth - oldWidth)
 		for y=1,oldHeight do
-			self:write(empty, oldWidth, y, colours.white, back, dirty)
+			self:write(empty, oldWidth + 1, y, colours.white, back, dirty)
 		end
 	elseif newWidth < oldWidth then
 		-- Trim strips
@@ -96,7 +96,7 @@ function BufferedScreen:updateSize(newWidth, newHeight, back, dirty)
 	-- Update height
 	if newHeight > oldHeight then
 		-- Fill extra lines
-		for y=oldHeight,newHeight do
+		for y=oldHeight+1,newHeight do
 			self.strips[y] = {}
 			self:clearLine(y, back, dirty)
 		end
