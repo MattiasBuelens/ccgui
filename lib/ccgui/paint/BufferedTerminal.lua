@@ -50,7 +50,7 @@ function BufferedTerminal:getHeight()
 end
 
 function BufferedTerminal:writeBuffer(str, x, y, text, back, dirty)
-	return self.screen:write(str, x, y, text, back, dirty)
+	return self.screen:write(str, math.floor(x), math.floor(y), text, back, dirty)
 end
 
 function BufferedTerminal:paint()
@@ -111,7 +111,7 @@ function BufferedTerminal:write(str)
 	self.curX, self.curY = self.out.getCursorPos()
 end
 function BufferedTerminal:setCursorPos(x, y)
-	self.curX, self.curY = x, y
+	self.curX, self.curY = math.floor(x), math.floor(y)
 	self.out.setCursorPos(x, y)
 end
 function BufferedTerminal:setTextColor(text)

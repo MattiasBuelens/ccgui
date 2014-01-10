@@ -91,7 +91,7 @@ function ElementTerminal:isColour()
 	return self:isColor()
 end
 function ElementTerminal:setCursorPos(x, y)
-	self.curX, self.curY = x, y
+	self.curX, self.curY = math.floor(x), math.floor(y)
 	self.element:markPaint()
 end
 function ElementTerminal:setTextColor(text)
