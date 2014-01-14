@@ -31,13 +31,6 @@ window:on("close", function()
 	screen:stop()
 end)
 
-local footer = ccgui.TextElement:new{
-	text = "Ready",
-	foreground = colours.white,
-	background = colours.lightGrey,
-	_name = "footer"
-}
-
 local toolbar = ccgui.FlowContainer:new{
 	horizontal = true,
 	padding = ccgui.geom.Margins:new(0, 1),
@@ -49,21 +42,21 @@ local btnOne = ccgui.Button:new{
 	_name = "btnOne"
 }
 btnOne:on("buttonpress", function()
-	footer:setText("One pressed")
+	window:setStatusText("One pressed")
 end)
 local btnTwo = ccgui.Button:new{
 	text = "Two",
 	_name = "btnTwo"
 }
 btnTwo:on("buttonpress", function()
-	footer:setText("Two pressed")
+	window:setStatusText("Two pressed")
 end)
 local btnThree = ccgui.Button:new{
 	text = "Three",
 	_name = "btnThree"
 }
 btnThree:on("buttonpress", function()
-	footer:setText("Three pressed")
+	window:setStatusText("Three pressed")
 end)
 toolbar:add(btnOne, btnTwo, btnThree)
 
@@ -86,7 +79,7 @@ local textMessage = ccgui.TextArea:new{
 	stretch = true,
 	_name = "textMessage"
 }
-window:content():add(toolbar, fieldAddress, textMessage, footer)
+window:content():add(toolbar, fieldAddress, textMessage)
 container:add(window)
 screen:add(container)
 window:maximize()
