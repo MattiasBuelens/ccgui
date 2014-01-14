@@ -124,6 +124,86 @@ function TitleBar:dragging(button, x, y)
 	end
 end
 
+local ResizeHandle = TextElement:subclass("ccgui.window.ResizeHandle")
+function ResizeHandle:initialize(opts)
+	opts.foreground = opts.foreground or colours.white
+	opts.background = opts.background or colours.lightGrey
+	opts.text = opts.text or "/"
+	
+	super.initialize(self, opts)
+	
+	-- Dragging
+	self.dragStartPos = nil
+	self.dragStartSize = nil
+	self:on("mouse_click", self.dragStart, self)
+	self:on("mouse_drag", self.dragging, self)
+end
+
+function ResizeHandle:getWindow()
+	return self.parent.parent
+end
+function ResizeHandle:canDrag()
+	return not self.parent.parent.isMaximized
+end
+
+-- Start dragging
+function ResizeHandle:dragStart(button, x, y)
+	if button == 1 and self:visible() and self:canDrag() and self:contains(x, y) then
+		-- Store starting position
+		self.dragStartPos = vector.new(x, y)
+		self.dragStartSize = self:getWindow():getSize()
+	else
+		-- Stop dragging
+		self.dragStartPos = nil
+	end
+end
+
+-- Resize window while dragging
+function ResizeHandle:dragging(button, x, y)
+	if button == 1 and self:visible() and self:canDrag() and self.dragStartPos ~= nil then
+		-- Get drag delta
+		local current = vector.new(x, y)
+		local delta = current - self.dragStartPos
+		-- Set window size
+		self:getWindow():setSize(self.dragStartSize + delta)
+	end
+end
+
+local StatusBar = FlowContainer:subclass("ccgui.window.StatusBar")
+function StatusBar:initialize(opts)
+	opts.background = opts.background or colours.lightGrey
+	opts.horizontal = true
+	
+	super.initialize(self, opts)
+	
+	-- Status text
+	self.statusText = TextElement:new{
+		foreground = opts.statusForeground or colours.white,
+		stretch = true
+	}
+	-- Resize handle
+	self.resizeHandle = ResizeHandle:new{
+		foreground = opts.resizeForeground
+	}
+	self:add(self.statusText, self.resizeHandle)
+	
+	self:setResizable(true)
+end
+
+function StatusBar:setText(text)
+	self.statusText:setText(text)
+end
+function StatusBar:setResizable(resizable)
+	if resizable then
+		self.resizeHandle:show()
+	else
+		self.resizeHandle:hide()
+	end
+end
+function StatusBar:updateMaximized()
+	self:setResizable(not self.parent.isMaximized)
+end
+
 local Window = FlowContainer:subclass("ccgui.Window")
 function Window:initialize(opts)
 	super.initialize(self, {
@@ -150,10 +230,16 @@ function Window:initialize(opts)
 	-- Content pane
 	self.contentPane = opts.contentPane or FlowContainer:new(opts)
 	self.contentPane.stretch = true
-	-- TODO Status bar, resize handle?
-
-	self:add(self.titleBar, self.contentPane)
-
+	
+	-- Status bar
+	self.statusBar = StatusBar:new{
+		background = opts.statusBackground
+	}
+	self:on("maximize", self.statusBar.updateMaximized, self.statusBar)
+	self:on("restore", self.statusBar.updateMaximized, self.statusBar)
+	
+	self:add(self.titleBar, self.contentPane, self.statusBar)
+	
 	self:on("mouse_click", self.foregroundOnClick, self)
 	self:on("window_background", self.hideCursorBlink, self)
 	self:on("window_foreground", self.showCursorBlink, self)
@@ -177,6 +263,10 @@ function Window:isClosable()
 end
 function Window:setClosable(value)
 	self.titleBar:setClosable(value)
+end
+
+function Window:setStatusText(text)
+	return self.statusBar:setText(text)
 end
 
 function Window:maximize()
