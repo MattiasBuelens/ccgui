@@ -34,6 +34,68 @@ function FlowContainer:calcSize(size)
 	local fixedSize = cbox[fixedDim]
 	-- Maximum fixed size
 	local maxFixed = 0
+	-- Has stretched child
+	local hasStretch = false
+
+	-- Calculate sizes of children
+	self:eachVisible(function(child, i, n)
+		-- No spacing on last child
+		local spacing = (i < n and self.spacing) or 0
+		-- Ignore absolutely positioned children
+		if child.absolute then
+			return
+		end
+		-- Check if stretched
+		if child.stretch then
+			hasStretch = true
+		end
+		-- Get child size
+		local csize = child:calcSize(Rectangle:new{
+			[flowDim] = remaining,
+			[fixedDim] = fixedSize
+		})
+		-- Remove child size and spacing from remaining
+		-- and add to flow size
+		local childSize = csize[flowDim] + spacing
+		flowSize = flowSize + childSize
+		remaining = remaining - childSize
+		-- Update maximum fixed size
+		maxFixed = math.max(maxFixed, csize[fixedDim])
+	end)
+
+	-- Fill if has stretched child
+	if hasStretch then
+		--flowSize = cbox[flowDim]
+	end
+
+	-- Get children size box
+	local bbox = Rectangle:new{
+		x = cbox.x,
+		y = cbox.y,
+		[flowDim] = flowSize,
+		[fixedDim] = maxFixed
+	}
+	-- Use outer size box
+	return self:outer(bbox)
+end
+
+function FlowContainer:updateSize(size)
+	-- Get inner box
+	local cbox = self:inner(size)
+
+	-- Flow dimension
+	local flowDim = (self.horizontal and "w") or "h"
+	-- Fixed dimension
+	local fixedDim = (self.horizontal and "h") or "w"
+
+	-- Flow size
+	local flowSize = 0
+	-- Remaining flow size
+	local remaining = cbox[flowDim]
+	-- Fixed size
+	local fixedSize = cbox[fixedDim]
+	-- Maximum fixed size
+	local maxFixed = 0
 
 	-- Children to be stretched
 	local stretchChildren = {}
@@ -42,8 +104,10 @@ function FlowContainer:calcSize(size)
 	self:eachVisible(function(child, i, n)
 		-- No spacing on last child
 		local spacing = (i < n and self.spacing) or 0
-		-- Ignore absolutely positioned children
+		-- Handle absolutely positioned children
 		if child.absolute then
+			-- Can occupy whole inner box
+			child:updateSize(Rectangle:new(cbox))
 			return
 		end
 		-- Handle stretched children later
@@ -57,17 +121,17 @@ function FlowContainer:calcSize(size)
 			return
 		end
 		-- Get child size
-		child:updateSize(Rectangle:new{
+		local csize = child:updateSize(Rectangle:new{
 			[flowDim] = remaining,
 			[fixedDim] = fixedSize
 		})
 		-- Remove child size and spacing from remaining
 		-- and add to flow size
-		local childSize = child.size[flowDim] + spacing
+		local childSize = csize[flowDim] + spacing
 		flowSize = flowSize + childSize
 		remaining = remaining - childSize
 		-- Update maximum fixed size
-		maxFixed = math.max(maxFixed, child.size[fixedDim])
+		maxFixed = math.max(maxFixed, csize[fixedDim])
 	end)
 
 	-- Divide remaining size over stretched children
@@ -76,7 +140,7 @@ function FlowContainer:calcSize(size)
 	for i,child in ipairs(stretchChildren) do
 		local childSize = (i == 1 and firstStretch) or stretchSize
 		-- Get child size
-		child:updateSize(Rectangle:new{
+		csize = child:updateSize(Rectangle:new{
 			[flowDim] = childSize,
 			[fixedDim] = fixedSize
 		})
@@ -85,7 +149,7 @@ function FlowContainer:calcSize(size)
 		-- Add child size to flow size
 		flowSize = flowSize + childSize
 		-- Update maximum fixed size
-		maxFixed = math.max(maxFixed, child.size[fixedDim])
+		maxFixed = math.max(maxFixed, csize[fixedDim])
 	end
 
 	-- Enforce fixed size
@@ -103,8 +167,10 @@ function FlowContainer:calcSize(size)
 		[flowDim] = flowSize,
 		[fixedDim] = maxFixed
 	}
+
 	-- Use outer size box
-	return self:outer(bbox)
+	self.size = self:outer(bbox)
+	return self.size
 end
 
 function FlowContainer:calcLayout(bbox)
@@ -112,7 +178,8 @@ function FlowContainer:calcLayout(bbox)
 end
 
 function FlowContainer:updateLayout(bbox)
-	bbox = super.updateLayout(self, bbox)
+	bbox = self:updateSize(bbox)
+	self.bbox = bbox
 
 	-- Get inner box for children bounding box
 	local cbox = self:inner(bbox)
@@ -143,9 +210,7 @@ function FlowContainer:updateLayout(bbox)
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Position in top-left corner
-			-- Can occupy whole inner box
-			local size = child:updateSize(Rectangle:new(cbox))
-			child:updateLayout(Rectangle:new(cbox:tl(), size:size()))
+			child:updateLayout(Rectangle:new(cbox:tl(), child.size:size()))
 			return
 		end
 		-- Get child bounding box
