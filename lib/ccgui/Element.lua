@@ -37,7 +37,7 @@ function Element:initialize(opts)
 	-- Mouse
 	self:on("mouse_click", self.focusOnClick, self)
 	-- Paint
-	self:on("repaint", self.clear, self)
+	self:on("repaint", self.drawBackground, self)
 	self:on("paint", self.drawBorder, self)
 
 	-- Bubble focus events
@@ -263,8 +263,8 @@ function Element:paint()
 	self:unmarkPaint()
 end
 
--- Clear element's bounding box
-function Element:clear()
+-- Fill element's bounding box with background color
+function Element:drawBackground()
 	local bbox = self.bbox
 	for y=0,bbox.h-1 do
 		for x=0,bbox.w-1 do
