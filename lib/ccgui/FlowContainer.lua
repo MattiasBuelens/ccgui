@@ -45,7 +45,7 @@ function FlowContainer:calcSize(size)
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Can occupy whole inner box
-			child:calcSize(Rectangle:new(cbox))
+			child:updateSize(Rectangle:new(cbox))
 			return
 		end
 		-- Handle stretched children later
@@ -59,7 +59,7 @@ function FlowContainer:calcSize(size)
 			return
 		end
 		-- Get child size
-		child:calcSize(Rectangle:new{
+		child:updateSize(Rectangle:new{
 			[flowDim] = remaining,
 			[fixedDim] = fixedSize
 		})
@@ -78,7 +78,7 @@ function FlowContainer:calcSize(size)
 	for i,child in ipairs(stretchChildren) do
 		local childSize = (i == 1 and firstStretch) or stretchSize
 		-- Get child size
-		child:calcSize(Rectangle:new{
+		child:updateSize(Rectangle:new{
 			[flowDim] = childSize,
 			[fixedDim] = fixedSize
 		})
@@ -104,7 +104,7 @@ function FlowContainer:calcSize(size)
 		[fixedDim] = maxFixed
 	}
 	-- Use outer size box
-	self.size = self:outer(bbox)
+	return self:outer(bbox)
 end
 
 function FlowContainer:calcLayout(bbox)
@@ -137,11 +137,11 @@ function FlowContainer:calcLayout(bbox)
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Can position in top-left corner
-			child:calcLayout(Rectangle:new(cbox:tl(), child.size:size()))
+			child:updateLayout(Rectangle:new(cbox:tl(), child.size:size()))
 			return
 		end
 		-- Get child bounding box
-		child:calcLayout(Rectangle:new{
+		child:updateLayout(Rectangle:new{
 			[flowCoord] = flowPos,
 			[fixedCoord] = fixedPos,
 			[flowDim] = child.size[flowDim],
@@ -167,7 +167,7 @@ function FlowContainer:calcLayout(bbox)
 	end)]]--
 
 	-- Use given bounding box
-	self.bbox = bbox
+	return super.calcLayout(self, bbox)
 end
 
 -- Exports

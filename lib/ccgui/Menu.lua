@@ -120,7 +120,7 @@ function Menu:calcLayout(bbox)
 	else
 		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y
 	end
-	super.calcLayout(self, bbox)
+	return super.calcLayout(self, bbox)
 end
 function Menu:contains(x, y)
 	return super.contains(self, x, y) or (self.openedSubMenu and self.openedSubMenu:contains(x, y))

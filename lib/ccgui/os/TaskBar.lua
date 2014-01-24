@@ -80,7 +80,7 @@ function TaskBar:calcLayout(bbox)
 		local pbox = self.parent:inner(self.parent.bbox)
 		bbox.y = pbox.y + pbox.h - bbox.h
 	end
-	super.calcLayout(self, bbox)
+	return super.calcLayout(self, bbox)
 end
 function TaskBar:contains(x, y)
 	return super.contains(self, x, y) or (self:isMenuOpen() and self.menu:contains(x, y))

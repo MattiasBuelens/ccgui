@@ -46,8 +46,9 @@ end
 
 function Page:pageLayout()
 	-- Fill whole screen
-	local width, height = self.term:getSize()
-	self:updateLayout(Rectangle:new(1, 1, width, height))
+	local bbox = Rectangle:new(1, 1, self.term:getSize())
+	self:updateSize(bbox)
+	self:updateLayout(bbox)
 end
 
 function Page:drawUnsafe(x, y, text, fgColor, bgColor)

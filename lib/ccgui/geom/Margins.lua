@@ -52,12 +52,16 @@ function Margins:add(m)
 	return Margins:new(self.top + m.top, self.right + m.right, self.bottom + m.bottom, self.left + m.left)
 end
 
-function Margins:multiply(m)
-	return Margins:new(self.top * m, self.right * m, self.bottom * m, self.left * m)
+function Margins:multiply(f)
+	return Margins:new(self.top * f, self.right * f, self.bottom * f, self.left * f)
 end
 
-function Margins:__add(o)
-	return self:add(o)
+function Margins:__add(m)
+	return self:add(m)
+end
+
+function Margins:__mul(f)
+	return self:multiply(f)
 end
 
 function Margins:__unm()

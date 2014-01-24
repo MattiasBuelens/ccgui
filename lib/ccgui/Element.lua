@@ -117,17 +117,18 @@ end
 
 -- Calculate element size within given size box
 function Element:calcSize(size)
-	self.size = Rectangle:new(0, 0, 0, 0)
+	return Rectangle:new(0, 0, 0, 0)
+end
+function Element:updateSize(size)
+	self.size = self:calcSize(size)
 end
 
 -- Calculate element layout within given bounding box
 function Element:calcLayout(bbox)
 	self.bbox = bbox
+	return bbox
 end
-
--- Update element layout within given bounding box
 function Element:updateLayout(bbox)
-	self:calcSize(bbox)
 	self:calcLayout(Rectangle:new(bbox:tl(), self.size:size()))
 end
 

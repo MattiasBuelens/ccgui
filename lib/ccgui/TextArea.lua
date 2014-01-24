@@ -310,7 +310,7 @@ function TextArea:calcSize(size)
 	-- Get inner bounding box with new size
 	bbox = Rectangle:new(bbox.x, bbox.y, w, h)
 	-- Use outer size box
-	self.size = self:outer(bbox)
+	return self:outer(bbox)
 end
 
 function TextArea:drawCursor()

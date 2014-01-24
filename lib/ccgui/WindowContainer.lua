@@ -101,13 +101,15 @@ function WindowContainer:markPaint()
 end
 
 function WindowContainer:calcSize(size)
-	self.size = size
+	return size
 end
 function WindowContainer:calcLayout(bbox)
-	super.calcLayout(self, bbox)
+	bbox = super.calcLayout(self, bbox)
 	self:each(function(window)
+		window:updateSize(bbox)
 		window:updateLayout(bbox)
 	end)
+	return bbox
 end
 
 function WindowContainer:windowsClick(button, x, y, ...)

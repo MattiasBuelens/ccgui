@@ -349,13 +349,13 @@ function Window:calcSize(size)
 	if not self.isMaximized then
 		size = Rectangle:new(self.windowBox)
 	end
-	super.calcSize(self, size)
+	return super.calcSize(self, size)
 end
 function Window:calcLayout(bbox)
 	if not self.isMaximized then
 		bbox = self.windowBox:shift(bbox:tl())
 	end
-	super.calcLayout(self, bbox)
+	return super.calcLayout(self, bbox)
 end
 
 -- Bring to foreground on click
