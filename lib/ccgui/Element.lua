@@ -121,15 +121,16 @@ function Element:calcSize(size)
 end
 function Element:updateSize(size)
 	self.size = self:calcSize(size)
+	return self.size
 end
 
 -- Calculate element layout within given bounding box
 function Element:calcLayout(bbox)
-	self.bbox = bbox
 	return bbox
 end
 function Element:updateLayout(bbox)
-	self:calcLayout(Rectangle:new(bbox:tl(), self.size:size()))
+	self.bbox = self:calcLayout(bbox)
+	return self.bbox
 end
 
 -- Check if the bounding box with padding contains the given point

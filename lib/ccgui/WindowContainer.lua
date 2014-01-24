@@ -6,6 +6,7 @@
 --]]
 
 local Container	= require "ccgui.Container"
+local Rectangle	= require "ccgui.geom.Rectangle"
 
 local WindowContainer = Container:subclass("ccgui.WindowContainer")
 function WindowContainer:initialize(opts)
@@ -103,11 +104,11 @@ end
 function WindowContainer:calcSize(size)
 	return size
 end
-function WindowContainer:calcLayout(bbox)
-	bbox = super.calcLayout(self, bbox)
+function WindowContainer:updateLayout(bbox)
+	bbox = super.updateLayout(self, bbox)
 	self:each(function(window)
-		window:updateSize(bbox)
-		window:updateLayout(bbox)
+		local size = window:updateSize(bbox)
+		window:updateLayout(Rectangle:new(bbox:tl(), size:size()))
 	end)
 	return bbox
 end

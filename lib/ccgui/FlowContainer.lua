@@ -100,6 +100,8 @@ function FlowContainer:calcSize(size)
 
 	-- Get children size box
 	local bbox = Rectangle:new{
+		x = cbox.x,
+		y = cbox.y,
 		[flowDim] = flowSize,
 		[fixedDim] = maxFixed
 	}
@@ -108,6 +110,12 @@ function FlowContainer:calcSize(size)
 end
 
 function FlowContainer:calcLayout(bbox)
+	return self:calcSize(bbox)
+end
+
+function FlowContainer:updateLayout(bbox)
+	bbox = super.updateLayout(self, bbox)
+
 	-- Get inner box for children bounding box
 	local cbox = self:inner(bbox)
 
@@ -166,8 +174,7 @@ function FlowContainer:calcLayout(bbox)
 		end
 	end)]]--
 
-	-- Use given bounding box
-	return super.calcLayout(self, bbox)
+	return bbox
 end
 
 -- Exports
