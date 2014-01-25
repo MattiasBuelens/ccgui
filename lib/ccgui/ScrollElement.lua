@@ -113,8 +113,8 @@ function ScrollElement:initialize(opts)
 	})
 
 	-- Mouse
-	self:sinkEvent("mouse_click")
-	self:sinkEvent("mouse_drag")
+	self:sinkScrollBarEvent("mouse_click")
+	self:sinkScrollBarEvent("mouse_drag")
 	self:on("mouse_scroll", self.scrollMouse, self)
 
 	-- Paint
@@ -216,16 +216,19 @@ end
 
 ]]--
 
-function ScrollElement:sinkEvent(event)
-	self:on(event, function(self, ...)
-		if self:visible() and self.showScrollBars then
-			if self.horizontal then
-				self.sliderHoriz:trigger(event, ...)
-			end
-			if self.vertical then
-				self.sliderVerti:trigger(event, ...)
-			end
+function ScrollElement:handleScrollBarSink(event, ...)
+	if self:visible() and self.showScrollBars then
+		if self.horizontal then
+			self.sliderHoriz:trigger(event, ...)
 		end
+		if self.vertical then
+			self.sliderVerti:trigger(event, ...)
+		end
+	end
+end
+function ScrollElement:sinkScrollBarEvent(event)
+	self:on(event, function(self, ...)
+		self:handleScrollBarSink(event, ...)
 	end, self, 1000)
 end
 
