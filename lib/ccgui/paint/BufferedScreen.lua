@@ -60,7 +60,7 @@ function BufferedScreen:initialize(width, height)
 	end
 end
 
-function BufferedScreen:measure(newWidth, newHeight, back, dirty)
+function BufferedScreen:updateSize(newWidth, newHeight, back, dirty)
 	dirty = (dirty == nil) or (not not dirty)
 	local oldWidth, oldHeight = self.width, self.height
 	self.width, self.height = newWidth, newHeight

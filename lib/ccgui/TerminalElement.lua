@@ -55,7 +55,7 @@ end
 function TerminalElement:terminalResize()
 	local bbox = self:inner(self.bbox)
 	-- Update terminal size
-	self.term:measure(bbox)
+	self.term:updateSize(bbox)
 end
 
 -- Exports
