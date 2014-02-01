@@ -60,8 +60,8 @@ end
 -- Draw rectangle
 function DrawContext:drawRect(rect, color)
 	local line = string.rep(" ", rect.w)
-	for y=1,rect.h do
-		self:draw(rect.x, rect.y + y, " ", colours.white, color)
+	for y=0,rect.h-1 do
+		self:draw(rect.x, rect.y + y, line, colours.white, color)
 	end
 end
 

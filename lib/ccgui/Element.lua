@@ -280,12 +280,7 @@ end
 
 -- Fill element's bounding box with background color
 function Element:drawBackground(ctxt)
-	local bbox = self.bbox
-	for y=0,bbox.h-1 do
-		for x=0,bbox.w-1 do
-			ctxt:draw(bbox.x + x, bbox.y + y, " ", colours.white, self:getBackground())
-		end
-	end
+	ctxt:drawRect(self.bbox, self:getBackground())
 end
 
 -- Draw element's border
