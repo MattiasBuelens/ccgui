@@ -5,9 +5,9 @@
 
 --]]
 
-local DrawContext	= require "ccgui.DrawContext"
+local DrawContext	= require "ccgui.paint.DrawContext"
 
-local ChildDrawContext = DrawContext:subclass("ccgui.ChildDrawContext")
+local ChildDrawContext = DrawContext:subclass("ccgui.paint.ChildDrawContext")
 function ChildDrawContext:initialize(parent, x, y, clip)
 	super.initialize(self, x, y, clip)
 	-- Parent context

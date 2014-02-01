@@ -9,6 +9,8 @@ require "ccgui.Element"
 require "ccgui.Align"
 require "ccgui.VAlign"
 
+require "ccgui.paint"
+
 require "ccgui.Container"
 require "ccgui.FlowContainer"
 require "ccgui.TabContainer"

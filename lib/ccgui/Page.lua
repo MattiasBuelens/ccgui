@@ -7,7 +7,7 @@
 
 local FlowContainer			= require "ccgui.FlowContainer"
 local BufferedTerminal		= require "ccgui.paint.BufferedTerminal"
-local TerminalDrawContext	= require "ccgui.TerminalDrawContext"
+local TerminalDrawContext	= require "ccgui.paint.TerminalDrawContext"
 local Rectangle				= require "ccgui.geom.Rectangle"
 local Thread				= require "concurrent.Thread"
 local Scheduler				= require "concurrent.Scheduler"

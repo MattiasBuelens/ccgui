@@ -5,7 +5,7 @@
 
 --]]
 
-local DrawContext	= require "ccgui.DrawContext"
+local DrawContext	= require "ccgui.paint.DrawContext"
 
 local TerminalDrawContext = DrawContext:subclass("ccgui.TerminalDrawContext")
 function TerminalDrawContext:initialize(term, x, y, clip)

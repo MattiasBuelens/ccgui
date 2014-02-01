@@ -7,7 +7,7 @@
 
 local Object	= require "objectlua.Object"
 
-local DrawContext = Object:subclass("ccgui.DrawContext")
+local DrawContext = Object:subclass("ccgui.paint.DrawContext")
 function DrawContext:initialize(x, y, clip)
 	-- Offset
 	self.offsetX = x or 0
