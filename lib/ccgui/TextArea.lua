@@ -304,6 +304,14 @@ function TextArea:measure(size)
 	local bbox = self:inner(size)
 	local w, h = bbox.w, bbox.h
 
+	-- Deal with unlimited space
+	if w == math.huge then
+		w = self.longestLineLength + 1
+	end
+	if h == math.huge then
+		h = #self.lines
+	end
+
 	-- Limit inner height when single line
 	if not self:multiline() then h = 1 end
 

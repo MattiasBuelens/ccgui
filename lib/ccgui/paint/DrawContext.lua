@@ -28,6 +28,10 @@ function DrawContext:draw(x, y, text, fgColor, bgColor, clip)
 		x, y, text, fgColor, bgColor, clip = x.x, x.y, y, text, fgColor, bgColor
 	end
 
+	-- Offset
+	x = x + self.offsetX
+	y = y + self.offsetY
+
 	-- Clip
 	clip = clip or self.clip
 	if clip then
@@ -41,10 +45,6 @@ function DrawContext:draw(x, y, text, fgColor, bgColor, clip)
 		text = string.sub(text, startIdx, endIdx)
 		x = x + startIdx - 1
 	end
-	
-	-- Offset
-	x = x + self.offsetX
-	y = y + self.offsetY
 
 	self:rawDraw(x, y, text, fgColor, bgColor)
 end
