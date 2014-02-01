@@ -41,14 +41,14 @@ function ElementTerminal:asTerm()
 	return self.term
 end
 
-function ElementTerminal:draw(bbox, repaint)
+function ElementTerminal:draw(ctxt, bbox, repaint)
 	-- Draw each strip in the screen
 	for lineY,line in ipairs(self.screen.strips) do
 		for i,strip in ipairs(line) do
 			if repaint or strip.dirty then
 				local x = bbox.x + strip:left() - 1
 				local y = bbox.y + lineY - 1
-				self.element:draw(x, y, strip.str, strip.text, strip.back, bbox)
+				ctxt:draw(x, y, strip.str, strip.text, strip.back, bbox)
 			end
 		end
 	end

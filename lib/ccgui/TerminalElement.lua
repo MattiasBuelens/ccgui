@@ -45,10 +45,10 @@ function TerminalElement:updateTerminalBlink()
 	end
 end
 
-function TerminalElement:terminalPaint()
+function TerminalElement:terminalPaint(ctxt)
 	local bbox = self:inner(self.bbox)
 	-- Draw terminal
-	self.term:draw(bbox, self.needsRepaint)
+	self.term:draw(ctxt, bbox, self.needsRepaint)
 	-- Update cursor blink
 	self:updateTerminalBlink()
 end

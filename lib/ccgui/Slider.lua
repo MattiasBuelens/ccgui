@@ -92,9 +92,9 @@ function Bar:getBarRect()
 end
 
 -- Draw the bar
-function Bar:barPaint()
+function Bar:barPaint(ctxt)
 	-- Draw a line
-	self:drawLine(self:getBarLine(), self.foreground)
+	ctxt:drawLine(self:getBarLine(), self:getForeground())
 end
 
 -- Start dragging on mouse click on bar

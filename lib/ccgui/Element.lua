@@ -247,7 +247,7 @@ function Element:unmarkPaint()
 	self.needsRepaint = false
 end
 
-function Element:paint()
+function Element:paint(ctxt)
 	-- Ignore if invisible or no paint requested
 	if not self:isVisible() then return end
 	if not self.needsPaint then return end
@@ -256,10 +256,10 @@ function Element:paint()
 	if self.bbox ~= nil then
 		-- Repaint
 		if self.needsRepaint then
-			self:trigger("repaint")
+			self:trigger("repaint", ctxt)
 		end
 		-- Paint
-		self:trigger("paint")
+		self:trigger("paint", ctxt)
 	end
 	self:trigger("afterpaint")
 	self:unmarkPaint()
@@ -279,69 +279,18 @@ function Element:getBackground()
 end
 
 -- Fill element's bounding box with background color
-function Element:drawBackground()
+function Element:drawBackground(ctxt)
 	local bbox = self.bbox
 	for y=0,bbox.h-1 do
 		for x=0,bbox.w-1 do
-			self:draw(bbox.x + x, bbox.y + y, " ", self.foreground, self.background)
+			ctxt:draw(bbox.x + x, bbox.y + y, " ", colours.white, self:getBackground())
 		end
 	end
 end
 
--- Draw single text line within bounding rectangle
-function Element:draw(x, y, text, fgColor, bgColor, bounds)
-	if type(x) == "table" then
-		-- Position given as vector
-		x, y, text, fgColor, bgColor, bounds = x.x, x.y, y, text, fgColor, bgColor
-	end
-
-	if bounds then
-		-- Check vertical bounds
-		if y < bounds.y or y >= bounds.y + bounds.h then
-			return
-		end
-		-- Limit to horizontal bounds
-		local startIdx = 1 + math.max(0, bounds.x - x)
-		local endIdx = math.min(#text, bounds.x + bounds.w - x)
-		text = string.sub(text, startIdx, endIdx)
-		x = x + startIdx - 1
-	end
-
-	self:drawUnsafe(x, y, text, fgColor, bgColor)
-end
-
--- Unsafe drawing
-function Element:drawUnsafe(x, y, text, fgColor, bgColor)
-	-- Fill in transparency
-	fgColor = fgColor ~= 0 and fgColor or self.foreground
-	bgColor = bgColor ~= 0 and bgColor or self.background
-	-- Draw on parent
-	if self.visible and self.parent ~= nil then
-		self.parent:drawUnsafe(x, y, text, fgColor, bgColor)
-	end
-end
-
--- Draw line
-function Element:drawLine(line, color)
-	-- Draw each point along the line
-	for i,point in ipairs(line:points()) do
-		self:draw(point, " ", colours.white, color)
-	end
-end
-
--- Draw single border
-function Element:drawSingleBorder(side)
-	if self.border:has(side) then
-		self:drawLine(self.bbox[side](self.bbox), self.border:get(side))
-	end
-end
-
--- Draw all borders
-function Element:drawBorder()
-	self:drawSingleBorder("left")
-	self:drawSingleBorder("right")
-	self:drawSingleBorder("top")
-	self:drawSingleBorder("bottom")
+-- Draw element's border
+function Element:drawBorder(ctxt)
+	ctxt:drawBorder(self.bbox, self.border)
 end
 
 -- Bubble event up to parent

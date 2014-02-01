@@ -327,14 +327,15 @@ function TextArea:drawCursor()
 	end
 end
 
-function TextArea:drawText()
+function TextArea:drawText(ctxt)
 	local bbox = self:inner(self.bbox)
 	-- Get screen position
 	local pos = self:toScreen(1, 1)
 	local x, y = pos.x, pos.y
 	-- Draw lines
 	for i,line in ipairs(self.lines) do
-		self:draw(x, y, line, self.foreground, self.background, bbox)
+		-- TODO Use ctxt's clip?
+		ctxt:draw(x, y, line, self:getForeground(), self:getBackground(), bbox)
 		y = y + 1
 	end
 end

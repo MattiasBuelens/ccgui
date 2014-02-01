@@ -151,10 +151,10 @@ function Container:markRepaint()
 	end
 end
 
-function Container:drawChildren()
+function Container:drawChildren(ctxt)
 	-- Paint visible children
 	self:eachVisible(function(child)
-		child:paint()
+		child:paint(ctxt)
 	end)
 end
 

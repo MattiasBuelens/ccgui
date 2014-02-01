@@ -5,17 +5,21 @@
 
 --]]
 
-local FlowContainer		= require "ccgui.FlowContainer"
-local BufferedTerminal	= require "ccgui.paint.BufferedTerminal"
-local Rectangle			= require "ccgui.geom.Rectangle"
-local Thread			= require "concurrent.Thread"
-local Scheduler			= require "concurrent.Scheduler"
+local FlowContainer			= require "ccgui.FlowContainer"
+local BufferedTerminal		= require "ccgui.paint.BufferedTerminal"
+local TerminalDrawContext	= require "ccgui.TerminalDrawContext"
+local Rectangle				= require "ccgui.geom.Rectangle"
+local Thread				= require "concurrent.Thread"
+local Scheduler				= require "concurrent.Scheduler"
 
 local Page = FlowContainer:subclass("ccgui.Page")
 function Page:initialize(opts)
 	super.initialize(self, opts)
 
+	-- Terminal
 	self.term = BufferedTerminal:new(opts.term or term)
+	self.ctxt = TerminalDrawContext:new(self.term)
+
 	-- Frames per second
 	self.fps = opts.fps or 8
 	-- Identifier of frame timer
@@ -51,17 +55,6 @@ function Page:pageLayout()
 	self:updateLayout(bbox)
 end
 
-function Page:drawUnsafe(x, y, text, fgColor, bgColor)
-	-- Fill in transparency
-	fgColor = fgColor ~= 0 and fgColor or self.foreground
-	bgColor = bgColor ~= 0 and bgColor or self.background
-	-- Remove colors when not supported
-	fgColor = self.term:isColor() and fgColor or colours.white
-	bgColor = self.term:isColor() and bgColor or colours.black
-	-- Draw on terminal
-	self.term:writeBuffer(text, x, y, fgColor, bgColor)
-end
-
 function Page:show()
 	if super.show(self) then
 		self:startFrameTimer()
@@ -89,7 +82,7 @@ end
 
 function Page:pageFrameTimer(timerId)
 	if timerId == self.frameTimer then
-		self:paint()
+		self:paint(self.ctxt)
 		self:restartFrameTimer()
 	end
 end
@@ -129,7 +122,7 @@ end
 function Page:loop()
 	-- Setup
 	self:trigger("start")
-	self:paint()
+	self:paint(self.ctxt)
 	self:startFrameTimer()
 	-- Event loop
 	while self.pageRunning do

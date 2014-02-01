@@ -185,14 +185,14 @@ function ScrollElement:markPaint()
 	end
 end
 
-function ScrollElement:scrollPaint()
+function ScrollElement:scrollPaint(ctxt)
 	if self.showScrollBars then
 		-- Paint scrollbars
 		if self.horizontal then
-			self.sliderHoriz:paint()
+			self.sliderHoriz:paint(ctxt)
 		end
 		if self.vertical then
-			self.sliderVerti:paint()
+			self.sliderVerti:paint(ctxt)
 		end
 	end
 end

@@ -53,9 +53,9 @@ function SubMenuButton:closeParentMenu(cascade)
 		self.parent:closeMenu(cascade)
 	end
 end
-function SubMenuButton:drawArrow()
+function SubMenuButton:drawArrow(ctxt)
 	-- Draw arrow
-	self:draw(self.bbox:tr(), ">")
+	ctxt:draw(self.bbox:tr(), ">", self:getForeground(), self:getBackground())
 end
 
 function SubMenuButton:toggleOnClick()

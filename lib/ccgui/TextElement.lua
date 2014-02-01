@@ -106,7 +106,7 @@ function TextElement:calcSize(size)
 	return self:outer(bbox)
 end
 
-function TextElement:drawText()
+function TextElement:drawText(ctxt)
 	-- Get inner bounding box
 	local bbox = self:inner(self.bbox)
 
@@ -137,7 +137,7 @@ function TextElement:drawText()
 			x = x + bbox.w - len
 		end
 		-- Write text
-		self:draw(x, y, line, self.foreground, self.background, bbox)
+		ctxt:draw(x, y, line, self:getForeground(), self:getBackground(), bbox)
 		y = y + 1
 	end
 end
