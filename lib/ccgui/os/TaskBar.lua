@@ -74,13 +74,13 @@ function TaskBar:toggleMenu()
 	end
 end
 
-function TaskBar:updateLayout(bbox)
+function TaskBar:layout(bbox)
 	-- Clip to bottom of parent container
 	if self.parent then
 		local pbox = self.parent:inner(self.parent.bbox)
 		bbox.y = pbox.y + pbox.h - bbox.h
 	end
-	super.updateLayout(self, bbox)
+	super.layout(self, bbox)
 end
 function TaskBar:contains(x, y)
 	return super.contains(self, x, y) or (self:isMenuOpen() and self.menu:contains(x, y))

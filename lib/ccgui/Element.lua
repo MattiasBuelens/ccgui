@@ -121,9 +121,9 @@ function Element:measure(size)
 	self.size = size
 end
 
--- Update element layout within given bounding box
--- Store layout in Element.bbox
-function Element:updateLayout(bbox)
+-- Layout element within given bounding box
+-- Store bounding box in Element.bbox
+function Element:layout(bbox)
 	self.bbox = bbox
 end
 

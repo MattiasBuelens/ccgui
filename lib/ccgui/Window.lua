@@ -351,11 +351,11 @@ function Window:measure(size)
 	end
 	return super.measure(self, size)
 end
-function Window:updateLayout(bbox)
+function Window:layout(bbox)
 	if not self.isMaximized then
 		bbox = self.windowBox:shift(bbox:tl())
 	end
-	return super.updateLayout(self, bbox)
+	return super.layout(self, bbox)
 end
 
 -- Bring to foreground on click

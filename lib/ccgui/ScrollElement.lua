@@ -38,7 +38,7 @@ function HorizontalSlider:sliderLayout()
 	local bbox = Rectangle:new(sbox.x, sbox.y + sbox.h, sbox.w, 1)
 	-- Update layout
 	self:measure(bbox)
-	self:updateLayout(bbox)
+	self:layout(bbox)
 end
 function HorizontalSlider:getValue()
 	return self.parent.scrollPosition.x
@@ -65,7 +65,7 @@ function VerticalSlider:sliderLayout()
 	local bbox = Rectangle:new(sbox.x + sbox.w, sbox.y, 1, sbox.h)
 	-- Update layout
 	self:measure(bbox)
-	self:updateLayout(bbox)
+	self:layout(bbox)
 end
 function VerticalSlider:getValue()
 	return self.parent.scrollPosition.y

@@ -107,10 +107,10 @@ function WindowContainer:measure(size)
 		window:measure(size)
 	end)
 end
-function WindowContainer:updateLayout(bbox)
-	super.updateLayout(self, bbox)
+function WindowContainer:layout(bbox)
+	super.layout(self, bbox)
 	self:each(function(window)
-		window:updateLayout(Rectangle:new(bbox:tl(), window.size:size()))
+		window:layout(Rectangle:new(bbox:tl(), window.size:size()))
 	end)
 end
 

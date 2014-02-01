@@ -108,8 +108,8 @@ function FlowContainer:measure(size)
 	super.measure(self, size)
 end
 
-function FlowContainer:updateLayout(bbox)
-	super.updateLayout(self, bbox)
+function FlowContainer:layout(bbox)
+	super.layout(self, bbox)
 
 	-- Get inner box for children bounding box
 	local cbox = self:inner(bbox)
@@ -140,11 +140,11 @@ function FlowContainer:updateLayout(bbox)
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Position in top-left corner
-			child:updateLayout(Rectangle:new(cbox:tl(), child.size:size()))
+			child:layout(Rectangle:new(cbox:tl(), child.size:size()))
 			return
 		end
 		-- Get child bounding box
-		child:updateLayout(Rectangle:new{
+		child:layout(Rectangle:new{
 			[flowCoord] = flowPos,
 			[fixedCoord] = fixedPos,
 			[flowDim] = child.size[flowDim],

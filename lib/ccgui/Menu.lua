@@ -119,14 +119,14 @@ function Menu:measure(size)
 	size = Rectangle:new(size:tl(), math.huge, math.huge)
 	return super.measure(self, size)
 end
-function Menu:updateLayout(bbox)
+function Menu:layout(bbox)
 	-- Open at menu position
 	if self.menuUp then
 		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y - bbox.h + 1
 	else
 		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y
 	end
-	return super.updateLayout(self, bbox)
+	return super.layout(self, bbox)
 end
 function Menu:contains(x, y)
 	return super.contains(self, x, y) or (self.openedSubMenu and self.openedSubMenu:contains(x, y))

@@ -52,7 +52,7 @@ function Page:pageLayout()
 	-- Fill whole screen
 	local bbox = Rectangle:new(1, 1, self.term:getSize())
 	self:measure(bbox)
-	self:updateLayout(bbox)
+	self:layout(bbox)
 end
 
 function Page:show()
