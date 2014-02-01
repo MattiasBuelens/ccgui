@@ -23,7 +23,7 @@ function Element:initialize(opts)
 	-- Parent element
 	self.parent = opts.parent or nil
 	-- Visibility
-	self.isVisible = (opts.isVisible == nil) or (not not opts.isVisible)
+	self.visible = (opts.visible == nil) or (not not opts.visible)
 	-- Colors
 	self.foreground = opts.foreground or colours.black
 	self.background = opts.background or 0
@@ -49,33 +49,33 @@ function Element:initialize(opts)
 	self.needsRepaint = true
 end
 
-function Element:visible()
-	if not self.isVisible then
+function Element:isVisible()
+	if not self.visible then
 		return false
 	end
 	if self.parent ~= nil then
-		return self.parent:visible()
+		return self.parent:isVisible()
 	end
 	-- TODO What about detached children?
 	return true
 end
 
 function Element:show()
-	if not self.isVisible then
+	if not self.visible then
 		self:markRepaint()
-		self.isVisible = true
+		self.visible = true
 		return true
 	end
 	return false
 end
 
 function Element:hide()
-	if self.isVisible then
+	if self.visible then
 		if self.parent ~= nil then
 			self.parent:markRepaint()
 		end
 		self:blur()
-		self.isVisible = false
+		self.visible = false
 		return true
 	end
 	return false
@@ -149,10 +149,10 @@ function Element:canFocus()
 	return false
 end
 
-function Element:focused(elem)
+function Element:hasFocus(elem)
 	if self:checkFocused(elem) then
 		-- Bubble up to parent
-		return (self.parent == nil) or self.parent:focused(self)
+		return (self.parent == nil) or self.parent:hasFocus(self)
 	end
 	return false
 end
@@ -160,7 +160,7 @@ end
 function Element:checkFocused(elem)
 	if elem == nil or elem == self then
 		-- Must have visible focus
-		return self:canFocus() and self.hasFocus and self.isVisible
+		return self:canFocus() and self.focused and self.visible
 	end
 end
 
@@ -181,8 +181,8 @@ function Element:blur()
 	end
 
 	-- Lose focus
-	if self.hasFocus then
-		self.hasFocus = false
+	if self.focused then
+		self.focused = false
 		self:trigger("blur", self)
 	end
 
@@ -199,8 +199,8 @@ function Element:updateFocus(newFocus)
 		self.parent:updateFocus(newFocus)
 	end
 	-- Trigger focus if gained focus
-	if self == newFocus and not self.hasFocus then
-		self.hasFocus = true
+	if self == newFocus and not self.focused then
+		self.focused = true
 		self:trigger("focus", self)
 	end
 end
@@ -209,7 +209,7 @@ function Element:focusOnClick(button, x, y)
 	if button == 1 then
 		-- Left mouse button
 		-- Take focus when focusable and contains mouse pointer
-		if self:canFocus() and not self.hasFocus and self:contains(x, y) then
+		if self:canFocus() and not self.focused and self:contains(x, y) then
 			self:focus()
 		end
 	end
@@ -249,7 +249,7 @@ end
 
 function Element:paint()
 	-- Ignore if invisible or no paint requested
-	if not self:visible() then return end
+	if not self:isVisible() then return end
 	if not self.needsPaint then return end
 
 	self:trigger("beforepaint")
@@ -263,6 +263,19 @@ function Element:paint()
 	end
 	self:trigger("afterpaint")
 	self:unmarkPaint()
+end
+
+function Element:getForeground()
+	if self.foreground == 0 and self.parent ~= nil then
+		return self.parent:getForeground()
+	end
+	return self.foreground
+end
+function Element:getBackground()
+	if self.background == 0 and self.parent ~= nil then
+		return self.parent:getBackground()
+	end
+	return self.background
 end
 
 -- Fill element's bounding box with background color
@@ -303,7 +316,7 @@ function Element:drawUnsafe(x, y, text, fgColor, bgColor)
 	fgColor = fgColor ~= 0 and fgColor or self.foreground
 	bgColor = bgColor ~= 0 and bgColor or self.background
 	-- Draw on parent
-	if self.isVisible and self.parent ~= nil then
+	if self.visible and self.parent ~= nil then
 		self.parent:drawUnsafe(x, y, text, fgColor, bgColor)
 	end
 end

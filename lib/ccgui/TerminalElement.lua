@@ -27,7 +27,7 @@ function TerminalElement:asTerm()
 end
 
 function TerminalElement:canFocus()
-	return self:visible()
+	return self:isVisible()
 end
 
 function TerminalElement:showTerminalBlink()
@@ -38,7 +38,7 @@ function TerminalElement:hideTerminalBlink()
 	self:setCursorBlink(false)
 end
 function TerminalElement:updateTerminalBlink()
-	if self:focused() then
+	if self:hasFocus() then
 		self:showTerminalBlink()
 	else
 		self:hideTerminalBlink()

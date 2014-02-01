@@ -103,7 +103,7 @@ end
 
 -- Start dragging
 function TitleBar:dragStart(button, x, y)
-	if button == 1 and self:visible() and self:canDrag() and self.titleText:contains(x, y) then
+	if button == 1 and self:isVisible() and self:canDrag() and self.titleText:contains(x, y) then
 		-- Store starting position
 		self.dragStartPos = vector.new(x, y)
 		self.dragStartValue = self.parent:getPosition()
@@ -115,7 +115,7 @@ end
 
 -- Position window while dragging
 function TitleBar:dragging(button, x, y)
-	if button == 1 and self:visible() and self:canDrag() and self.dragStartPos ~= nil then
+	if button == 1 and self:isVisible() and self:canDrag() and self.dragStartPos ~= nil then
 		-- Get drag delta
 		local current = vector.new(x, y)
 		local delta = current - self.dragStartPos
@@ -148,7 +148,7 @@ end
 
 -- Start dragging
 function ResizeHandle:dragStart(button, x, y)
-	if button == 1 and self:visible() and self:canDrag() and self:contains(x, y) then
+	if button == 1 and self:isVisible() and self:canDrag() and self:contains(x, y) then
 		-- Store starting position
 		self.dragStartPos = vector.new(x, y)
 		self.dragStartSize = self:getWindow():getSize()
@@ -160,7 +160,7 @@ end
 
 -- Resize window while dragging
 function ResizeHandle:dragging(button, x, y)
-	if button == 1 and self:visible() and self:canDrag() and self.dragStartPos ~= nil then
+	if button == 1 and self:isVisible() and self:canDrag() and self.dragStartPos ~= nil then
 		-- Get drag delta
 		local current = vector.new(x, y)
 		local delta = current - self.dragStartPos
@@ -286,7 +286,7 @@ function Window:restoreSize()
 	end
 end
 function Window:isForeground()
-	if not self:visible() then
+	if not self:isVisible() then
 		return false
 	end
 	if self.parent ~= nil then
@@ -360,7 +360,7 @@ end
 
 -- Bring to foreground on click
 function Window:foregroundOnClick(button, x, y)
-	if button == 1 and self:visible() and self:contains(x, y) then
+	if button == 1 and self:isVisible() and self:contains(x, y) then
 		self:bringToForeground()
 	end
 end

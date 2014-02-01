@@ -30,7 +30,7 @@ function ProgramPane:initialize(opts)
 end
 
 function ProgramPane:isForeground()
-	if not self:visible() then
+	if not self:isVisible() then
 		return false
 	end
 	if self.parent ~= nil then
@@ -100,7 +100,7 @@ function ProgramPane:filterProgramEvent(eventData)
 	local event = eventData[1]
 	if event == "key" or event == "char" then
 		-- Must have focus for keyboard event
-		if self:focused() then
+		if self:hasFocus() then
 			return eventData
 		else
 			return nil

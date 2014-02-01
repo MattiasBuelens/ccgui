@@ -22,7 +22,7 @@ end
 function Button:buttonClick(button, x, y)
 	if button == 1 then
 		-- Left mouse button, trigger pressed
-		if self:visible() and self:contains(x, y) then
+		if self:isVisible() and self:contains(x, y) then
 			self:trigger("buttonpress")
 		end
 	end

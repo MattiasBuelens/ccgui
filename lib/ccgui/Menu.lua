@@ -14,7 +14,7 @@ local SubMenuButton	= require "ccgui.SubMenuButton"
 local Menu = FlowContainer:subclass("ccgui.Menu")
 function Menu:initialize(opts)
 	opts.horizontal = false
-	opts.isVisible = false
+	opts.visible = false
 	opts.absolute = true
 	opts.background = opts.background or colours.lightGrey
 
@@ -59,7 +59,7 @@ function Menu:addSubMenu(button, menu)
 end
 
 function Menu:isMenuOpen()
-	return self:visible()
+	return self:isVisible()
 end
 function Menu:openMenu(x, y, up)
 	self.menuPos = vector.new(x, y)

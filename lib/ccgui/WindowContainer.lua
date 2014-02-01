@@ -72,7 +72,7 @@ function WindowContainer:getWindowAt(x, y)
 	-- Find window from foreground to background
 	for i=self:getWindowCount(),1,-1 do
 		local window = self:getWindow(i)
-		if window:visible() and window:contains(x, y) then
+		if window:isVisible() and window:contains(x, y) then
 			return window
 		end
 	end
@@ -115,7 +115,7 @@ end
 
 function WindowContainer:windowsClick(button, x, y, ...)
 	-- Click on containing window
-	if self:visible() and self:contains(x, y) then
+	if self:isVisible() and self:contains(x, y) then
 		local window = self:getWindowAt(x, y)
 		if window ~= nil then
 			return window:trigger("mouse_click", button, x, y, ...)
@@ -125,7 +125,7 @@ end
 function WindowContainer:windowsDrag(button, x, y, ...)
 	-- Drag foreground window
 	local window = self:getForegroundWindow()
-	if window ~= nil and window:visible() then
+	if window ~= nil and window:isVisible() then
 		window:trigger("mouse_drag", button, x, y, ...)
 	end
 end

@@ -58,7 +58,7 @@ end
 function Container:visibleChildren()
 	local t = {}
 	for i,child in ipairs(self.children) do
-		if child.isVisible then
+		if child.visible then
 			table.insert(t, child)
 		end
 	end
@@ -169,7 +169,7 @@ function Container:focusedChild()
 end
 
 function Container:checkFocused(elem)
-	if self.isVisible and self.childFocus ~= nil then
+	if self.visible and self.childFocus ~= nil then
 		-- Check focused child
 		if elem == nil then
 			return true
@@ -220,7 +220,7 @@ end
 ]]--
 
 function Container:handleSink(event, ...)
-	if self:visible() then
+	if self:isVisible() then
 		local args = { ... }
 		self:each(function(child)
 			child:trigger(event, unpack(args))
@@ -235,7 +235,7 @@ end
 
 function Container:handleFocusSink(event, ...)
 	local child = self:focusedChild()
-	if child and child:focused() then
+	if child and child:hasFocus() then
 		child:trigger(event, ...)
 	end
 end

@@ -114,7 +114,7 @@ end
 ]]--
 
 function TextArea:canFocus()
-	return self:visible()
+	return self:isVisible()
 end
 
 function TextArea:textFocus()
@@ -314,7 +314,7 @@ function TextArea:calcSize(size)
 end
 
 function TextArea:drawCursor()
-	if self:focused() then
+	if self:hasFocus() then
 		-- Get screen position
 		local pos = self:toScreen(self.cursorChar, self.cursorLine)
 		if self:contains(pos) then

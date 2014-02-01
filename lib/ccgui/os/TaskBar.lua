@@ -88,7 +88,7 @@ end
 
 -- Window-like behaviour
 function TaskBar:isForeground()
-	if not self:visible() then
+	if not self:isVisible() then
 		return false
 	end
 	if self.parent then
@@ -110,7 +110,7 @@ function TaskBar:markRepaint()
 end
 function TaskBar:foregroundOnClick(button, x, y)
 	-- Bring to foreground on click
-	if button == 1 and self:visible() and self:contains(x, y) then
+	if button == 1 and self:isVisible() and self:contains(x, y) then
 		self:bringToForeground()
 	end
 end
