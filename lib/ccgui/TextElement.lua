@@ -103,8 +103,7 @@ function TextElement:measure(size)
 	-- Get inner bounding box with new size
 	size = Rectangle:new(bbox.x, bbox.y, nw, nh)
 	-- Use outer size box
-	size = self:outer(size)
-	super.measure(self, size)
+	self.size = self:outer(size)
 end
 
 function TextElement:drawText(ctxt)

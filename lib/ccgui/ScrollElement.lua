@@ -5,10 +5,11 @@
 
 --]]
 
-local Element	= require "ccgui.Element"
-local Slider	= require "ccgui.Slider"
-local Margins	= require "ccgui.geom.Margins"
-local Rectangle	= require "ccgui.geom.Rectangle"
+local Element		= require "ccgui.Element"
+local Slider		= require "ccgui.Slider"
+local MeasureSpec	= require "ccgui.MeasureSpec"
+local Margins		= require "ccgui.geom.Margins"
+local Rectangle		= require "ccgui.geom.Rectangle"
 
 local ScrollSlider = Slider:subclass("ccgui.scroll.ScrollSlider")
 function ScrollSlider:initialize(opts)
@@ -37,7 +38,7 @@ function HorizontalSlider:sliderLayout()
 	local sbox = self.parent:inner(self.parent.bbox)
 	local bbox = Rectangle:new(sbox.x, sbox.y + sbox.h, sbox.w, 1)
 	-- Update layout
-	self:measure(bbox)
+	self:measure(MeasureSpec:new(bbox))
 	self:layout(bbox)
 end
 function HorizontalSlider:getValue()
@@ -64,7 +65,7 @@ function VerticalSlider:sliderLayout()
 	local sbox = self.parent:inner(self.parent.bbox)
 	local bbox = Rectangle:new(sbox.x + sbox.w, sbox.y, 1, sbox.h)
 	-- Update layout
-	self:measure(bbox)
+	self:measure(MeasureSpec:new(bbox))
 	self:layout(bbox)
 end
 function VerticalSlider:getValue()

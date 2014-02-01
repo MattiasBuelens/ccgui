@@ -115,10 +115,10 @@ function Element:outer(bbox)
 	return bbox:expand(self.padding):expand(self.border:margins())
 end
 
--- Measure element size within given size box
+-- Measure element size within given specification
 -- Store measurement in Element.size
 function Element:measure(size)
-	self.size = size
+	error("Element:measure() not implemented")
 end
 
 -- Layout element within given bounding box

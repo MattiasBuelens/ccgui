@@ -8,6 +8,7 @@
 local FlowContainer	= require "ccgui.FlowContainer"
 local Margins		= require "ccgui.geom.Margins"
 local Rectangle		= require "ccgui.geom.Rectangle"
+local MeasureSpec	= require "ccgui.MeasureSpec"
 local MenuButton	= require "ccgui.MenuButton"
 local SubMenuButton	= require "ccgui.SubMenuButton"
 
@@ -114,10 +115,10 @@ function Menu:markRepaint()
 	end
 	super.markRepaint(self)
 end
-function Menu:measure(size)
+function Menu:measure(spec)
 	-- Calculate with unlimited space
-	size = Rectangle:new(size:tl(), math.huge, math.huge)
-	return super.measure(self, size)
+	spec = MeasureSpec:new("?", "?")
+	super.measure(self, spec)
 end
 function Menu:layout(bbox)
 	-- Open at menu position

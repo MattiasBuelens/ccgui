@@ -9,6 +9,7 @@ local FlowContainer	= require "ccgui.FlowContainer"
 local TextElement	= require "ccgui.TextElement"
 local Button		= require "ccgui.Button"
 local ToggleButton	= require "ccgui.ToggleButton"
+local MeasureSpec	= require "ccgui.MeasureSpec"
 local Rectangle		= require "ccgui.geom.Rectangle"
 
 local TitleBar = FlowContainer:subclass("ccgui.window.TitleBar")
@@ -345,17 +346,17 @@ function Window:markRepaint()
 	end
 	super.markRepaint(self)
 end
-function Window:measure(size)
+function Window:measure(spec)
 	if not self.isMaximized then
-		size = Rectangle:new(self.windowBox)
+		spec = MeasureSpec:new(self.windowBox)
 	end
-	return super.measure(self, size)
+	super.measure(self, spec)
 end
 function Window:layout(bbox)
 	if not self.isMaximized then
 		bbox = self.windowBox:shift(bbox:tl())
 	end
-	return super.layout(self, bbox)
+	super.layout(self, bbox)
 end
 
 -- Bring to foreground on click

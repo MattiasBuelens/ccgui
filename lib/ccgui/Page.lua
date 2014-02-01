@@ -9,6 +9,7 @@ local FlowContainer			= require "ccgui.FlowContainer"
 local BufferedTerminal		= require "ccgui.paint.BufferedTerminal"
 local TerminalDrawContext	= require "ccgui.paint.TerminalDrawContext"
 local Rectangle				= require "ccgui.geom.Rectangle"
+local MeasureSpec			= require "ccgui.MeasureSpec"
 local Thread				= require "concurrent.Thread"
 local Scheduler				= require "concurrent.Scheduler"
 
@@ -51,7 +52,7 @@ end
 function Page:pageLayout()
 	-- Fill whole screen
 	local bbox = Rectangle:new(1, 1, self.term:getSize())
-	self:measure(bbox)
+	self:measure(MeasureSpec:new(bbox))
 	self:layout(bbox)
 end
 

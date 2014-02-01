@@ -17,9 +17,9 @@ function FlowContainer:initialize(opts)
 	self.spacing = opts.spacing or 0
 end
 
-function FlowContainer:measure(size)
-	-- Get inner box
-	local cbox = self:inner(size)
+function FlowContainer:measure(spec)
+	-- Get inner spec
+	local cbox = self:inner(spec)
 
 	-- Flow dimension
 	local flowDim = (self.horizontal and "w") or "h"
@@ -99,13 +99,12 @@ function FlowContainer:measure(size)
 	end)
 
 	-- Get children size box
-	size = Rectangle:new{
+	local size = Rectangle:new{
 		[flowDim] = flowSize,
 		[fixedDim] = maxFixed
 	}
 	-- Use outer size box
-	size = self:outer(size)
-	super.measure(self, size)
+	self.size = self:outer(size)
 end
 
 function FlowContainer:layout(bbox)
