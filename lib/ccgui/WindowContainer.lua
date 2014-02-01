@@ -101,16 +101,17 @@ function WindowContainer:markPaint()
 	self.ignorePaints = false
 end
 
-function WindowContainer:calcSize(size)
-	return size
+function WindowContainer:updateSize(size)
+	super.updateSize(self, size)
+	self:each(function(window)
+		window:updateSize(size)
+	end)
 end
 function WindowContainer:updateLayout(bbox)
-	bbox = super.updateLayout(self, bbox)
+	super.updateLayout(self, bbox)
 	self:each(function(window)
-		local size = window:updateSize(bbox)
-		window:updateLayout(Rectangle:new(bbox:tl(), size:size()))
+		window:updateLayout(Rectangle:new(bbox:tl(), window.size:size()))
 	end)
-	return bbox
 end
 
 function WindowContainer:windowsClick(button, x, y, ...)

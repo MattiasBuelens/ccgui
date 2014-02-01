@@ -17,7 +17,7 @@ function FlowContainer:initialize(opts)
 	self.spacing = opts.spacing or 0
 end
 
-function FlowContainer:calcSize(size)
+function FlowContainer:updateSize(size)
 	-- Get inner box
 	local cbox = self:inner(size)
 
@@ -42,8 +42,10 @@ function FlowContainer:calcSize(size)
 	self:eachVisible(function(child, i, n)
 		-- No spacing on last child
 		local spacing = (i < n and self.spacing) or 0
-		-- Ignore absolutely positioned children
+		-- Handle absolutely positioned children
 		if child.absolute then
+			-- Can occupy whole inner box
+			child:updateSize(Rectangle:new(cbox))
 			return
 		end
 		-- Handle stretched children later
@@ -97,22 +99,17 @@ function FlowContainer:calcSize(size)
 	end)
 
 	-- Get children size box
-	local bbox = Rectangle:new{
-		x = cbox.x,
-		y = cbox.y,
+	size = Rectangle:new{
 		[flowDim] = flowSize,
 		[fixedDim] = maxFixed
 	}
 	-- Use outer size box
-	return self:outer(bbox)
-end
-
-function FlowContainer:calcLayout(bbox)
-	return self:calcSize(bbox)
+	size = self:outer(size)
+	super.updateSize(self, size)
 end
 
 function FlowContainer:updateLayout(bbox)
-	bbox = super.updateLayout(self, bbox)
+	super.updateLayout(self, bbox)
 
 	-- Get inner box for children bounding box
 	local cbox = self:inner(bbox)
@@ -143,9 +140,7 @@ function FlowContainer:updateLayout(bbox)
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Position in top-left corner
-			-- Can occupy whole inner box
-			local size = child:updateSize(Rectangle:new(cbox))
-			child:updateLayout(Rectangle:new(cbox:tl(), size:size()))
+			child:updateLayout(Rectangle:new(cbox:tl(), child.size:size()))
 			return
 		end
 		-- Get child bounding box
@@ -173,8 +168,6 @@ function FlowContainer:updateLayout(bbox)
 			self:markRepaint()
 		end
 	end)]]--
-
-	return bbox
 end
 
 -- Exports

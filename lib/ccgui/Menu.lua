@@ -114,19 +114,19 @@ function Menu:markRepaint()
 	end
 	super.markRepaint(self)
 end
-function Menu:calcSize(size)
+function Menu:updateSize(size)
 	-- Calculate with unlimited space
 	size = Rectangle:new(size:tl(), math.huge, math.huge)
-	return super.calcSize(self, size)
+	return super.updateSize(self, size)
 end
-function Menu:calcLayout(bbox)
+function Menu:updateLayout(bbox)
 	-- Open at menu position
 	if self.menuUp then
 		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y - bbox.h + 1
 	else
 		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y
 	end
-	return super.calcLayout(self, bbox)
+	return super.updateLayout(self, bbox)
 end
 function Menu:contains(x, y)
 	return super.contains(self, x, y) or (self.openedSubMenu and self.openedSubMenu:contains(x, y))

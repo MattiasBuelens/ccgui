@@ -115,22 +115,14 @@ function Element:outer(bbox)
 	return bbox:expand(self.padding):expand(self.border:margins())
 end
 
--- Calculate element size within given size box
-function Element:calcSize(size)
-	return Rectangle:new(0, 0, 0, 0)
-end
+-- Update element size within given size box
 function Element:updateSize(size)
-	self.size = self:calcSize(size)
-	return self.size
+	self.size = size
 end
 
--- Calculate element layout within given bounding box
-function Element:calcLayout(bbox)
-	return bbox
-end
+-- Update element layout within given bounding box
 function Element:updateLayout(bbox)
-	self.bbox = self:calcLayout(bbox)
-	return self.bbox
+	self.bbox = bbox
 end
 
 -- Check if the bounding box with padding contains the given point

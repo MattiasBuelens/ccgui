@@ -345,17 +345,17 @@ function Window:markRepaint()
 	end
 	super.markRepaint(self)
 end
-function Window:calcSize(size)
+function Window:updateSize(size)
 	if not self.isMaximized then
 		size = Rectangle:new(self.windowBox)
 	end
-	return super.calcSize(self, size)
+	return super.updateSize(self, size)
 end
-function Window:calcLayout(bbox)
+function Window:updateLayout(bbox)
 	if not self.isMaximized then
 		bbox = self.windowBox:shift(bbox:tl())
 	end
-	return super.calcLayout(self, bbox)
+	return super.updateLayout(self, bbox)
 end
 
 -- Bring to foreground on click
