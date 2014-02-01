@@ -299,7 +299,7 @@ function TextArea:toScreen(x, y)
 	return textPos - vector.new(1, 1) + self:inner(self.bbox):tl() - self.scrollPosition
 end
 
-function TextArea:updateSize(size)
+function TextArea:measure(size)
 	-- Get inner bounding box
 	local bbox = self:inner(size)
 	local w, h = bbox.w, bbox.h
@@ -311,7 +311,7 @@ function TextArea:updateSize(size)
 	size = Rectangle:new(bbox.x, bbox.y, w, h)
 	-- Use outer size box
 	size = self:outer(size)
-	super.updateSize(self, size)
+	super.measure(self, size)
 end
 
 function TextArea:drawCursor()

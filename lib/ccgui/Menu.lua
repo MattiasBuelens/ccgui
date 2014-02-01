@@ -114,10 +114,10 @@ function Menu:markRepaint()
 	end
 	super.markRepaint(self)
 end
-function Menu:updateSize(size)
+function Menu:measure(size)
 	-- Calculate with unlimited space
 	size = Rectangle:new(size:tl(), math.huge, math.huge)
-	return super.updateSize(self, size)
+	return super.measure(self, size)
 end
 function Menu:updateLayout(bbox)
 	-- Open at menu position

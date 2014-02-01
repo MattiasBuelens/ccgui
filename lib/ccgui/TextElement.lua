@@ -80,7 +80,7 @@ function TextElement.wordwrap(str, limit)
 	return str
 end
 
-function TextElement:updateSize(size)
+function TextElement:measure(size)
 	-- Get inner bounding box
 	local bbox = self:inner(size)
 
@@ -104,7 +104,7 @@ function TextElement:updateSize(size)
 	size = Rectangle:new(bbox.x, bbox.y, nw, nh)
 	-- Use outer size box
 	size = self:outer(size)
-	super.updateSize(self, size)
+	super.measure(self, size)
 end
 
 function TextElement:drawText(ctxt)

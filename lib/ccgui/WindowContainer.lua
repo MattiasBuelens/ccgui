@@ -101,10 +101,10 @@ function WindowContainer:markPaint()
 	self.ignorePaints = false
 end
 
-function WindowContainer:updateSize(size)
-	super.updateSize(self, size)
+function WindowContainer:measure(size)
+	super.measure(self, size)
 	self:each(function(window)
-		window:updateSize(size)
+		window:measure(size)
 	end)
 end
 function WindowContainer:updateLayout(bbox)

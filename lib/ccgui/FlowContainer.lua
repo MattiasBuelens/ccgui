@@ -17,7 +17,7 @@ function FlowContainer:initialize(opts)
 	self.spacing = opts.spacing or 0
 end
 
-function FlowContainer:updateSize(size)
+function FlowContainer:measure(size)
 	-- Get inner box
 	local cbox = self:inner(size)
 
@@ -45,7 +45,7 @@ function FlowContainer:updateSize(size)
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Can occupy whole inner box
-			child:updateSize(Rectangle:new(cbox))
+			child:measure(Rectangle:new(cbox))
 			return
 		end
 		-- Handle stretched children later
@@ -59,7 +59,7 @@ function FlowContainer:updateSize(size)
 			return
 		end
 		-- Get child size
-		child:updateSize(Rectangle:new{
+		child:measure(Rectangle:new{
 			[flowDim] = remaining,
 			[fixedDim] = fixedSize
 		})
@@ -78,7 +78,7 @@ function FlowContainer:updateSize(size)
 	for i,child in ipairs(stretchChildren) do
 		local childSize = (i == 1 and firstStretch) or stretchSize
 		-- Get child size
-		child:updateSize(Rectangle:new{
+		child:measure(Rectangle:new{
 			[flowDim] = childSize,
 			[fixedDim] = fixedSize
 		})
@@ -105,7 +105,7 @@ function FlowContainer:updateSize(size)
 	}
 	-- Use outer size box
 	size = self:outer(size)
-	super.updateSize(self, size)
+	super.measure(self, size)
 end
 
 function FlowContainer:updateLayout(bbox)

@@ -115,12 +115,14 @@ function Element:outer(bbox)
 	return bbox:expand(self.padding):expand(self.border:margins())
 end
 
--- Update element size within given size box
-function Element:updateSize(size)
+-- Measure element size within given size box
+-- Store measurement in Element.size
+function Element:measure(size)
 	self.size = size
 end
 
 -- Update element layout within given bounding box
+-- Store layout in Element.bbox
 function Element:updateLayout(bbox)
 	self.bbox = bbox
 end

@@ -345,11 +345,11 @@ function Window:markRepaint()
 	end
 	super.markRepaint(self)
 end
-function Window:updateSize(size)
+function Window:measure(size)
 	if not self.isMaximized then
 		size = Rectangle:new(self.windowBox)
 	end
-	return super.updateSize(self, size)
+	return super.measure(self, size)
 end
 function Window:updateLayout(bbox)
 	if not self.isMaximized then

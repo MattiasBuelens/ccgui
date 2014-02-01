@@ -53,8 +53,8 @@ function ElementTerminal:draw(ctxt, bbox, repaint)
 		end
 	end
 end
-function ElementTerminal:updateSize(bbox)
-	self.screen:updateSize(bbox.w, bbox.h, self.back, true)
+function ElementTerminal:measure(bbox)
+	self.screen:measure(bbox.w, bbox.h, self.back, true)
 end
 function ElementTerminal:getBlinkState(bbox)
 	local x = bbox.x + self.curX - 1
