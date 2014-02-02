@@ -14,33 +14,22 @@ local ccgui	= require "ccgui"
 
 local screen = ccgui.Page:new{
 	horizontal = false,
-	background = colours.white,
+	background = colours.lightBlue,
 	_name = "screen"
 }
-local header = require("ccgui.FlowContainer"):new{
-	horizontal = true,
-	_name = "header"
-}
-local headerTitle = ccgui.TextElement:new{
-	text = "CCGUI :: Tabs Example",
-	align = ccgui.Align.Center,
+local container = ccgui.WindowContainer:new{
 	stretch = true,
-	foreground = colours.white,
-	background = colours.blue,
-	_name = "headerTitle"
+	_name = "container"
 }
-local btnQuit = ccgui.Button:new{
-	text = "x",
-	align = ccgui.Align.Right,
-	padding = 0,
-	foreground = colours.white,
-	background = colours.red,
-	_name = "btnQuit"
+local window = ccgui.Window:new{
+	title = "CCGUI :: Tabs Example",
+	background = colours.white,
+	windowBox = ccgui.geom.Rectangle:new(1, 1, 45, 15),
+	_name = "window"
 }
-btnQuit:on("buttonpress", function()
+window:on("close", function()
 	screen:stop()
 end)
-header:add(headerTitle, btnQuit)
 
 local tabs = ccgui.TabContainer:new{
 	horizontal = false,
@@ -90,8 +79,10 @@ local form = ccgui.FlowContainer:new{
 }
 form:add(labelChoice, radioOne, radioTwo, radioThree)
 tabs:addTab("Form", form)
-
-screen:add(header, tabs)
+window:content():add(tabs)
+container:add(window)
+screen:add(container)
+window:maximize()
 
 screen:run()
 

@@ -59,7 +59,7 @@ function TabContainer:initialize(opts)
 	-- Tab pane
 	self.tabPane = ccgui.FlowContainer:new{
 		horizontal = self.horizontal,
-		stretch = tabStretch
+		stretch = self.tabStretch
 	}
 	self:add(self.tabBar, self.tabPane)
 
