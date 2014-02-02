@@ -11,7 +11,7 @@ _G.objectlua = {}
 local function delegated(t, prototype)
     if nil == _G.rawget(prototype, '__index') then
         _G.rawset(prototype, '__index', prototype)
-        _G.rawset(prototype, '__metatable', 'private')
+        --_G.rawset(prototype, '__metatable', 'private')
     end
     return _G.setmetatable(t, prototype)
 end

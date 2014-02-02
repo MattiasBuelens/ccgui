@@ -5,28 +5,33 @@
 
 --]]
 
-local ScrollElement		= require "ccgui.ScrollElement"
+local Container			= require "ccgui.Container"
+local Scrollable		= require "ccgui.Scrollable"
 local Margins			= require "ccgui.geom.Margins"
 local Rectangle			= require "ccgui.geom.Rectangle"
+local MeasureSpec		= require "ccgui.MeasureSpec"
 local ChildDrawContext	= require "ccgui.paint.ChildDrawContext"
 
-local ScrollWrapper = ScrollElement:subclass("ccgui.ScrollWrapper")
+local ScrollWrapper = Container:subclass("ccgui.ScrollWrapper")
+ScrollWrapper:uses(Scrollable)
+
 function ScrollWrapper:initialize(opts)
 	-- Mouse scroll by default
 	opts.mouseScroll = (opts.mouseScroll == nil) or (not not opts.mouseScroll)
 
 	super.initialize(self, opts)
+	self:initializeScroll(opts)
 
 	-- Content element
 	self.content = opts.content
-	self.content.parent = self
+	self:add(self.content)
+end
 
-	-- Mouse
-	self:sinkEvent("mouse_click")
-	self:sinkEvent("mouse_drag")
-
-	-- Paint
-	self:on("paint", self.scrollContentPaint, self)
+function ScrollWrapper:inner(bbox)
+	return self:scrollInner(super.inner(self, bbox))
+end
+function ScrollWrapper:outer(bbox)
+	return self:scrollOuter(super.inner(self, bbox))
 end
 
 function ScrollWrapper:scrollVisible()
@@ -48,18 +53,37 @@ function ScrollWrapper:toScreen(x, y)
 	return localPos + self:getScreenOffset()
 end
 
-function ScrollWrapper:measure(size)
-	local ownSize = self:inner(size)
-	-- Update content size
-	local w = self.horizontal and math.huge or ownSize.w
-	local h = self.vertical and math.huge or ownSize.h
-	self.content:measure(Rectangle:new(1, 1, w, h))
+function ScrollWrapper:measure(spec)
+	-- Get inner spec
+	spec = self:inner(spec)
+	
+	-- Measure content with unconstrained specifications
+	local cw = self.horizontal and "?" or spec.w
+	local ch = self.vertical and "?" or spec.h
+	self.content:measure(MeasureSpec:new(cw, ch))
 	local contentSize = self.content.size
-	-- Update own size
-	ownSize.w = self.horizontal and math.min(ownSize.w, contentSize.w) or contentSize.w
-	ownSize.h = self.vertical and math.min(ownSize.h, contentSize.h) or contentSize.h
-	size = self:outer(ownSize)
-	super.measure(self, size)
+	
+	-- Get own size
+	local w, h
+	if spec.w:isExact() then
+		w = spec.w.value
+	elseif spec.w:isUnspecified() then
+		w = contentSize.w
+	else
+		w = math.min(spec.w.value, contentSize.w)
+	end
+	if spec.h:isExact() then
+		h = spec.h.value
+	elseif spec.h:isUnspecified() then
+		h = contentSize.h
+	else
+		h = math.min(spec.h.value, contentSize.h)
+	end
+	
+	-- Get inner bounding box
+	local size = Rectangle:new(1, 1, w, h)
+	-- Use outer size box
+	self.size = self:outer(size)
 end
 function ScrollWrapper:layout(bbox)
 	super.layout(self, bbox)
@@ -69,20 +93,29 @@ end
 function ScrollWrapper:markPaint()
 	if not self.needsPaint then
 		super.markPaint(self)
+		-- Mark scrollbars
+		self:scrollMarkPaint()
+		-- Mark content
 		self.content:markPaint()
 	end
 end
-function ScrollWrapper:markRepaint()
-	if not self.needsRepaint then
-		super.markRepaint(self)
-		self.content:markRepaint()
-	end
-end
-function ScrollWrapper:scrollContentPaint(ctxt)
+function ScrollWrapper:drawChildren(ctxt)
+	-- Change context
 	local offset = self:getScreenOffset()
 	local clip = self:inner(self.bbox)
 	local contentCtxt = ChildDrawContext:new(ctxt, offset.x, offset.y, clip)
-	self.content:paint(contentCtxt)
+	-- Draw content
+	super.drawChildren(self, contentCtxt)
+end
+function ScrollWrapper:setCursorBlink(blink, x, y, color)
+	if blink then
+		-- Transform coordinates
+		local blinkPos = self:toScreen(x, y)
+		x, y = blinkPos.x, blinkPos.y
+		-- Check bounds
+		blink = self:contains(x, y)
+	end
+	return super.setCursorBlink(self, blink, x, y, color)
 end
 
 --[[
@@ -91,7 +124,7 @@ end
 
 ]]--
 
-function ScrollWrapper:handleSink(event, ...)
+function ScrollWrapper:scrollFilterEvent(event, ...)
 	local args = { ... }
 	if event == "mouse_click" or event == "mouse_scroll" or event == "mouse_drag" then
 		local x, y = args[2], args[3]
@@ -101,12 +134,13 @@ function ScrollWrapper:handleSink(event, ...)
 			args[2], args[3] = localPos.x, localPos.y
 		end
 	end
-	self.content:trigger(event, unpack(args))
+	return event, unpack(args)
 end
-function ScrollWrapper:sinkEvent(event)
-	self:on(event, function(self, ...)
-		self:handleSink(event, ...)
-	end, self, 1000)
+function ScrollWrapper:handleSink(event, ...)
+	super.handleSink(self, self:scrollFilterEvent(event, ...))
+end
+function ScrollWrapper:handleFocusSink(event, ...)
+	super.handleFocusSink(self, self:scrollFilterEvent(event, ...))
 end
 
 -- Exports

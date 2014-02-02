@@ -35,21 +35,44 @@ local content = ccgui.FlowContainer:new{
 	stretch = true,
 	horizontal = false
 }
-local btnQuit = ccgui.Button:new{
-	text = "Quit"
+local toolbar = ccgui.FlowContainer:new{
+	horizontal = true,
+	padding = ccgui.geom.Margins:new(0, 1),
+	spacing = 1,
+	_name = "toolbar"
 }
-btnQuit:on("buttonpress", function()
-	screen:stop()
+local btnOne = ccgui.Button:new{
+	text = "One",
+	_name = "btnOne"
+}
+btnOne:on("buttonpress", function()
+	window:setStatusText("One pressed")
 end)
+local btnTwo = ccgui.Button:new{
+	text = "Two",
+	_name = "btnTwo"
+}
+btnTwo:on("buttonpress", function()
+	window:setStatusText("Two pressed")
+end)
+local btnThree = ccgui.Button:new{
+	text = "Three",
+	_name = "btnThree"
+}
+btnThree:on("buttonpress", function()
+	window:setStatusText("Three pressed")
+end)
+toolbar:add(btnOne, btnTwo, btnThree)
 local txtA = ccgui.TextElement:new{
-	text = "ABC\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDEF\nGHI"
+	text = "|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n",
+	foreground = colours.grey
 }
 local txtB = ccgui.TextArea:new{
 	text = "ABC\nDEF\nGHI"
 }
-content:add(btnQuit, txtA, txtB)
+content:add(toolbar, txtA, txtB)
 
-local scroll = require("ccgui.ScrollWrapper"):new{
+local scroll = ccgui.ScrollWrapper:new{
 	vertical = true,
 	content = content,
 	_name = "scroll"

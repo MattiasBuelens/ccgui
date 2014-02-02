@@ -21,29 +21,41 @@ function DrawContext:rawDraw(x, y, text, fgColor, bgColor)
 	error("DrawContext:rawDraw() not implemented")
 end
 
+function DrawContext:doClip(x, y, text, clip)
+	-- Check vertical bounds
+	if y < clip.y or y >= clip.y + clip.h then
+		return false
+	end
+	-- Limit to horizontal bounds
+	local startIdx = 1 + math.max(0, clip.x - x)
+	local endIdx = math.min(#text, clip.x + clip.w - x)
+	text = string.sub(text, startIdx, endIdx)
+	x = x + startIdx - 1
+	return true, x, y, text
+end
+
 -- Draw single text line within bounding rectangle
-function DrawContext:draw(x, y, text, fgColor, bgColor)
+function DrawContext:draw(x, y, text, fgColor, bgColor, clip)
 	if type(x) == "table" then
 		-- Position given as vector
 		x, y, text, fgColor, bgColor = x.x, x.y, y, text, fgColor
+	end
+
+	-- Clip
+	local draw = true
+	if clip then
+		draw, x, y, text = self:doClip(x, y, text, clip)
+		if not draw then return end
 	end
 
 	-- Offset
 	x = x + self.offsetX
 	y = y + self.offsetY
 
-	-- Clip
-	clip = self.clip
-	if clip then
-		-- Check vertical bounds
-		if y < clip.y or y >= clip.y + clip.h then
-			return
-		end
-		-- Limit to horizontal bounds
-		local startIdx = 1 + math.max(0, clip.x - x)
-		local endIdx = math.min(#text, clip.x + clip.w - x)
-		text = string.sub(text, startIdx, endIdx)
-		x = x + startIdx - 1
+	-- Context clip
+	if self.clip then
+		draw, x, y, text = self:doClip(x, y, text, self.clip)
+		if not draw then return end
 	end
 
 	self:rawDraw(x, y, text, fgColor, bgColor)

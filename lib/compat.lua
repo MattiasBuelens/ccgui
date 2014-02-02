@@ -20,8 +20,8 @@ _G.shell = shell
 --
 -- avoid overwriting the package table if it's already there
 --
-package = package or {}
-local _PACKAGE = package
+_G.package = _G.package or {}
+local _PACKAGE = _G.package
 package.root = "./"
 package.path = LUA_PATH or "?;?.lua;?/init.lua"
 
