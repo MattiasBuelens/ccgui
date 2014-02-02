@@ -22,10 +22,10 @@ function DrawContext:rawDraw(x, y, text, fgColor, bgColor)
 end
 
 -- Draw single text line within bounding rectangle
-function DrawContext:draw(x, y, text, fgColor, bgColor, clip)
+function DrawContext:draw(x, y, text, fgColor, bgColor)
 	if type(x) == "table" then
 		-- Position given as vector
-		x, y, text, fgColor, bgColor, clip = x.x, x.y, y, text, fgColor, bgColor
+		x, y, text, fgColor, bgColor = x.x, x.y, y, text, fgColor
 	end
 
 	-- Offset
@@ -33,7 +33,7 @@ function DrawContext:draw(x, y, text, fgColor, bgColor, clip)
 	y = y + self.offsetY
 
 	-- Clip
-	clip = clip or self.clip
+	clip = self.clip
 	if clip then
 		-- Check vertical bounds
 		if y < clip.y or y >= clip.y + clip.h then

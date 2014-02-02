@@ -54,7 +54,7 @@ local scroll = require("ccgui.ScrollWrapper"):new{
 	content = content,
 	_name = "scroll"
 }
-window:add(scroll)
+window:content():add(scroll)
 container:add(window)
 screen:add(container)
 

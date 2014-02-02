@@ -157,7 +157,7 @@ function TextElement:drawText(ctxt)
 			x = x + bbox.w - len
 		end
 		-- Write text
-		ctxt:draw(x, y, line, self:getForeground(), self:getBackground(), bbox)
+		ctxt:draw(x, y, line, self:getForeground(), self:getBackground())
 		y = y + 1
 	end
 end
