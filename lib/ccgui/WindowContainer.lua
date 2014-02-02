@@ -102,7 +102,11 @@ function WindowContainer:markPaint()
 end
 
 function WindowContainer:measure(spec)
-	super.measure(self, spec)
+	-- TODO Improve?
+	assert(spec.w:isSpecified(), "window container width spec must be specified")
+	assert(spec.h:isSpecified(), "window container height spec must be specified")
+	self.size = Rectangle:new(1, 1, spec.w.value, spec.h.value)
+	
 	self:each(function(window)
 		window:measure(spec)
 	end)

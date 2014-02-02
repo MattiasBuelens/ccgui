@@ -30,10 +30,15 @@ end
 function Bar:hasBounds()
 	return self.bbox ~= nil
 end
-
 function Bar:getBounds()
 	assert(self:hasBounds(), "slider bar not positioned")
 	return self:inner(self.bbox)
+end
+
+function Bar:measure(spec)
+	assert(spec.w:isSpecified(), "bar width spec must be specified")
+	assert(spec.h:isSpecified(), "bar height spec must be specified")
+	self.size = Rectangle:new(1, 1, spec.w.value, spec.h.value)
 end
 
 -- Get the available space for the bar

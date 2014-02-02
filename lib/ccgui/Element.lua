@@ -117,8 +117,8 @@ end
 
 -- Measure element size within given specification
 -- Store measurement in Element.size
-function Element:measure(size)
-	error("Element:measure() not implemented")
+function Element:measure(spec)
+	error(self.class:name()..":measure() not implemented")
 end
 
 -- Layout element within given bounding box

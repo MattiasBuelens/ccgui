@@ -299,24 +299,24 @@ function TextArea:toScreen(x, y)
 	return textPos - vector.new(1, 1) + self:inner(self.bbox):tl() - self.scrollPosition
 end
 
-function TextArea:measure(size)
-	-- Get inner bounding box
-	local bbox = self:inner(size)
-	local w, h = bbox.w, bbox.h
+function TextArea:measure(spec)
+	-- Get inner spec
+	spec = self:inner(spec)
 
-	-- Deal with unlimited space
-	if w == math.huge then
-		w = self.longestLineLength + 1
+	-- Use smallest possible size
+	local w, h = spec.w.value, spec.h.value
+	if not spec.w:isExact() then
+		w = math.min(w, self.longestLineLength + 1)
 	end
-	if h == math.huge then
-		h = #self.lines
+	if not spec.h:isExact() then
+		h = math.min(h, #self.lines)
 	end
 
 	-- Limit inner height when single line
 	if not self:multiline() then h = 1 end
 
 	-- Get inner bounding box with new size
-	size = Rectangle:new(bbox.x, bbox.y, w, h)
+	size = Rectangle:new(1,1, w, h)
 	-- Use outer size box
 	self.size = self:outer(size)
 end

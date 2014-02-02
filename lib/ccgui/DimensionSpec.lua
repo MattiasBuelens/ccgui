@@ -7,25 +7,28 @@
 
 local Object = require "objectlua.Object"
 
--- Specification types
-DimensionSpec.class.Unspecified	= "?"
-DimensionSpec.class.Exact			= "="
-DimensionSpec.class.AtMost		= "<"
-
 local DimensionSpec = Object:subclass("ccgui.DimensionSpec")
 function DimensionSpec:initialize(specType, value)
-	self.specType = specType or self.Unspecified
+	self.specType = specType or DimensionSpec.Unspecified
 	self.value = self:isUnspecified() and math.huge or (value or 0)
 end
 
+-- Specification types
+DimensionSpec.class.Unspecified	= "?"
+DimensionSpec.class.Exact		= "="
+DimensionSpec.class.AtMost		= "<"
+
 function DimensionSpec:isUnspecified()
-	return self.specType == DimensionSpec.class.Unspecified
+	return self.specType == DimensionSpec.Unspecified
+end
+function DimensionSpec:isSpecified()
+	return not self:isUnspecified()
 end
 function DimensionSpec:isExact()
-	return self.specType == DimensionSpec.class.Exact
+	return self.specType == DimensionSpec.Exact
 end
 function DimensionSpec:isAtMost()
-	return self.specType == DimensionSpec.class.AtMost
+	return self.specType == DimensionSpec.AtMost
 end
 
 function DimensionSpec:add(v)
@@ -36,6 +39,9 @@ function DimensionSpec:multiply(f)
 end
 function DimensionSpec:__add(m)
 	return self:add(m)
+end
+function DimensionSpec:__sub(m)
+	return self:add(-m)
 end
 function DimensionSpec:__mul(f)
 	return self:multiply(f)

@@ -5,8 +5,10 @@
 
 --]]
 
-local Container		= require "ccgui.Container"
-local Rectangle		= require "ccgui.geom.Rectangle"
+local Container			= require "ccgui.Container"
+local Rectangle			= require "ccgui.geom.Rectangle"
+local DimensionSpec		= require "ccgui.DimensionSpec"
+local MeasureSpec		= require "ccgui.MeasureSpec"
 
 local FlowContainer = Container:subclass("ccgui.FlowContainer")
 function FlowContainer:initialize(opts)
@@ -17,94 +19,147 @@ function FlowContainer:initialize(opts)
 	self.spacing = opts.spacing or 0
 end
 
+function FlowContainer:getFlowFixedDims()
+	if self.horizontal then
+		return "w", "h", "x", "y"
+	else
+		return "h", "w", "y", "x"
+	end
+end
+
 function FlowContainer:measure(spec)
 	-- Get inner spec
-	local cbox = self:inner(spec)
+	spec = self:inner(spec)
+	
+	-- Dimensions
+	local flowDim, fixedDim = self:getFlowFixedDims()
+	-- Flow specification
+	local flowSpec = spec[flowDim]
+	-- Sizes
+	local flowSize, fixedSize = 0, 0
 
-	-- Flow dimension
-	local flowDim = (self.horizontal and "w") or "h"
-	-- Fixed dimension
-	local fixedDim = (self.horizontal and "h") or "w"
+	-- Measure
+	if flowSpec:isUnspecified() then
+		flowSize, fixedSize = self:measureUnspecified(spec)
+	else
+		flowSize, fixedSize = self:measureSpecified(spec, flowSpec:isExact())
+	end
+	
+	-- Force fixed size
+	self:forceFixedSize(fixedSize)
+	
+	-- Set size
+	local size = Rectangle:new{
+		[flowDim] = flowSize,
+		[fixedDim] = fixedSize
+	}
+	self.size = self:outer(size)
+end
 
-	-- Flow size
-	local flowSize = 0
-	-- Remaining flow size
-	local remaining = cbox[flowDim]
-	-- Fixed size
-	local fixedSize = cbox[fixedDim]
-	-- Maximum fixed size
-	local maxFixed = 0
+function FlowContainer:measureUnspecified(spec)
+	-- Dimensions
+	local flowDim, fixedDim = self:getFlowFixedDims()
+	-- Sizes
+	local flowSize, fixedSize = 0, 0
+	
+	-- Measure all children with unspecified spec
+	self:eachVisible(function(child, i, n)
+		-- No spacing on last child
+		local spacing = (i < n and self.spacing) or 0
+		-- Measure child
+		child:measure(spec)
+		-- Update flow size
+		local childSize = child.size[flowDim] + spacing
+		flowSize = flowSize + childSize
+		-- Update fixed size
+		fixedSize = math.max(fixedSize, child.size[fixedDim])
+	end)
+	
+	return flowSize, fixedSize
+end
 
+function FlowContainer:measureSpecified(spec, doStretch)
+	-- Dimensions
+	local flowDim, fixedDim = self:getFlowFixedDims()
+	-- Sizes
+	local flowSize, fixedSize = 0, 0
+	
+	-- Flow specification: at most
+	local remainingSpec = DimensionSpec:new("<", spec[flowDim].value)
+	-- Fixed specification: inherit
+	local fixedSpec = spec[fixedDim]
+	
 	-- Children to be stretched
 	local stretchChildren = {}
-
-	-- Update sizes of children
+	
+	-- Measure children with decreasing spec
 	self:eachVisible(function(child, i, n)
 		-- No spacing on last child
 		local spacing = (i < n and self.spacing) or 0
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Can occupy whole inner box
-			child:measure(Rectangle:new(cbox))
+			child:measure(spec)
 			return
 		end
 		-- Handle stretched children later
-		if child.stretch then
+		if doStretch and child.stretch then
 			-- Remove spacing from remaining
 			-- and add to flow size
 			flowSize = flowSize + spacing
-			remaining = remaining - spacing
+			remainingSpec = remainingSpec - spacing
 			-- Add to stretched children
 			table.insert(stretchChildren, child)
 			return
 		end
 		-- Get child size
-		child:measure(Rectangle:new{
-			[flowDim] = remaining,
-			[fixedDim] = fixedSize
+		child:measure(MeasureSpec:new{
+			[flowDim] = remainingSpec,
+			[fixedDim] = fixedSpec
 		})
 		-- Remove child size and spacing from remaining
 		-- and add to flow size
 		local childSize = child.size[flowDim] + spacing
 		flowSize = flowSize + childSize
-		remaining = remaining - childSize
+		remainingSpec = remainingSpec - childSize
 		-- Update maximum fixed size
-		maxFixed = math.max(maxFixed, child.size[fixedDim])
+		fixedSize = math.max(fixedSize, child.size[fixedDim])
 	end)
 
 	-- Divide remaining size over stretched children
+	local remaining = remainingSpec.value
 	local stretchSize = math.floor(remaining / #stretchChildren)
 	local firstStretch = stretchSize + (remaining % #stretchChildren)
 	for i,child in ipairs(stretchChildren) do
 		local childSize = (i == 1 and firstStretch) or stretchSize
-		-- Get child size
-		child:measure(Rectangle:new{
-			[flowDim] = childSize,
-			[fixedDim] = fixedSize
+		-- Measure child
+		child:measure(MeasureSpec:new{
+			[flowDim] = DimensionSpec:new("=", childSize),
+			[fixedDim] = fixedSpec
 		})
-		-- Force flow size
-		child.size[flowDim] = childSize
-		-- Add child size to flow size
+		-- Update size
 		flowSize = flowSize + childSize
-		-- Update maximum fixed size
-		maxFixed = math.max(maxFixed, child.size[fixedDim])
+		fixedSize = math.max(fixedSize, child.size[fixedDim])
 	end
+	
+	return flowSize, fixedSize
+end
 
-	-- Enforce fixed size
+function FlowContainer:forceFixedSize(fixedSize)
+	-- Dimensions
+	local flowDim, fixedDim = self:getFlowFixedDims()
+	
+	-- Make fixed dimension exact
+	local fixedSpec = DimensionSpec:new("=", fixedSize)
 	self:eachVisible(function(child)
 		-- Ignore absolutely positioned children
 		if child.absolute then return end
-		-- Set fixed size
-		child.size[fixedDim] = maxFixed
+		-- Force fixed size
+		child:measure(MeasureSpec:new{
+			[flowDim] = DimensionSpec:new("=", child.size[flowDim]),
+			[fixedDim] = fixedSpec
+		})
 	end)
-
-	-- Get children size box
-	local size = Rectangle:new{
-		[flowDim] = flowSize,
-		[fixedDim] = maxFixed
-	}
-	-- Use outer size box
-	self.size = self:outer(size)
 end
 
 function FlowContainer:layout(bbox)
@@ -113,24 +168,11 @@ function FlowContainer:layout(bbox)
 	-- Get inner box for children bounding box
 	local cbox = self:inner(bbox)
 
-	-- Collect old child bounding boxes
-	--[[local childBboxes = {}
-	self:eachVisible(function(child, i)
-		childBboxes[i] = child.bbox
-	end)]]--
-
-	-- Flow coordinate
-	local flowCoord = (self.horizontal and "x") or "y"
-	-- Fixed coordinate
-	local fixedCoord = (self.horizontal and "y") or "x"
-	-- Flow dimension
-	local flowDim = (self.horizontal and "w") or "h"
-	-- Fixed dimension
-	local fixedDim = (self.horizontal and "h") or "w"
-
+	-- Dimensions and coordinates
+	local flowDim, fixedDim, flowCoord, fixedCoord = self:getFlowFixedDims()
 	-- Flow position
 	local flowPos = cbox[flowCoord]
-	-- Fixed size
+	-- Fixed position and size
 	local fixedPos, fixedSize = cbox[fixedCoord], cbox[fixedDim]
 
 	-- Update layout of children
@@ -138,7 +180,7 @@ function FlowContainer:layout(bbox)
 		local spacing = (i < n and self.spacing) or 0
 		-- Handle absolutely positioned children
 		if child.absolute then
-			-- Position in top-left corner
+			-- Position in top left corner
 			child:layout(Rectangle:new(cbox:tl(), child.size:size()))
 			return
 		end
@@ -150,23 +192,12 @@ function FlowContainer:layout(bbox)
 			[fixedDim] = fixedSize
 		})
 		-- Force size
-		child.bbox[flowDim] = child.size[flowDim]
-		child.bbox[fixedDim] = fixedSize
+		--child.bbox[flowDim] = child.size[flowDim]
+		--child.bbox[fixedDim] = fixedSize
 		-- Add child size and spacing to flow position
 		local childSize = child.bbox[flowDim] + spacing
 		flowPos = flowPos + childSize
 	end)
-
-	-- Check for child bounding box changes
-	--[[local childBboxChanged = false
-	self:eachVisible(function(child, i)
-		local oldBbox = childBboxes[i]
-		if oldBbox == nil or oldBbox ~= child.bbox then
-			-- Bounding box changed, repaint child and container
-			child:markRepaint()
-			self:markRepaint()
-		end
-	end)]]--
 end
 
 -- Exports

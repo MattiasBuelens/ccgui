@@ -7,6 +7,7 @@
 
 local Element			= require "ccgui.Element"
 local ElementTerminal	= require "ccgui.paint.ElementTerminal"
+local Rectangle			= require "ccgui.geom.Rectangle"
 
 -- Element hosting a terminal
 local TerminalElement = Element:subclass("ccgui.TerminalElement")
@@ -45,6 +46,12 @@ function TerminalElement:updateTerminalBlink()
 	end
 end
 
+function TerminalElement:measure(spec)
+	-- TODO Improve?
+	assert(spec.w:isSpecified(), "terminal element width spec must be specified")
+	assert(spec.h:isSpecified(), "terminal element height spec must be specified")
+	self.size = Rectangle:new(1, 1, spec.w.value, spec.h.value)
+end
 function TerminalElement:terminalPaint(ctxt)
 	local bbox = self:inner(self.bbox)
 	-- Draw terminal

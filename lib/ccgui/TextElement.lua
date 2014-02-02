@@ -80,28 +80,48 @@ function TextElement.wordwrap(str, limit)
 	return str
 end
 
-function TextElement:measure(size)
-	-- Get inner bounding box
-	local bbox = self:inner(size)
+function TextElement:measure(spec)
+	-- Get inner spec
+	spec = self:inner(spec)
 
-	-- Wrap text to fit bounding box width
-	local text = self.wordwrap(self.text, bbox.w)
+	local text = self.text
+	if spec.w:isSpecified() then
+		-- Word wrap
+		text = self.wordwrap(text, spec.w.value)
+	end
 
 	-- Split in lines
 	self.lines = splitLines(text)
 
-	-- Get longest line length
-	local nw = 0
-	for i,line in ipairs(self.lines) do
-		nw = math.max(nw, #line)
+	local w = 0
+	if spec.w:isExact() then
+		-- Use exact width
+		w = spec.w.value
+	else
+		-- Get longest line length
+		for i,line in ipairs(self.lines) do
+			w = math.max(w, #line)
+		end
 	end
 
-	-- Draw less lines if height limited
-	local nh = math.min(bbox.h, #self.lines)
-	self.lineCount = nh
+	local nlines, h = 0, 0
+	if spec.h:isUnspecified() then
+		-- Draw all lines
+		nlines = #self.lines
+		h = nlines
+	elseif spec.h:isExact() then
+		-- Use exact height
+		h = spec.h.value
+		nlines = math.min(h, #self.lines)
+	else
+		-- Draw less lines if height limited
+		nlines = math.min(spec.h.value, #self.lines)
+		h = nlines
+	end
+	self.lineCount = nlines
 
 	-- Get inner bounding box with new size
-	size = Rectangle:new(bbox.x, bbox.y, nw, nh)
+	size = Rectangle:new(1, 1, w, h)
 	-- Use outer size box
 	self.size = self:outer(size)
 end
