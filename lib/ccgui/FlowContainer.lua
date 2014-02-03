@@ -78,7 +78,7 @@ function FlowContainer:measureUnspecified(spec)
 	return flowSize, fixedSize
 end
 
-function FlowContainer:measureSpecified(spec, doStretch)
+function FlowContainer:measureSpecified(spec, isExact)
 	-- Dimensions
 	local flowDim, fixedDim = self:getFlowFixedDims()
 	-- Sizes
@@ -103,7 +103,7 @@ function FlowContainer:measureSpecified(spec, doStretch)
 			return
 		end
 		-- Handle stretched children later
-		if doStretch and child.stretch then
+		if isExact and child.stretch then
 			-- Remove spacing from remaining
 			-- and add to flow size
 			flowSize = flowSize + spacing
@@ -140,6 +140,11 @@ function FlowContainer:measureSpecified(spec, doStretch)
 		-- Update size
 		flowSize = flowSize + childSize
 		fixedSize = math.max(fixedSize, child.size[fixedDim])
+	end
+	
+	-- Force exact flow size
+	if isExact then
+		flowSize = math.max(flowSize, spec[flowDim].value)
 	end
 	
 	return flowSize, fixedSize

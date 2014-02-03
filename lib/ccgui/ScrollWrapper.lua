@@ -44,6 +44,8 @@ function ScrollWrapper:scrollVisible()
 	return self:scrollOuterSize()
 end
 function ScrollWrapper:scrollTotal()
+	-- Own size may be bigger than actual content size
+	-- This prevents scrollVisible from exceeding scrollTotal
 	local ownSize = self:scrollOuterSize()
 	local contentSize = self:scrollContentSize()
 	return vector.new(
