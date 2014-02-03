@@ -71,11 +71,11 @@ function ProgramPane:wrapProgram(func)
 		local input = { ... }
 		while true do
 			-- Redirect terminal
-			term.redirect(redirectTerm)
+			local prev = term.redirect(redirectTerm)
 			-- Resume program
 			local output = { coroutine.resume(co, unpack(input)) }
 			-- Restore terminal
-			term.restore()
+			redirectTerm = term.redirect(prev)
 			-- Handle result
 			local ok = table.remove(output, 1)
 			if ok then
@@ -124,7 +124,7 @@ end
 
 function ProgramPane:handleProgramResult(thread, ok, data)
 	-- Print result on program terminal
-	term.redirect(self:asTerm())
+	local prevTerm = term.redirect(self:asTerm())
 	if ok then
 		term.setTextColour(colours.white)
 		if data and #data > 0 then
@@ -135,7 +135,7 @@ function ProgramPane:handleProgramResult(thread, ok, data)
 	else
 		printError(data[1])
 	end
-	term.restore()
+	term.redirect(prevTerm)
 end
 
 -- Program running
