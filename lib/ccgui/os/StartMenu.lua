@@ -51,6 +51,9 @@ function StartMenu:initialize(opts)
 	end)
 
 	self.exitButton = self:addButton("Exit")
+	self.exitButton:on("buttonpress", function()
+		os.queueEvent("terminate")
+	end)
 end
 
 function StartMenu:createProgramsMenu()
