@@ -36,8 +36,15 @@ function MenuBar:addMenu(button, menu)
 	return super.addSubMenu(self, button, menu)
 end
 
-function MenuBar:closeMenu(cascade)
-	-- Ignore
+function MenuBar:handleMenuClose()
+	local wasVisible = self.visible
+	
+	super.handleMenuClose(self)
+	
+	-- Keep menu bar shown
+	if wasVisible then
+		self:show()
+	end
 end
 
 function MenuBar:menuBeforeMeasure(spec)

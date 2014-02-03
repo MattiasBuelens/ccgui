@@ -49,9 +49,6 @@ function TaskBar:initialize(opts)
 		background = self.clockBackground
 	}
 	self:add(self.bar, self.clockText)
-	
-	--self:on("window_background", self.closeMenu, self)
-	--self:on("mouse_click", self.foregroundOnClick, self)
 end
 
 -- Exports
