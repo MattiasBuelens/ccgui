@@ -9,10 +9,10 @@ local FlowContainer	= require "ccgui.FlowContainer"
 local Margins		= require "ccgui.geom.Margins"
 local Rectangle		= require "ccgui.geom.Rectangle"
 local MeasureSpec	= require "ccgui.MeasureSpec"
-local MenuButton	= require "ccgui.MenuButton"
-local SubMenuButton	= require "ccgui.SubMenuButton"
+local MenuButton	= require "ccgui.menu.MenuButton"
+local SubMenuButton	= require "ccgui.menu.SubMenuButton"
 
-local Menu = FlowContainer:subclass("ccgui.Menu")
+local Menu = FlowContainer:subclass("ccgui.menu.Menu")
 function Menu:initialize(opts)
 	-- Default style
 	opts.horizontal = opts.horizontal or false

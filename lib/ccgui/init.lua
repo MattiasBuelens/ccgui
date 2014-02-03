@@ -32,11 +32,11 @@ require "ccgui.Window"
 require "ccgui.WindowContainer"
 require "ccgui.ProgramWindow"
 
-require "ccgui.MenuButton"
-require "ccgui.SubMenuButton"
-require "ccgui.Menu"
-require "ccgui.MenuBarButton"
-require "ccgui.MenuBar"
+require "ccgui.menu.MenuButton"
+require "ccgui.menu.SubMenuButton"
+require "ccgui.menu.Menu"
+require "ccgui.menu.MenuBarButton"
+require "ccgui.menu.MenuBar"
 
 require "ccgui.Page"
 

@@ -5,8 +5,8 @@
 
 --]]
 
-local Menu			= require "ccgui.Menu"
-local MenuButton	= require "ccgui.MenuButton"
+local Menu			= require "ccgui.menu.Menu"
+local MenuButton	= require "ccgui.menu.MenuButton"
 local ProgramWindow	= require "ccgui.ProgramWindow"
 
 local ProgramMenuButton = MenuButton:subclass("ccgui.os.ProgramMenuButton")

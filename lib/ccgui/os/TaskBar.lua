@@ -6,8 +6,8 @@
 --]]
 
 local FlowContainer	= require "ccgui.FlowContainer"
-local MenuBar		= require "ccgui.MenuBar"
-local MenuBarButton	= require "ccgui.MenuBarButton"
+local MenuBar		= require "ccgui.menu.MenuBar"
+local MenuBarButton	= require "ccgui.menu.MenuBarButton"
 local Margins		= require "ccgui.geom.Margins"
 local StartMenu		= require "ccgui.os.StartMenu"
 local ClockDisplay	= require "ccgui.os.ClockDisplay"

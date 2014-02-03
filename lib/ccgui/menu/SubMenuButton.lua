@@ -8,7 +8,7 @@
 local Button		= require "ccgui.Button"
 local Margins		= require "ccgui.geom.Margins"
 
-local SubMenuButton	= Button:subclass("ccgui.SubMenuButton")
+local SubMenuButton	= Button:subclass("ccgui.menu.SubMenuButton")
 function SubMenuButton:initialize(opts)
 	opts.padding = opts.padding or Margins:new(0, 2, 0, 1)
 

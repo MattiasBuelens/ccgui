@@ -5,10 +5,10 @@
 
 --]]
 
-local SubMenuButton	= require "ccgui.SubMenuButton"
+local SubMenuButton	= require "ccgui.menu.SubMenuButton"
 local Margins		= require "ccgui.geom.Margins"
 
-local MenuBarButton = SubMenuButton:subclass("ccgui.MenuBarButton")
+local MenuBarButton = SubMenuButton:subclass("ccgui.menu.MenuBarButton")
 function MenuBarButton:initialize(opts)
 	opts.padding = opts.padding or Margins:new(0, 1, 0, 1)
 

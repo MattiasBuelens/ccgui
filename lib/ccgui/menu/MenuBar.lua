@@ -5,10 +5,10 @@
 
 --]]
 
-local Menu			= require "ccgui.Menu"
-local MenuBarButton	= require "ccgui.MenuBarButton"
+local Menu			= require "ccgui.menu.Menu"
+local MenuBarButton	= require "ccgui.menu.MenuBarButton"
 
-local MenuBar = Menu:subclass("ccgui.MenuBar")
+local MenuBar = Menu:subclass("ccgui.menu.MenuBar")
 function MenuBar:initialize(opts)
 	-- Default style
 	opts.horizontal = true
