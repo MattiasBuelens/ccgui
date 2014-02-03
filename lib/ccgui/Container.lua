@@ -151,11 +151,23 @@ function Container:markRepaint()
 	end
 end
 
+local function compareZIndex(a, b)
+	return a.zIndex < b.zIndex
+end
 function Container:drawChildren(ctxt)
-	-- Paint visible children
-	self:eachVisible(function(child)
+	-- Copy visible children
+	local t = {}
+	for _,child in ipairs(self.children) do
+		if child.visible then
+			table.insert(t, child)
+		end
+	end
+	-- Sort by Z-index
+	table.sort(t, compareZIndex)
+	-- Paint children
+	for _,child in ipairs(t) do
 		child:paint(ctxt)
-	end)
+	end
 end
 
 --[[

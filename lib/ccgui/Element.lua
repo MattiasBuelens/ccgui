@@ -24,6 +24,8 @@ function Element:initialize(opts)
 	self.parent = opts.parent or nil
 	-- Visibility
 	self.visible = (opts.visible == nil) or (not not opts.visible)
+	-- Z-index for paint ordering
+	self.zIndex = opts.zIndex or 0
 	-- Colors
 	self.foreground = opts.foreground or colours.black
 	self.background = opts.background or 0

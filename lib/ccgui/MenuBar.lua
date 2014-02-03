@@ -37,6 +37,7 @@ function MenuBar:initialize(opts)
 	opts.horizontal = true
 	opts.absolute = false
 	opts.visible = (opts.visible == nil) or (not not opts.visible)
+	opts.zIndex = opts.zIndex or 100
 	opts.foreground = opts.foreground or colours.grey
 	opts.background = opts.background or colours.lightGrey
 	
