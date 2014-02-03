@@ -14,9 +14,10 @@ local SubMenuButton	= require "ccgui.SubMenuButton"
 
 local Menu = FlowContainer:subclass("ccgui.Menu")
 function Menu:initialize(opts)
-	opts.horizontal = false
-	opts.visible = false
-	opts.absolute = true
+	-- Default style
+	opts.horizontal = opts.horizontal or false
+	opts.visible = opts.visible or false
+	opts.absolute = (opts.absolute == nil) or (not not opts.absolute)
 	opts.background = opts.background or colours.lightGrey
 
 	super.initialize(self, opts)
@@ -47,7 +48,7 @@ function Menu:addSubMenu(button, menu)
 	if type(button) == "string" then
 		button = SubMenuButton:new{
 			text = button,
-			menu = menu or Menu:new()
+			menu = menu or Menu:new{}
 		}
 	end
 	-- Store menu
@@ -116,18 +117,27 @@ function Menu:markRepaint()
 	super.markRepaint(self)
 end
 function Menu:measure(spec)
-	-- Calculate with unlimited space
-	spec = MeasureSpec:new("?", "?")
+	spec = self:menuBeforeMeasure(spec)
 	super.measure(self, spec)
 end
 function Menu:layout(bbox)
+	bbox = self:menuBeforeLayout(bbox)
+	super.layout(self, bbox)
+end
+function Menu:menuBeforeMeasure(spec)
+	-- Calculate with unlimited space
+	spec = MeasureSpec:new("?", "?")
+	return spec
+end
+function Menu:menuBeforeLayout(bbox)
 	-- Open at menu position
+	local x, y
 	if self.menuUp then
-		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y - bbox.h + 1
+		x, y = self.menuPos.x, self.menuPos.y - bbox.h + 1
 	else
-		bbox.x, bbox.y = self.menuPos.x, self.menuPos.y
+		x, y = self.menuPos.x, self.menuPos.y
 	end
-	return super.layout(self, bbox)
+	return Rectangle:new(x, y, bbox.w, bbox.h)
 end
 function Menu:contains(x, y)
 	return super.contains(self, x, y) or (self.openedSubMenu and self.openedSubMenu:contains(x, y))

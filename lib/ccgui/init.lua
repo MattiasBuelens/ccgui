@@ -35,6 +35,7 @@ require "ccgui.ProgramWindow"
 require "ccgui.MenuButton"
 require "ccgui.SubMenuButton"
 require "ccgui.Menu"
+require "ccgui.MenuBar"
 
 require "ccgui.Page"
 
