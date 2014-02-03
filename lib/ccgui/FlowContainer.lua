@@ -68,6 +68,8 @@ function FlowContainer:measureUnspecified(spec)
 		local spacing = (i < n and self.spacing) or 0
 		-- Measure child
 		child:measure(spec)
+		-- Ignore absolutely positioned children
+		if child.absolute then return end
 		-- Update flow size
 		local childSize = child.size[flowDim] + spacing
 		flowSize = flowSize + childSize
