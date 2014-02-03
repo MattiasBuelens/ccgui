@@ -99,7 +99,7 @@ end
 -- Draw the bar
 function Bar:barPaint(ctxt)
 	-- Draw a line
-	ctxt:drawLine(self:getBarLine(), self:getForeground())
+	ctxt:drawLine(self:getBarLine(), self:getForeground(), self.parent.bbox)
 end
 
 -- Start dragging on mouse click on bar

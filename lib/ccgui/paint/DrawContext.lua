@@ -29,6 +29,9 @@ function DrawContext:doClip(x, y, text, clip)
 	-- Limit to horizontal bounds
 	local startIdx = 1 + math.max(0, clip.x - x)
 	local endIdx = math.min(#text, clip.x + clip.w - x)
+	if startIdx > endIdx then
+		return false
+	end
 	text = string.sub(text, startIdx, endIdx)
 	x = x + startIdx - 1
 	return true, x, y, text
@@ -62,34 +65,34 @@ function DrawContext:draw(x, y, text, fgColor, bgColor, clip)
 end
 
 -- Draw line
-function DrawContext:drawLine(line, color)
+function DrawContext:drawLine(line, color, clip)
 	-- Draw each point along the line
 	for i,point in ipairs(line:points()) do
-		self:draw(point, " ", colours.white, color)
+		self:draw(point, " ", colours.white, color, clip)
 	end
 end
 
 -- Draw rectangle
-function DrawContext:drawRect(rect, color)
+function DrawContext:drawRect(rect, color, clip)
 	local line = string.rep(" ", rect.w)
 	for y=0,rect.h-1 do
-		self:draw(rect.x, rect.y + y, line, colours.white, color)
+		self:draw(rect.x, rect.y + y, line, colours.white, color, clip)
 	end
 end
 
 -- Draw single border
-function DrawContext:drawSingleBorder(rect, border, side)
+function DrawContext:drawSingleBorder(rect, border, side, clip)
 	if border:has(side) then
-		self:drawLine(rect[side](rect), border:get(side))
+		self:drawLine(rect[side](rect), border:get(side), clip)
 	end
 end
 
 -- Draw full border
-function DrawContext:drawBorder(rect, border)
-	self:drawSingleBorder(rect, border, "left")
-	self:drawSingleBorder(rect, border, "right")
-	self:drawSingleBorder(rect, border, "top")
-	self:drawSingleBorder(rect, border, "bottom")
+function DrawContext:drawBorder(rect, border, clip)
+	self:drawSingleBorder(rect, border, "left", clip)
+	self:drawSingleBorder(rect, border, "right", clip)
+	self:drawSingleBorder(rect, border, "top", clip)
+	self:drawSingleBorder(rect, border, "bottom", clip)
 end
 
 -- Exports

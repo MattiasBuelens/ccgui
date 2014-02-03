@@ -34,11 +34,22 @@ function ScrollWrapper:outer(bbox)
 	return self:scrollOuter(super.inner(self, bbox))
 end
 
-function ScrollWrapper:scrollVisible()
+function ScrollWrapper:scrollOuterSize()
 	return self:inner(self.bbox):size()
 end
-function ScrollWrapper:scrollTotal()
+function ScrollWrapper:scrollContentSize()
 	return self.content:inner(self.content.bbox):size()
+end
+function ScrollWrapper:scrollVisible()
+	return self:scrollOuterSize()
+end
+function ScrollWrapper:scrollTotal()
+	local ownSize = self:scrollOuterSize()
+	local contentSize = self:scrollContentSize()
+	return vector.new(
+		math.max(ownSize.x, contentSize.x),
+		math.max(ownSize.y, contentSize.y)
+	)
 end
 
 function ScrollWrapper:getScreenOffset()
