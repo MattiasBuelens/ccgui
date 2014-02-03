@@ -89,8 +89,8 @@ local textFoo = ccgui.TextArea:new{
 	_name = "textFoo"
 }
 window2:content():add(textFoo)
-container:add(taskBar, window1, window2)
-screen:add(container)
+container:add(window1, window2)
+screen:add(container, taskBar)
 
 screen:run()
 
