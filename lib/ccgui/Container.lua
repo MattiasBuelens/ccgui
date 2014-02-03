@@ -6,6 +6,7 @@
 --]]
 
 local Element		= require "ccgui.Element"
+local stablesort	= require "common.stablesort"
 
 local Container = Element:subclass("ccgui.Container")
 function Container:initialize(opts)
@@ -163,7 +164,7 @@ function Container:drawChildren(ctxt)
 		end
 	end
 	-- Sort by Z-index
-	table.sort(t, compareZIndex)
+	stablesort(t, compareZIndex)
 	-- Paint children
 	for _,child in ipairs(t) do
 		child:paint(ctxt)

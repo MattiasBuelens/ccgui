@@ -10,6 +10,7 @@ local EventEmitter = Object:subclass("event.EventEmitter")
 local Event = Object:subclass("event.Event")
 local EventHandler = Object:subclass("event.EventHandler")
 
+local stablesort = require "common.stablesort"
 
 function EventEmitter:initialize()
 	self:offAll()
@@ -56,7 +57,7 @@ function Event:add(func, ctxt, prio)
 	table.insert(self.handlers, handler)
 
 	-- Sort by priority
-	table.sort(self.handlers, EventHandler.compareByPriority)
+	stablesort(self.handlers, EventHandler.compareByPriority)
 	return true
 end
 function Event:remove(func, ctxt, prio)
