@@ -6,8 +6,11 @@
 --]]
 
 local TextElement	= require "ccgui.TextElement"
+local Pressable		= require "ccgui.Pressable"
 
 local Button = TextElement:subclass("ccgui.Button")
+Button:uses(Pressable)
+
 function Button:initialize(opts)
 	-- Default style
 	opts.foreground = opts.foreground or colours.grey
@@ -15,17 +18,7 @@ function Button:initialize(opts)
 	opts.padding = (opts.padding == nil) and 1 or opts.padding
 
 	super.initialize(self, opts)
-
-	self:on("mouse_click", self.buttonClick, self)
-end
-
-function Button:buttonClick(button, x, y)
-	if button == 1 then
-		-- Left mouse button, trigger pressed
-		if self:isVisible() and self:contains(x, y) then
-			self:trigger("buttonpress")
-		end
-	end
+	self:pressInitialize(opts)
 end
 
 -- Exports

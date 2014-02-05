@@ -81,7 +81,7 @@ function VerticalSlider:getMaximum()
 	return self.parent:scrollTotal().y
 end
 
-local Scrollable = Trait:new("Scrollable")
+local Scrollable = Trait:new("ccgui.Scrollable")
 function Scrollable:initializeScroll(opts)
 	-- Orientation
 	self.horizontal = not not opts.horizontal
