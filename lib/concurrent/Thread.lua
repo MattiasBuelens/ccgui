@@ -79,7 +79,7 @@ function Thread:handleResult(ok, data)
 	self.scheduler = nil
 	-- Callback
 	if self.callback then
-		self.callback(self, ok, data)
+		self.callback(self, ok, unpack(data))
 	end
 end
 
