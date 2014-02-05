@@ -48,7 +48,7 @@ local function splitLines(str)
 	return t
 end
 
-function TextArea:text()
+function TextArea:getText()
 	local text = ""
 	-- Join lines
 	for i,line in ipairs(self.lines) do
