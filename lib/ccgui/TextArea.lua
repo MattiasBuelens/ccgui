@@ -289,14 +289,16 @@ end
 
 ]]--
 
+function TextArea:getScreenOffset()
+	return self:inner(self.bbox):tl() - self.scrollPosition - vector.new(1, 1)
+end
 function TextArea:fromScreen(x, y)
 	local screenPos = type(x) == "table" and x or vector.new(x, y)
-	return screenPos + vector.new(1, 1) - self:inner(self.bbox):tl() + self.scrollPosition
+	return screenPos - self:getScreenOffset()
 end
-
 function TextArea:toScreen(x, y)
-	local textPos = type(x) == "table" and x or vector.new(x, y)
-	return textPos - vector.new(1, 1) + self:inner(self.bbox):tl() - self.scrollPosition
+	local localPos = type(x) == "table" and x or vector.new(x, y)
+	return localPos + self:getScreenOffset()
 end
 
 function TextArea:measure(spec)
@@ -342,10 +344,13 @@ function TextArea:drawText(ctxt)
 	local x, y = pos.x, pos.y
 	-- Draw lines
 	for i,line in ipairs(self.lines) do
-		-- TODO Use ctxt's clip?
-		ctxt:draw(x, y, line, self:getForeground(), self:getBackground(), bbox)
+		self:drawTextLine(ctxt, line, x, y, bbox)
 		y = y + 1
 	end
+end
+function TextArea:drawTextLine(ctxt, line, x, y, bbox)
+	-- TODO Use ctxt's clip?
+	ctxt:draw(x, y, line, self:getForeground(), self:getBackground(), bbox)
 end
 
 function TextArea:textKey(key)

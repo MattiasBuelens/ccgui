@@ -21,6 +21,7 @@ require "ccgui.ToggleButton"
 require "ccgui.TextElement"
 require "ccgui.TextArea"
 require "ccgui.TextInput"
+require "ccgui.PasswordInput"
 require "ccgui.TextViewer"
 
 require "ccgui.Slider"
