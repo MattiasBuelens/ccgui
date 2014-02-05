@@ -113,33 +113,49 @@ function Container:move(child, newIndex)
 	end
 end
 
-function Container:remove(child)
-	if child.parent ~= self then
+function Container:removeByIndex(i)
+	local child = self.children[i]
+	if child == nil or child.parent ~= self then
 		return false
 	end
 	self:trigger("beforeremove", child)
 
-	-- Remove from children
-	local i = self:find(child, false)
-	if i ~= nil then
-		-- Fix focused child
-		if self.childFocus ~= nil then
-			if self.childFocus == i then
-				-- Currently focused child removed
-				self:updateFocus(nil)
-			elseif self.childFocus > i then
-				-- Adjust focused child index
-				self.childFocus = self.childFocus - 1
-			end
+	-- Fix focused child
+	if self.childFocus ~= nil then
+		if self.childFocus == i then
+			-- Currently focused child removed
+			self:updateFocus(nil)
+		elseif self.childFocus > i then
+			-- Adjust focused child index
+			self.childFocus = self.childFocus - 1
 		end
-		table.remove(self.children, i)
 	end
 
 	-- Remove as parent
 	child.parent = nil
+	table.remove(self.children, i)
 
 	self:trigger("remove", child)
 	return true
+end
+
+function Container:remove(child)
+	if child.parent ~= self then
+		return false
+	end
+
+	local i = self:find(child, false)
+	if i == nil then return false end
+
+	return self:removeByIndex(i)
+end
+
+function Container:removeAll()
+	self:trigger("beforeremoveall")
+	while #self.children > 0 do
+		self:removeByIndex(1)
+	end
+	self:trigger("removeall")
 end
 
 function Container:markRepaint()
