@@ -226,6 +226,11 @@ function TextArea:insert(text)
 	local line = self.lines[y]
 	local before, after = string.sub(line, 1, x-1), string.sub(line, x, -1)
 	
+	-- Remove new lines when not multiline
+	if not self:multiline() then
+		text = string.gsub(text, "\n", "")
+	end
+	
 	local textLines = splitLines(text)
 	if #textLines == 1 then
 		-- Single line
