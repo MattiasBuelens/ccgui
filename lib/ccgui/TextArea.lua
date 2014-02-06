@@ -225,18 +225,18 @@ function TextArea:insert(text)
 	local x, y = self.cursorChar, self.cursorLine
 	local line = self.lines[y]
 	local before, after = string.sub(line, 1, x-1), string.sub(line, x, -1)
-	
+
 	-- Remove new lines when not multiline
 	if not self:multiline() then
 		text = string.gsub(text, "\n", "")
 	end
-	
+
 	local textLines = splitLines(text)
 	if #textLines == 1 then
 		-- Single line
 		self.lines[y] = before .. text .. after
 		-- Update cursor
-		self:setCursor(x+#text, y)
+		x = x + #text
 	else
 		-- Multiple lines
 		-- Insert last line
@@ -248,63 +248,64 @@ function TextArea:insert(text)
 		-- Update first line
 		self.lines[y] = before .. textLines[1]
 		-- Update cursor
-		self:setCursor(#(textLines[#textLines])+1, y+#textLines-1)
+		x = #(textLines[#textLines]) + 1
+		y = y + #textLines - 1
 	end
-	
+	self:setCursor(x, y)
+
 	self:markRepaint()
 	self:updateScroll()
 end
 
 function TextArea:delete(before)
-	if before == nil then
-		before = true
-	else
-		before = not not before
-	end
+	local x, y = self.cursorChar, self.cursorLine
+	before = (before == nil) or (not not before)
 
 	if before then
-		if self.cursorChar == 1 and self.cursorLine > 1 then
+		if x == 1 and y > 1 then
 			-- Get old length of previous line
-			local prevLength = #(self.lines[self.cursorLine-1])
+			local prevLength = #(self.lines[y-1])
 			-- Concat with previous line
-			self.lines[self.cursorLine-1] = self.lines[self.cursorLine-1] .. self.lines[self.cursorLine]
-			table.remove(self.lines, self.cursorLine)
-			self:setCursor(prevLength + 1, self.cursorLine-1)
-		elseif self.cursorChar > 1 then
+			self.lines[y-1] = self.lines[y-1] .. self.lines[y]
+			table.remove(self.lines, y)
+			self:setCursor(prevLength + 1, y-1)
+		elseif x > 1 then
 			-- Remove previous in current line
-			local line = self.lines[self.cursorLine]
-			line = string.sub(line, 1, self.cursorChar-2) .. string.sub(line, self.cursorChar, -1)
-			self.lines[self.cursorLine] = line
+			local line = self.lines[y]
+			line = string.sub(line, 1, x-2) .. string.sub(line, x, -1)
+			self.lines[y] = line
 			self:moveCursor(-1, 0)
 		end
 	else
-		local line = self.lines[self.cursorLine]
-		if self.cursorChar == #line + 1 and self.cursorLine < #(self.lines) then
+		local line = self.lines[y]
+		if x == #line+1 and y < #(self.lines) then
 			-- Concat with next line
-			self.lines[self.cursorLine] = self.lines[self.cursorLine] .. self.lines[self.cursorLine + 1]
-			table.remove(self.lines, self.cursorLine + 1)
-		elseif self.cursorChar <= #line then
+			self.lines[y] = self.lines[y] .. self.lines[y+1]
+			table.remove(self.lines, y+1)
+		elseif x <= #line then
 			-- Remove next in current line
-			line = string.sub(line, 1, self.cursorChar-1) .. string.sub(line, self.cursorChar + 1, -1)
-			self.lines[self.cursorLine] = line
+			line = string.sub(line, 1, x-1) .. string.sub(line, x+1, -1)
+			self.lines[y] = line
 		end
 	end
-	self:markRepaint()
 
+	self:markRepaint()
 	self:updateScroll()
 end
 
 function TextArea:newline()
 	if not self:multiline() then return end
+	local x, y = self.cursorChar, self.cursorLine
 
 	-- Split current line
-	local line = self.lines[self.cursorLine]
-	self.lines[self.cursorLine] = string.sub(line, 1,self.cursorChar-1)
-	table.insert(self.lines, self.cursorLine + 1, string.sub(line, self.cursorChar, -1))
-	self:markRepaint()
-
+	local line = self.lines[y]
+	local before, after = string.sub(line, 1, x-1), string.sub(line, x, -1)
+	self.lines[y] = before
+	table.insert(self.lines, y+1, after)
 	-- Move to new next line
-	self:setCursor(1, self.cursorLine + 1)
+	self:setCursor(1, y+1)
+
+	self:markRepaint()
 	self:updateScroll()
 end
 
