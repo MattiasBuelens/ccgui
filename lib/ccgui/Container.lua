@@ -36,6 +36,7 @@ function Container:initialize(opts)
 	-- Keyboard
 	self:sinkFocusEvent("key")
 	self:sinkFocusEvent("char")
+	self:sinkFocusEvent("paste")
 end
 
 function Container:find(elem, deep)

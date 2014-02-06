@@ -98,7 +98,7 @@ function ProgramPane:wrapProgram(func)
 end
 function ProgramPane:filterProgramEvent(eventData)
 	local event = eventData[1]
-	if event == "key" or event == "char" then
+	if event == "key" or event == "char" or event == "paste" then
 		-- Must have focus for keyboard event
 		if self:hasFocus() then
 			return eventData

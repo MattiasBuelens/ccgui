@@ -33,6 +33,7 @@ function TextArea:initialize(opts)
 	self:on("mouse_click", self.textClick, self)
 	self:on("key", self.textKey, self)
 	self:on("char", self.textChar, self)
+	self:on("paste", self.textPaste, self)
 
 	self:on("paint", self.drawText, self)
 	self:on("afterpaint", self.drawCursor, self)
@@ -219,14 +220,33 @@ end
 
 ]]--
 
-function TextArea:insert(char)
-	-- Insert character
-	local line = self.lines[self.cursorLine]
-	line = string.sub(line, 1, self.cursorChar-1) .. char .. string.sub(line, self.cursorChar, -1)
-	self.lines[self.cursorLine] = line
+function TextArea:insert(text)
+	-- Insert text on current line
+	local x, y = self.cursorChar, self.cursorLine
+	local line = self.lines[y]
+	local before, after = string.sub(line, 1, x-1), string.sub(line, x, -1)
+	
+	local textLines = splitLines(text)
+	if #textLines == 1 then
+		-- Single line
+		self.lines[y] = before .. text .. after
+		-- Update cursor
+		self:setCursor(x+#text, y)
+	else
+		-- Multiple lines
+		-- Insert last line
+		table.insert(self.lines, y+1, textLines[#textLines] .. after)
+		-- Insert other lines back to front before last line
+		for i=#textLines-1,2,-1 do
+			table.insert(self.lines, y+1, textLines[i])
+		end
+		-- Update first line
+		self.lines[y] = before .. textLines[1]
+		-- Update cursor
+		self:setCursor(#(textLines[#textLines])+1, y+#textLines-1)
+	end
+	
 	self:markRepaint()
-	-- Move cursor
-	self:moveCursor(1, 0)
 	self:updateScroll()
 end
 
@@ -386,6 +406,13 @@ function TextArea:textChar(char)
 	if not self:readonly() then
 		-- Insert character
 		self:insert(char)
+	end
+end
+
+function TextArea:textPaste(pasted)
+	if not self:readonly() then
+		-- Insert pasted text
+		self:insert(pasted)
 	end
 end
 
