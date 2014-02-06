@@ -141,7 +141,7 @@ function Container:removeByIndex(i)
 end
 
 function Container:remove(child)
-	if child.parent ~= self then
+	if child == nil or child.parent ~= self then
 		return false
 	end
 

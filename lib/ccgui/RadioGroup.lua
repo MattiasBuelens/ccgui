@@ -22,6 +22,7 @@ function RadioGroup:add(radio)
 end
 
 function RadioGroup:remove(radio)
+	if radio == nil then return end
 	self.radios[radio] = nil
 	if self.selected == radio then
 		self:unselect()
