@@ -133,7 +133,7 @@ function TextElement:drawText(ctxt)
 	-- Vertical align
 	local firstLine, y = 1, bbox.y
 	local nLines, nLinesToPaint = #self.lines, self.lineCount
-	if self.valign == VAlign.Center then
+	if self.valign == VAlign.Middle then
 		y = y + math.floor((bbox.h - nLinesToPaint)/2)
 		if nLines > nLinesToPaint then
 			firstLine = math.floor((nLines - nLinesToPaint)/2) + 1
