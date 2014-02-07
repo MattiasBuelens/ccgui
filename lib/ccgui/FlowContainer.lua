@@ -93,6 +93,8 @@ function FlowContainer:measureSpecified(spec, isExact)
 	
 	-- Children to be stretched
 	local stretchChildren = {}
+	-- Total of stretch factors
+	local stretchTotal = 0
 	
 	-- Measure children with decreasing spec
 	self:eachVisible(function(child, i, n)
@@ -106,6 +108,9 @@ function FlowContainer:measureSpecified(spec, isExact)
 		end
 		-- Handle stretched children later
 		if isExact and child.stretch then
+			-- Add to stretch total
+			local stretchFactor = (type(child.stretch) == "number" and child.stretch or 1)
+			stretchTotal = stretchTotal + stretchFactor
 			-- Remove spacing from remaining
 			-- and add to flow size
 			flowSize = flowSize + spacing
@@ -130,10 +135,11 @@ function FlowContainer:measureSpecified(spec, isExact)
 
 	-- Divide remaining size over stretched children
 	local remaining = remainingSpec.value
-	local stretchSize = math.floor(remaining / #stretchChildren)
-	local firstStretch = stretchSize + (remaining % #stretchChildren)
+	local stretchUnit = math.floor(remaining / stretchTotal)
+	local stretchExtra = remaining % stretchTotal
 	for i,child in ipairs(stretchChildren) do
-		local childSize = (i == 1 and firstStretch) or stretchSize
+		local stretchFactor = (type(child.stretch) == "number" and child.stretch or 1)
+		local childSize = stretchUnit * stretchFactor + (i == 1 and stretchExtra or 0)
 		-- Measure child
 		child:measure(MeasureSpec:new{
 			[flowDim] = DimensionSpec:new("=", childSize),
