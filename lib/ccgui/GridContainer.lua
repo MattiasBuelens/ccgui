@@ -1,7 +1,7 @@
 --[[
 
 	ComputerCraft GUI
-	Flow container
+	Grid container
 
 --]]
 
@@ -10,16 +10,45 @@ local Rectangle			= require "ccgui.geom.Rectangle"
 local DimensionSpec		= require "ccgui.DimensionSpec"
 local MeasureSpec		= require "ccgui.MeasureSpec"
 
-local FlowContainer = Container:subclass("ccgui.FlowContainer")
-function FlowContainer:initialize(opts)
+local GridContainer = Container:subclass("ccgui.GridContainer")
+function GridContainer:initialize(opts)
 	super.initialize(self, opts)
 	-- Orientation
 	self.horizontal = not not opts.horizontal
-	-- Spacing between children
-	self.spacing = opts.spacing or 0
+	-- Spacing between rows and columns
+	self.rowSpacing = opts.rowSpacing or 0
+	self.columnSpacing = opts.columnSpacing or 0
+	-- Cells
+	self.cells = {}
+	
+	self:on("add", self.gridCellAdd, self)
+	self:on("remove", self.gridCellRemove, self)
 end
 
-function FlowContainer:getFlowFixedDims()
+function GridContainer:gridCellAdd(child)
+	-- Update indices
+	local r, c = child.rowIndex or (#self.cells + 1), child.columnIndex or 1
+	child.rowIndex, child.columnIndex = r, c
+	-- Update cells
+	local row = self.cells[r] or {}
+	assert(row[c] == nil, "cannot place two elements in same cell at "..r..","..c)
+	row[c] = child
+	self.cells[r] = row
+end
+function GridContainer:gridCellRemove(child)
+	local r, c = child.rowIndex, child.columnIndex
+	local row = self.cells[r]
+	if row and row[c] == child then
+		-- Remove in row
+		row[c] = nil
+		-- Remove row when empty
+		if next(row) == nil then
+			self.cells[r] = nil
+		end
+	end
+end
+
+function GridContainer:getFlowFixedDims()
 	if self.horizontal then
 		return "w", "h", "x", "y"
 	else
@@ -27,7 +56,7 @@ function FlowContainer:getFlowFixedDims()
 	end
 end
 
-function FlowContainer:measure(spec)
+function GridContainer:measure(spec)
 	-- Get inner spec
 	spec = self:inner(spec)
 	
@@ -56,7 +85,7 @@ function FlowContainer:measure(spec)
 	self.size = self:outer(size)
 end
 
-function FlowContainer:measureUnspecified(spec)
+function GridContainer:measureUnspecified(spec)
 	-- Dimensions
 	local flowDim, fixedDim = self:getFlowFixedDims()
 	-- Sizes
@@ -80,7 +109,7 @@ function FlowContainer:measureUnspecified(spec)
 	return flowSize, fixedSize
 end
 
-function FlowContainer:measureSpecified(spec, isExact)
+function GridContainer:measureSpecified(spec, isExact)
 	-- Dimensions
 	local flowDim, fixedDim = self:getFlowFixedDims()
 	-- Sizes
@@ -156,7 +185,7 @@ function FlowContainer:measureSpecified(spec, isExact)
 	return flowSize, fixedSize
 end
 
-function FlowContainer:forceFixedSize(fixedSize)
+function GridContainer:forceFixedSize(fixedSize)
 	-- Dimensions
 	local flowDim, fixedDim = self:getFlowFixedDims()
 	
@@ -173,7 +202,7 @@ function FlowContainer:forceFixedSize(fixedSize)
 	end)
 end
 
-function FlowContainer:layout(bbox)
+function GridContainer:layout(bbox)
 	super.layout(self, bbox)
 
 	-- Get inner box for children bounding box
@@ -202,6 +231,7 @@ function FlowContainer:layout(bbox)
 			[flowDim] = child.size[flowDim],
 			[fixedDim] = fixedSize
 		})
+		-- Force size
 		-- Add child size and spacing to flow position
 		local childSize = child.bbox[flowDim] + spacing
 		flowPos = flowPos + childSize
@@ -209,4 +239,4 @@ function FlowContainer:layout(bbox)
 end
 
 -- Exports
-return FlowContainer
+return GridContainer
