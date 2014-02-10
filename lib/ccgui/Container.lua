@@ -57,29 +57,30 @@ function Container:find(elem, deep)
 	return nil
 end
 
-function Container:visibleChildren()
-	local t = {}
-	for i,child in ipairs(self.children) do
-		if child.visible then
-			table.insert(t, child)
+function Container.class.filterVisible(t)
+	local r = {}
+	for i,elem in ipairs(t) do
+		if elem.visible then
+			table.insert(r, elem)
 		end
 	end
-	return t
+	return r
+end
+function Container:visibleChildren()
+	return self.class.filterVisible(self.children)
 end
 
-local function forEach(t, f)
+function Container.class.forEach(t, f)
 	local n = #t
 	for i,x in ipairs(t) do
 		f(x, i, n)
 	end
 end
-
 function Container:each(func)
-	return forEach(self.children, func)
+	return self.class.forEach(self.children, func)
 end
-
 function Container:eachVisible(func)
-	return forEach(self:visibleChildren(), func)
+	return self.class.forEach(self:visibleChildren(), func)
 end
 
 function Container:add(...)

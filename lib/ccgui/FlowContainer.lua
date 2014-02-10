@@ -36,7 +36,7 @@ function FlowContainer:measure(spec)
 	-- Flow specification
 	local flowSpec = spec[flowDim]
 	-- Sizes
-	local flowSize, fixedSize = 0, 0
+	local flowSize, fixedSize
 
 	-- Measure
 	if flowSpec:isUnspecified() then
@@ -187,8 +187,7 @@ function FlowContainer:layout(bbox)
 	local fixedPos, fixedSize = cbox[fixedCoord], cbox[fixedDim]
 
 	-- Update layout of children
-	self:eachVisible(function(child, i, n)
-		local spacing = (i < n and self.spacing) or 0
+	self:eachVisible(function(child, i)
 		-- Handle absolutely positioned children
 		if child.absolute then
 			-- Position in top left corner
@@ -203,8 +202,7 @@ function FlowContainer:layout(bbox)
 			[fixedDim] = fixedSize
 		})
 		-- Add child size and spacing to flow position
-		local childSize = child.bbox[flowDim] + spacing
-		flowPos = flowPos + childSize
+		flowPos = flowPos + child.bbox[flowDim] + self.spacing
 	end)
 end
 
