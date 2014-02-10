@@ -33,64 +33,14 @@ function FlowContainer:measure(spec)
 	
 	-- Dimensions
 	local flowDim, fixedDim = self:getFlowFixedDims()
-	-- Flow specification
-	local flowSpec = spec[flowDim]
-	-- Sizes
-	local flowSize, fixedSize
-
-	-- Measure
-	if flowSpec:isUnspecified() then
-		flowSize, fixedSize = self:measureUnspecified(spec)
-	else
-		flowSize, fixedSize = self:measureSpecified(spec, flowSpec:isExact())
-	end
+	-- Specifications
+	local flowSpec, fixedSpec = spec[flowDim], spec[fixedDim]
 	
-	-- Force fixed size
-	self:forceFixedSize(fixedSize)
+	-- Use at most specification for remaining
+	local remainingSpec = flowSpec:isExact() and DimensionSpec:new("<", flowSpec.value) or flowSpec
 	
-	-- Set size
-	local size = Rectangle:new{
-		[flowDim] = flowSize,
-		[fixedDim] = fixedSize
-	}
-	self.size = self:outer(size)
-end
-
-function FlowContainer:measureUnspecified(spec)
-	-- Dimensions
-	local flowDim, fixedDim = self:getFlowFixedDims()
 	-- Sizes
 	local flowSize, fixedSize = 0, 0
-	
-	-- Measure all children with unspecified spec
-	self:eachVisible(function(child, i, n)
-		-- No spacing on last child
-		local spacing = (i < n and self.spacing) or 0
-		-- Measure child
-		child:measure(spec)
-		-- Ignore absolutely positioned children
-		if child.absolute then return end
-		-- Update flow size
-		local childSize = child.size[flowDim] + spacing
-		flowSize = flowSize + childSize
-		-- Update fixed size
-		fixedSize = math.max(fixedSize, child.size[fixedDim])
-	end)
-	
-	return flowSize, fixedSize
-end
-
-function FlowContainer:measureSpecified(spec, isExact)
-	-- Dimensions
-	local flowDim, fixedDim = self:getFlowFixedDims()
-	-- Sizes
-	local flowSize, fixedSize = 0, 0
-	
-	-- Flow specification: at most
-	local remainingSpec = DimensionSpec:new("<", spec[flowDim].value)
-	-- Fixed specification: inherit
-	local fixedSpec = spec[fixedDim]
-	
 	-- Children to be stretched
 	local stretchChildren = {}
 	-- Total of stretch factors
@@ -110,7 +60,7 @@ function FlowContainer:measureSpecified(spec, isExact)
 		flowSize = flowSize + spacing
 		remainingSpec = remainingSpec - spacing
 		-- Handle stretched children later
-		if isExact and child.stretch then
+		if flowSpec:isExact() and child.stretch then
 			-- Add to stretch total
 			local stretchFactor = (type(child.stretch) == "number" and child.stretch or 1)
 			stretchTotal = stretchTotal + stretchFactor
@@ -149,11 +99,19 @@ function FlowContainer:measureSpecified(spec, isExact)
 	end
 	
 	-- Force exact flow size
-	if isExact then
-		flowSize = math.max(flowSize, spec[flowDim].value)
+	if flowSpec:isExact() then
+		flowSize = math.max(flowSize, flowSpec.value)
 	end
 	
-	return flowSize, fixedSize
+	-- Force fixed size
+	self:forceFixedSize(fixedSize)
+	
+	-- Set size
+	local size = Rectangle:new{
+		[flowDim] = flowSize,
+		[fixedDim] = fixedSize
+	}
+	self.size = self:outer(size)
 end
 
 function FlowContainer:forceFixedSize(fixedSize)
