@@ -5,6 +5,7 @@
 
 --]]
 
+local Object			= require "objectlua.Object"
 local Container			= require "ccgui.Container"
 local Rectangle			= require "ccgui.geom.Rectangle"
 local DimensionSpec		= require "ccgui.DimensionSpec"
@@ -14,7 +15,7 @@ local GridSpec = Object:subclass("ccgui.grid.GridSpec")
 function GridSpec:initialize(stretch)
 	super.initialize(self)
 	
-	-- Stretching
+	-- Stretch factor
 	self.stretch = not not stretch
 end
 
@@ -24,8 +25,8 @@ function GridContainer:initialize(opts)
 	-- Orientation
 	self.horizontal = not not opts.horizontal
 	-- Row and column specifications
-	self.rowSpecs = {}
-	self.colSpecs = {}
+	self.rowSpecs = opts.rowSpecs or {}
+	self.colSpecs = opts.colSpecs or {}
 	-- Spacing between rows and columns
 	self.rowSpacing = opts.rowSpacing or 0
 	self.colSpacing = opts.colSpacing or 0
@@ -70,7 +71,7 @@ function GridContainer:eachRow(func)
 	end
 end
 function GridContainer:eachColumn(func)
-	local n = #self.columnSpec
+	local n = #self.colSpecs
 	for i=1,n do
 		func(self:getColumn(i), i, n)
 	end
@@ -145,8 +146,9 @@ function GridContainer:gridMeasureFlow(primary, spec, fixSizes)
 	local flowDim, fixDim = self:getDimensions(primary)
 	local gridSpecs = self:getSpecs(primary)
 	local flowSpacing = self:getSpacing(primary)
-	
 	local flowSpec, fixSpec = spec[flowDim], spec[fixDim]
+	
+	local remainingSpec = self:makeRemaining(flowSpec)
 	local groupSizes = {}
 	local stretchGroups = {}
 	local stretchTotal = 0
@@ -155,11 +157,11 @@ function GridContainer:gridMeasureFlow(primary, spec, fixSizes)
 	self:eachGroup(primary, function(group, i, n)
 		-- Remove spacing
 		local spacing = (i < n and flowSpacing) or 0
-		flowSpec = flowSpec - spacing
+		remainingSpec = remainingSpec - spacing
 		
 		-- Handle stretched groups later
 		local gridSpec = gridSpecs[i]
-		if spec[flowDim]:isExact() and gridSpec.stretch then
+		if flowSpec:isExact() and gridSpec.stretch then
 			-- Add to stretch total
 			local stretchFactor = (type(gridSpec.stretch) == "number" and gridSpec.stretch or 1)
 			stretchTotal = stretchTotal + stretchFactor
@@ -171,19 +173,19 @@ function GridContainer:gridMeasureFlow(primary, spec, fixSizes)
 		-- Measure group
 		local groupFlow, groupFix
 		if fixSizes then
-			groupFlow, groupFix = self:gridMeasureGroupExact(group, primary, flowSpec, fixSizes)
+			groupFlow, groupFix = self:gridMeasureGroupExact(group, primary, remainingSpec, fixSizes)
 		else
-			groupFlow, groupFix = self:gridMeasureGroup(group, primary, flowSpec, fixSpec)
+			groupFlow, groupFix = self:gridMeasureGroup(group, primary, remainingSpec, fixSpec)
 		end
 		
 		-- Set group size
 		groupSizes[i] = groupFlow
 		-- Update remaining size
-		flowSpec = flowSpec - groupFlow
+		remainingSpec = remainingSpec - groupFlow
 	end)
 	
 	-- Stretch groups
-	local remaining = flowSpec.value
+	local remaining = remainingSpec.value
 	local stretchUnit = math.floor(remaining / stretchTotal)
 	local stretchExtra = remaining % stretchTotal
 	for i,group in pairs(stretchGroups) do
@@ -237,22 +239,24 @@ end
 function GridContainer:gridMeasureGroup(group, primary, flowSpec, fixSpec)
 	local flowDim, fixDim = self:getDimensions(primary)
 	local fixSpacing = self:getSpacing(not primary)
-
+	
+	local remainingSpec = self:makeRemaining(fixSpec)
 	local maxFlow, totalFix = 0, 0
-	self.class:forEach(group, function(child, i, n)
+	
+	self.class.forEach(group, function(child, i, n)
 		-- Remove spacing
 		local spacing = (i < n and fixSpacing) or 0
-		fixSpec = fixSpec - spacing
+		remainingSpec = remainingSpec - spacing
 		-- Measure child
 		child:measure(MeasureSpec:new{
 			[flowDim] = flowSpec,
-			[fixDim] = fixSpec
+			[fixDim] = remainingSpec
 		})
 		-- Add child size to total fix
 		local childSize = child.size[fixDim]
 		totalFix = totalFix + childSize
 		-- Remove child size
-		fixSpec = fixSpec - childSize
+		remainingSpec = remainingSpec - childSize
 		-- Update maximum flow size
 		maxFlow = math.max(maxFlow, child.size[flowDim])
 	end)
@@ -270,7 +274,7 @@ function GridContainer:gridMeasureGroupExact(group, primary, flowSpec, fixSizes)
 	local fixSpacing = self:getSpacing(not primary)
 
 	local maxFlow, totalFix = 0, 0
-	self.class:forEach(group, function(child, i, n)
+	self.class.forEach(group, function(child, i, n)
 		-- Measure child
 		child:measure(MeasureSpec:new{
 			[flowDim] = flowSpec,
@@ -286,6 +290,11 @@ function GridContainer:gridMeasureGroupExact(group, primary, flowSpec, fixSizes)
 	return maxFlow, totalFix
 end
 
+function GridContainer:makeRemaining(dimSpec)
+	-- Use at most specification for remaining
+	return dimSpec:isExact() and DimensionSpec:new("<", dimSpec.value) or dimSpec
+end
+
 function GridContainer:layout(bbox)
 	super.layout(self, bbox)
 
@@ -297,24 +306,24 @@ function GridContainer:layout(bbox)
 	local primSpacing, secSpacing = self:getSpacing(true), self:getSpacing(false)
 	
 	-- Update layout of children
-	local primPos = cbox[primCoord]
-	self:eachGroup(true, function(group, iGroup)
-		local groupSize = self.primSizes[iGroup]
+	local secPos = cbox[secCoord]
+	self:eachGroup(false, function(group, iGroup)
+		local groupSize = self.secSizes[iGroup]
 		-- Layout group
-		local secPos = cbox[secCoord]
-		self.class:forEach(group, function(child, iChild)
-			local childSize = self.secSizes[iChild]
+		local primPos = cbox[primCoord]
+		self.class.forEach(group, function(child, iChild)
+			local childSize = self.primSizes[iChild]
 			-- Layout child
 			child:layout(Rectangle:new{
 				[primCoord] = primPos,
 				[secCoord] = secPos,
-				[primDim] = groupSize,
-				[secDim] = childSize
+				[primDim] = childSize,
+				[secDim] = groupSize
 			})
-			secPos = secPos + childSize + secSpacing
+			primPos = primPos + childSize + primSpacing
 		end)
-		primPos = primPos + groupSize + primSpacing
-	end
+		secPos = secPos + groupSize + secSpacing
+	end)
 end
 
 -- Exports

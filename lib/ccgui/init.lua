@@ -13,6 +13,7 @@ require "ccgui.paint"
 
 require "ccgui.Container"
 require "ccgui.FlowContainer"
+require "ccgui.GridContainer"
 require "ccgui.TabContainer"
 
 require "ccgui.Button"

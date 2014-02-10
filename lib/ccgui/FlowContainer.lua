@@ -37,7 +37,7 @@ function FlowContainer:measure(spec)
 	local flowSpec, fixedSpec = spec[flowDim], spec[fixedDim]
 	
 	-- Use at most specification for remaining
-	local remainingSpec = flowSpec:isExact() and DimensionSpec:new("<", flowSpec.value) or flowSpec
+	local remainingSpec = self:makeRemaining(flowSpec)
 	
 	-- Sizes
 	local flowSize, fixedSize = 0, 0
@@ -112,6 +112,11 @@ function FlowContainer:measure(spec)
 		[fixedDim] = fixedSize
 	}
 	self.size = self:outer(size)
+end
+
+function FlowContainer:makeRemaining(dimSpec)
+	-- Use at most specification for remaining
+	return dimSpec:isExact() and DimensionSpec:new("<", dimSpec.value) or dimSpec
 end
 
 function FlowContainer:forceFixedSize(fixedSize)
