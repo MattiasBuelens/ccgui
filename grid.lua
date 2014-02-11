@@ -36,12 +36,12 @@ local content = ccgui.GridContainer:new{
 	rowSpacing = 1,
 	colSpacing = 1,
 	colSpecs = {
-		ccgui.GridContainer.GridSpec:new(false),
-		ccgui.GridContainer.GridSpec:new(true)
-	},
-	rowSpecs = {
 		ccgui.GridContainer.GridSpec:new(true),
 		ccgui.GridContainer.GridSpec:new(false)
+	},
+	rowSpecs = {
+		ccgui.GridContainer.GridSpec:new(false),
+		ccgui.GridContainer.GridSpec:new(true)
 	}
 }
 local btnOne = ccgui.Button:new{
@@ -54,16 +54,12 @@ local btnOne = ccgui.Button:new{
 btnOne:on("buttonpress", function()
 	window:setStatusText("One pressed")
 end)
-local btnTwo = ccgui.Button:new{
+local txtTwo = ccgui.TextArea:new{
 	rowIndex = 1,
 	colIndex = 2,
-	text = "Two",
-	background = colours.yellow,
-	_name = "btnTwo"
+	text = "Twooooooooooooooooooooooooooooooooooooooo",
+	_name = "txtTwo"
 }
-btnTwo:on("buttonpress", function()
-	window:setStatusText("Two pressed")
-end)
 local btnThree = ccgui.Button:new{
 	rowIndex = 2,
 	colIndex = 1,
@@ -84,7 +80,7 @@ local btnFour = ccgui.Button:new{
 btnFour:on("buttonpress", function()
 	window:setStatusText("Four pressed")
 end)
-content:add(btnOne, btnTwo, btnThree, btnFour)
+content:add(btnOne, txtTwo, btnThree, btnFour)
 
 window:content():add(content)
 container:add(window)
