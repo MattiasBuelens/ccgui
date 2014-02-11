@@ -205,7 +205,7 @@ end
 ]]--
 function GridContainer:gridMeasureExact(primSizes, secSizes)
 	local flowDim, fixDim = self:getDimensions(true)
-	local flowSpacing = self:getSpacing(primary)
+	local flowSpacing = self:getSpacing(true)
 	local flowSize, fixSize = 0, 0
 	
 	-- Measure groups
