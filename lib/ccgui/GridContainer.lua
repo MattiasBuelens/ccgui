@@ -92,9 +92,9 @@ function GridContainer:getDimensions(primary)
 end
 function GridContainer:getSpecs(primary)
 	if self.horizontal == (not not primary) then
-		return self.rowSpecs
-	else
 		return self.colSpecs
+	else
+		return self.rowSpecs
 	end
 end
 function GridContainer:getSpacing(primary)
