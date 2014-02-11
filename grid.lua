@@ -36,12 +36,13 @@ local content = ccgui.GridContainer:new{
 	rowSpacing = 1,
 	colSpacing = 1,
 	colSpecs = {
-		ccgui.GridContainer.GridSpec:new(true),
-		ccgui.GridContainer.GridSpec:new(false)
-	},
-	rowSpecs = {
 		ccgui.GridContainer.GridSpec:new(false),
 		ccgui.GridContainer.GridSpec:new(true)
+	},
+	rowSpecs = {
+		ccgui.GridContainer.GridSpec:new(true),
+		ccgui.GridContainer.GridSpec:new(false),
+		ccgui.GridContainer.GridSpec:new(false)
 	}
 }
 local btnOne = ccgui.Button:new{
@@ -74,13 +75,33 @@ local btnFour = ccgui.Button:new{
 	rowIndex = 2,
 	colIndex = 2,
 	text = "Four",
-	background = colours.blue,
+	background = colours.cyan,
 	_name = "btnFour"
 }
 btnFour:on("buttonpress", function()
 	window:setStatusText("Four pressed")
 end)
-content:add(btnOne, txtTwo, btnThree, btnFour)
+local btnFive = ccgui.Button:new{
+	rowIndex = 3,
+	colIndex = 1,
+	text = "Five",
+	background = colours.blue,
+	_name = "btnFive"
+}
+btnFive:on("buttonpress", function()
+	window:setStatusText("Five pressed")
+end)
+local btnSix = ccgui.Button:new{
+	rowIndex = 3,
+	colIndex = 2,
+	text = "Six",
+	background = colours.magenta,
+	_name = "btnSix"
+}
+btnSix:on("buttonpress", function()
+	window:setStatusText("Six pressed")
+end)
+content:add(btnOne, txtTwo, btnThree, btnFour, btnFive, btnSix)
 
 window:content():add(content)
 container:add(window)
