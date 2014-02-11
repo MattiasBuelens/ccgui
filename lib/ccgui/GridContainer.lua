@@ -78,9 +78,9 @@ end
 
 function GridContainer:eachGroup(primary, func)
 	if self.horizontal == (not not primary) then
-		self:eachRow(func)
-	else
 		self:eachColumn(func)
+	else
+		self:eachRow(func)
 	end
 end
 function GridContainer:getDimensions(primary)
