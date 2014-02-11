@@ -170,12 +170,7 @@ function GridContainer:gridMeasureFlow(primary, spec, fixSizes)
 		end
 		
 		-- Measure group
-		local groupFlow, groupFix
-		if fixSizes then
-			groupFlow, groupFix = self:gridMeasureGroupExact(group, primary, remainingSpec, fixSizes)
-		else
-			groupFlow, groupFix = self:gridMeasureGroup(group, primary, remainingSpec, fixSpec)
-		end
+		local groupFlow, groupFix = self:gridMeasureGroup(group, primary, remainingSpec, fixSpec, fixSizes)
 		
 		-- Set group size
 		groupSizes[i] = groupFlow
@@ -194,12 +189,7 @@ function GridContainer:gridMeasureFlow(primary, spec, fixSizes)
 		local groupFlowSpec = DimensionSpec:new("=", groupSize)
 		
 		-- Measure group
-		local groupFlow, groupFix
-		if fixSizes then
-			groupFlow, groupFix = self:gridMeasureGroupExact(group, primary, groupFlowSpec, fixSizes)
-		else
-			groupFlow, groupFix = self:gridMeasureGroup(group, primary, groupFlowSpec, fixSpec)
-		end
+		local groupFlow, groupFix = self:gridMeasureGroup(group, primary, groupFlowSpec, fixSpec, fixSizes)
 		
 		-- Set group size
 		groupSizes[i] = groupFlow
@@ -232,10 +222,23 @@ end
 
 --[[
 
-	Measure group with fixed dimension specification
+	Measure group
 
 ]]--
-function GridContainer:gridMeasureGroup(group, primary, flowSpec, fixSpec)
+function GridContainer:gridMeasureGroup(group, primary, flowSpec, fixSpec, fixSizes)
+	if fixSizes then
+		return self:gridMeasureGroupExact(group, primary, flowSpec, fixSizes)
+	else
+		return self:gridMeasureGroupSpec(group, primary, flowSpec, fixSpec)
+	end
+end
+
+--[[
+
+	Measure group with fixed dimension specification (first pass)
+
+]]--
+function GridContainer:gridMeasureGroupSpec(group, primary, flowSpec, fixSpec)
 	local flowDim, fixDim = self:getDimensions(primary)
 	local fixSpacing = self:getSpacing(not primary)
 	
@@ -266,7 +269,7 @@ end
 
 --[[
 
-	Measure group with known exact sizes for fixed dimension
+	Measure group with known exact sizes for fixed dimension (second pass)
 
 ]]--
 function GridContainer:gridMeasureGroupExact(group, primary, flowSpec, fixSizes)
