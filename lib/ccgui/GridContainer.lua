@@ -241,15 +241,28 @@ end
 function GridContainer:gridMeasureGroupSpec(group, primary, flowSpec, fixSpec)
 	local flowDim, fixDim = self:getDimensions(primary)
 	local fixSpacing = self:getSpacing(not primary)
+	local fixSpecs = self:getSpecs(not primary)
 	
 	local remainingSpec = self:makeRemaining(fixSpec)
 	local maxFlow, totalFix = 0, 0
+	local stretchChildren = {}
+	local stretchTotal = 0
 	
 	self.class.forEach(group, function(child, i, n)
 		-- Remove spacing
 		local spacing = (i < n and fixSpacing) or 0
 		remainingSpec = remainingSpec - spacing
 		if not child then return end
+		-- Handle stretched children later
+		local gridSpec = fixSpecs[i]
+		if gridSpec.stretch then
+			-- Add to stretch total
+			local stretchFactor = (type(gridSpec.stretch) == "number" and gridSpec.stretch or 1)
+			stretchTotal = stretchTotal + stretchFactor
+			-- Add to stretched children
+			stretchChildren[i] = child
+			return
+		end
 		-- Measure child
 		child:measure(MeasureSpec:new{
 			[flowDim] = flowSpec,
@@ -263,6 +276,25 @@ function GridContainer:gridMeasureGroupSpec(group, primary, flowSpec, fixSpec)
 		-- Update maximum flow size
 		maxFlow = math.max(maxFlow, child.size[flowDim])
 	end)
+	
+	-- Stretch children
+	local remaining = remainingSpec.value
+	local stretchUnit = math.floor(remaining / stretchTotal)
+	local stretchExtra = remaining % stretchTotal
+	for i,child in pairs(stretchChildren) do
+		local gridSpec = fixSpecs[i]
+		local stretchFactor = (type(gridSpec.stretch) == "number" and gridSpec.stretch or 1)
+		local childSize = stretchUnit * stretchFactor + (i == 1 and stretchExtra or 0)
+		-- Measure child
+		child:measure(MeasureSpec:new{
+			[flowDim] = flowSpec,
+			[fixDim] = DimensionSpec:new("=", childSize)
+		})
+		-- Add child size to total fix
+		totalFix = totalFix + childSize
+		-- Update maximum flow size
+		maxFlow = math.max(maxFlow, child.size[flowDim])
+	end
 	
 	return maxFlow, totalFix
 end
