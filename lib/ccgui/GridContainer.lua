@@ -189,10 +189,10 @@ function GridContainer:gridMeasureFlow(primary, spec, fixSizes)
 		local groupFlowSpec = DimensionSpec:new("=", groupSize)
 		
 		-- Measure group
-		local groupFlow, groupFix = self:gridMeasureGroup(group, primary, groupFlowSpec, fixSpec, fixSizes)
+		self:gridMeasureGroup(group, primary, groupFlowSpec, fixSpec, fixSizes)
 		
 		-- Set group size
-		groupSizes[i] = groupFlow
+		groupSizes[i] = groupSize
 	end
 	
 	return groupSizes
