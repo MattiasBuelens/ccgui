@@ -36,45 +36,44 @@ function GridContainer:initialize(opts)
 end
 GridContainer.class.GridSpec = GridSpec
 
-function GridContainer.class.compareByRow(a, b)
-	return (a.rowIndex or 1) < (b.rowIndex or 1)
-end
-function GridContainer.class.compareByColumn(a, b)
-	return (a.colIndex or 1) < (b.colIndex or 1)
-end
-
-function GridContainer:getRow(i)
-	local t = {}
+function GridContainer:getRows()
+	local rows = {}
+	for r=1,#self.rowSpecs do
+		rows[r] = {}
+		for c=1,#self.colSpecs do
+			rows[r][c] = false
+		end
+	end
 	self:each(function(child)
-		if child.visible and child.rowIndex == i then
-			table.insert(t, child)
+		if child.visible then
+			local r, c = child.rowIndex or 1, child.colIndex or 1
+			rows[r][c] = child
 		end
 	end)
-	table.sort(t, self.class.compareByColumn)
-	return t
+	return rows
 end
-function GridContainer:getColumn(i)
-	local t = {}
+function GridContainer:getColumns()
+	local cols = {}
+	for c=1,#self.colSpecs do
+		cols[c] = {}
+		for r=1,#self.rowSpecs do
+			cols[c][r] = false
+		end
+	end
 	self:each(function(child)
-		if child.visible and child.colIndex == i then
-			table.insert(t, child)
+		if child.visible then
+			local r, c = child.rowIndex or 1, child.colIndex or 1
+			cols[c][r] = child
 		end
 	end)
-	table.sort(t, self.class.compareByRow)
-	return t
+	return cols
 end
 
 function GridContainer:eachRow(func)
-	local n = #self.rowSpecs
-	for i=1,n do
-		func(self:getRow(i), i, n)
-	end
+	self.class.forEach(self:getRows(), func)
 end
 function GridContainer:eachColumn(func)
-	local n = #self.colSpecs
-	for i=1,n do
-		func(self:getColumn(i), i, n)
-	end
+	self.class.forEach(self:getColumns(), func)
 end
 
 function GridContainer:eachGroup(primary, func)
@@ -100,9 +99,9 @@ function GridContainer:getSpecs(primary)
 end
 function GridContainer:getSpacing(primary)
 	if self.horizontal == (not not primary) then
-		return self.rowSpacing
-	else
 		return self.colSpacing
+	else
+		return self.rowSpacing
 	end
 end
 
@@ -247,6 +246,7 @@ function GridContainer:gridMeasureGroup(group, primary, flowSpec, fixSpec)
 		-- Remove spacing
 		local spacing = (i < n and fixSpacing) or 0
 		remainingSpec = remainingSpec - spacing
+		if not child then return end
 		-- Measure child
 		child:measure(MeasureSpec:new{
 			[flowDim] = flowSpec,
@@ -275,6 +275,7 @@ function GridContainer:gridMeasureGroupExact(group, primary, flowSpec, fixSizes)
 
 	local maxFlow, totalFix = 0, 0
 	self.class.forEach(group, function(child, i, n)
+		if not child then return end
 		-- Measure child
 		child:measure(MeasureSpec:new{
 			[flowDim] = flowSpec,
@@ -314,12 +315,14 @@ function GridContainer:layout(bbox)
 		self.class.forEach(group, function(child, iChild)
 			local childSize = self.primSizes[iChild]
 			-- Layout child
-			child:layout(Rectangle:new{
-				[primCoord] = primPos,
-				[secCoord] = secPos,
-				[primDim] = childSize,
-				[secDim] = groupSize
-			})
+			if child then
+				child:layout(Rectangle:new{
+					[primCoord] = primPos,
+					[secCoord] = secPos,
+					[primDim] = childSize,
+					[secDim] = groupSize
+				})
+			end
 			primPos = primPos + childSize + primSpacing
 		end)
 		secPos = secPos + groupSize + secSpacing

@@ -33,6 +33,8 @@ end)
 
 local content = ccgui.GridContainer:new{
 	stretch = true,
+	rowSpacing = 1,
+	colSpacing = 1,
 	colSpecs = {
 		ccgui.GridContainer.GridSpec:new(false),
 		ccgui.GridContainer.GridSpec:new(true)
